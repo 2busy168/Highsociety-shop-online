@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>H!GH$OC!€T¥ - Cannabis E-commerce</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* กำหนดฟอนต์ Kanit สำหรับทั้งหน้า */
+        body {
+            font-family: 'Kanit', sans-serif;
+        }
+        /* กำหนดสีพื้นหลังแบบไล่ระดับสำหรับส่วนหัวและส่วนฮีโร่ */
+        .gradient-bg {
+            background: linear-gradient(135deg, #065f46 0%, #10b981 100%);
+        }
+        /* เพิ่มเอฟเฟกต์โฮเวอร์สำหรับบัตรสินค้า */
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        /* เพิ่มเอฟเฟกต์โฮเวอร์สำหรับปุ่มเลือกความรู้สึก */
+        .feeling-btn {
+            transition: all 0.3s ease;
+        }
+        .feeling-btn:hover {
+            transform: scale(1.05);
+        }
+        /* สไตล์สำหรับปุ่มเลือกความรู้สึกที่ถูกเลือก */
+        .feeling-btn.active {
+            background: linear-gradient(135deg, #059669, #10b981);
+            color: white;
+            transform: scale(1.05);
+        }
+        /* แอนิเมชันสำหรับการเพิ่มสินค้าในตะกร้า */
+        .cart-item {
+            animation: slideIn 0.3s ease;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        /* สไตล์สำหรับโมดัล */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 0.75rem; /* rounded-xl */
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1); /* shadow-lg */
+            max-width: 90%;
+            width: 400px;
+            text-align: center;
+        }
+        /* สไตล์สำหรับ Loading Overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1001; /* สูงกว่า modal */
+            font-size: 1.5rem;
+            color: #065f46;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- ส่วนหัวของเว็บไซต์ -->
+    <header class="gradient-bg text-white py-6 shadow-lg">
+        <div class="container mx-auto px-4">
+            <div class="flex items-center justify-between">
+                <h1 class="text-3xl md:text-4xl font-bold">H!GH$OC!€T¥</h1>
+                <div class="flex items-center space-x-4">
+                    <div class="relative">
+                        <!-- ปุ่มตะกร้าสินค้าพร้อมจำนวนสินค้า -->
+                        <button id="cartBtn" class="bg-white bg-opacity-20 px-4 py-2 rounded-full flex items-center space-x-2 hover:bg-opacity-30 transition">
+                            <span>🛒</span>
+                            <span id="cartCount" class="bg-red-500 text-white rounded-full px-2 py-1 text-sm">0</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ส่วนฮีโร่ - แนะนำการค้นหาสายพันธุ์ -->
+    <section class="gradient-bg text-white py-16">
+        <div class="container mx-auto px-4 text-center">
+            <h2 class="text-4xl md:text-6xl font-bold mb-6">ค้นหาสายพันธุ์ที่เหมาะกับคุณ</h2>
+            <p class="text-xl md:text-2xl mb-8 opacity-90">เลือกความรู้สึกที่ต้องการ เราจะแนะนำสายพันธุ์ที่ดีที่สุดให้คุณ</p>
+        </div>
+    </section>
+
+    <!-- ส่วนเลือกความรู้สึก -->
+    <section class="py-16 bg-white">
+        <div class="container mx-auto px-4">
+            <h3 class="text-3xl font-bold text-center mb-12 text-gray-800">คุณต้องการความรู้สึกแบบไหน?</h3>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
+                <!-- ปุ่มสำหรับเลือกความรู้สึกต่างๆ -->
+                <button class="feeling-btn bg-green-100 hover:bg-green-200 p-4 rounded-xl text-center border-2 border-green-200" data-feeling="ดูหนัง">
+                    <div class="text-3xl mb-2">🎬</div>
+                    <div class="font-medium">ดูหนัง</div>
+                </button>
+                <button class="feeling-btn bg-green-100 hover:bg-green-200 p-4 rounded-xl text-center border-2 border-green-200" data-feeling="ฟังเพลง">
+                    <div class="text-3xl mb-2">🎵</div>
+                    <div class="font-medium">ฟังเพลง</div>
+                </button>
+                <button class="feeling-btn bg-green-100 hover:bg-green-200 p-4 rounded-xl text-center border-2 border-green-200" data-feeling="เล่นเกม">
+                    <div class="text-3xl mb-2">🎮</div>
+                    <div class="font-medium">เล่นเกม</div>
+                </button>
+                <button class="feeling-btn bg-green-100 hover:bg-green-200 p-4 rounded-xl text-center border-2 border-green-200" data-feeling="ลดความเครียด">
+                    <div class="text-3xl mb-2">😌</div>
+                    <div class="font-medium">ลดความเครียด</div>
+                </button>
+                <button class="feeling-btn bg-green-100 hover:bg-green-200 p-4 rounded-xl text-center border-2 border-green-200" data-feeling="ซึมเศร้า">
+                    <div class="text-3xl mb-2">💚</div>
+                    <div class="font-medium">ซึมเศร้า</div>
+                </button>
+                <button class="feeling-btn bg-green-100 hover:bg-green-200 p-4 rounded-xl text-center border-2 border-green-200" data-feeling="เข้านอน">
+                    <div class="text-3xl mb-2">😴</div>
+                    <div class="font-medium">เข้านอน</div>
+                </button>
+                <button class="feeling-btn bg-green-100 hover:bg-green-200 p-4 rounded-xl text-center border-2 border-green-200" data-feeling="เพิ่มสมาธิ">
+                    <div class="text-3xl mb-2">🧘</div>
+                    <div class="font-medium">เพิ่มสมาธิ</div>
+                </button>
+                <button class="feeling-btn bg-green-100 hover:bg-green-200 p-4 rounded-xl text-center border-2 border-green-200" data-feeling="เสริมไอเดีย">
+                    <div class="text-3xl mb-2">💡</div>
+                    <div class="font-medium">เสริมไอเดีย</div>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ส่วนแสดงคำแนะนำสายพันธุ์ -->
+    <section id="recommendationSection" class="py-16 bg-gray-50 hidden">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-12">
+                <h3 class="text-3xl font-bold mb-4 text-gray-800">แนะนำสำหรับคุณ</h3>
+                <div id="recommendationText" class="text-xl text-gray-600 mb-6"></div>
+                <div id="strainTypeCard" class="inline-block bg-white p-6 rounded-xl shadow-lg"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ส่วนแสดงสินค้าที่แนะนำ -->
+    <section id="productsSection" class="py-16 bg-white hidden">
+        <div class="container mx-auto px-4">
+            <h3 class="text-3xl font-bold text-center mb-12 text-gray-800">สายพันธุ์ที่แนะนำ</h3>
+            <div id="productsList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
+        </div>
+    </section>
+
+    <!-- ส่วนตะกร้าสินค้า -->
+    <section id="cartSection" class="py-16 bg-gray-50 hidden">
+        <div class="container mx-auto px-4">
+            <h3 class="text-3xl font-bold text-center mb-12 text-gray-800">ตะกร้าสินค้า</h3>
+            <div class="max-w-2xl mx-auto">
+                <div id="cartItems" class="space-y-4 mb-8"></div>
+                <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <div class="flex justify-between items-center text-xl font-bold mb-4">
+                        <span>ราคารวม:</span>
+                        <span id="totalPrice" class="text-green-600">0 บาท</span>
+                    </div>
+                    <!-- ปุ่มสั่งซื้อผ่าน LINE -->
+                    <button id="orderBtn" class="w-full gradient-bg text-white py-4 rounded-xl font-bold text-lg hover:opacity-90 transition disabled:opacity-50" disabled>
+                        สั่งซื้อผ่าน LINE
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ส่วนท้ายของเว็บไซต์ -->
+    <footer class="gradient-bg text-white py-12">
+        <div class="container mx-auto px-4 text-center">
+            <h4 class="text-2xl font-bold mb-4">H!GH$OC!€T¥</h4>
+            <p class="opacity-80 mb-4">คุณภาพดี ราคาเป็นธรรม บริการเป็นมิตร</p>
+            <p class="text-sm opacity-60">⚠️ สำหรับผู้ใหญ่เท่านั้น ใช้อย่างรับผิดชอบ</p>
+        </div>
+    </footer>
+
+    <!-- โมดัลสำหรับแสดงข้อความแจ้งเตือน -->
+    <div id="customModal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h4 id="modalTitle" class="text-xl font-bold mb-4 text-gray-800"></h4>
+            <p id="modalMessage" class="text-gray-700 mb-6"></p>
+            <button id="modalCloseBtn" class="gradient-bg text-white py-2 px-6 rounded-lg font-medium hover:opacity-90 transition">
+                ตกลง
+            </button>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay hidden">
+        กำลังโหลด...
+    </div>
+
+    <script>
+        // *** สำคัญมาก: URL ของ Web App ที่คุณได้จาก Google Apps Script ***
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwV-WmEwyidcFuJQZ2I9Kbq-fNhIM3pWQosVVk79tnTPhFMp0ePGhcXE2Rw3wZfW48F4w/exec'; 
+
+        // LINE ID ของร้านค้า
+        const LINE_OA_ID = '@761qogmt'; 
+
+        let products = []; // จะโหลดข้อมูลสินค้ามาจาก Google Sheet
+        let cart = []; // ตะกร้าสินค้า
+        let selectedFeeling = ''; // ความรู้สึกที่ผู้ใช้เลือก
+        let recommendedType = ''; // ประเภทสายพันธุ์ที่แนะนำ
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            setupFeelingButtons();
+            setupCartButton();
+            setupOrderButton();
+            setupModal(); // ตั้งค่าโมดัล
+            fetchProductsFromSheet(); // โหลดข้อมูลสินค้าเมื่อหน้าเว็บโหลดเสร็จ
+        });
+
+        /**
+         * แสดง Loading Overlay
+         */
+        function showLoading() {
+            document.getElementById('loadingOverlay').classList.remove('hidden');
+        }
+
+        /**
+         * ซ่อน Loading Overlay
+         */
+        function hideLoading() {
+            document.getElementById('loadingOverlay').classList.add('hidden');
+        }
+
+        /**
+         * ดึงข้อมูลสินค้าจาก Google Sheet ผ่าน Google Apps Script
+         */
+        async function fetchProductsFromSheet() {
+            showLoading(); // แสดง loading
+            try {
+                // ตรวจสอบว่า URL ถูกตั้งค่าแล้ว
+                if (APPS_SCRIPT_URL === 'YOUR_DEPLOYED_WEB_APP_URL_HERE' || !APPS_SCRIPT_URL.startsWith('https://script.google.com/macros/s/')) {
+                    throw new Error('กรุณาตั้งค่า APPS_SCRIPT_URL ให้ถูกต้องในโค้ด JavaScript');
+                }
+
+                const response = await fetch(APPS_SCRIPT_URL);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+
+                if (data.status === "error") {
+                    // กรณี Apps Script ส่ง error กลับมา
+                    showModal('ข้อผิดพลาดในการโหลดสินค้า', `เกิดข้อผิดพลาด: ${data.message}`);
+                    products = []; // เคลียร์สินค้าหากมีข้อผิดพลาด
+                } else {
+                    products = data; // อัปเดตตัวแปร products ด้วยข้อมูลจากชีต
+                    console.log('Products loaded from Google Sheet:', products);
+                }
+            } catch (error) {
+                console.error('Error fetching products:', error);
+                showModal('ข้อผิดพลาดในการเชื่อมต่อ', `ไม่สามารถโหลดข้อมูลสินค้าได้: ${error.message} กรุณาตรวจสอบ APPS_SCRIPT_URL และการตั้งค่า Apps Script`);
+                products = []; // เคลียร์สินค้าหากมีข้อผิดพลาด
+            } finally {
+                hideLoading(); // ซ่อน loading ไม่ว่าจะสำเร็จหรือล้มเหลว
+            }
+        }
+
+        /**
+         * ตั้งค่า Event Listener สำหรับปุ่มเลือกความรู้สึก
+         */
+        function setupFeelingButtons() {
+            const feelingBtns = document.querySelectorAll('.feeling-btn');
+            feelingBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // Remove active class from all buttons
+                    feelingBtns.forEach(b => b.classList.remove('active'));
+                    // Add active class to clicked button
+                    this.classList.add('active');
+                    
+                    selectedFeeling = this.dataset.feeling;
+                    recommendedType = feelingToStrain[selectedFeeling];
+                    
+                    showRecommendation();
+                    showProducts();
+                });
+            });
+        }
+
+        /**
+         * แสดงส่วนคำแนะนำสายพันธุ์ตามความรู้สึกที่เลือก
+         */
+        function showRecommendation() {
+            const section = document.getElementById('recommendationSection');
+            const text = document.getElementById('recommendationText');
+            const card = document.getElementById('strainTypeCard');
+            
+            const strainInfo = strainDescriptions[recommendedType];
+            
+            text.textContent = `สำหรับ "${selectedFeeling}" เราแนะนำ:`;
+            
+            card.innerHTML = `
+                <div class="text-center">
+                    <div class="text-4xl mb-3">${strainInfo.icon}</div>
+                    <h4 class="text-2xl font-bold mb-2 text-gray-800">${strainInfo.title}</h4>
+                    <p class="text-gray-600">${strainInfo.description}</p>
+                </div>
+            `;
+            card.className = `inline-block p-6 rounded-xl shadow-lg border-2 ${strainInfo.color}`;
+            
+            section.classList.remove('hidden');
+        }
+
+        /**
+         * แสดงสินค้าที่กรองแล้วตามประเภทสายพันธุ์ที่แนะนำ
+         */
+        function showProducts() {
+            const section = document.getElementById('productsSection');
+            const productsList = document.getElementById('productsList');
+            
+            // ตรวจสอบว่า products มีข้อมูลหรือไม่ก่อนทำการ filter
+            if (products.length === 0) {
+                productsList.innerHTML = '<p class="text-center text-gray-500">ไม่พบข้อมูลสินค้า กรุณาลองโหลดหน้าเว็บใหม่</p>';
+                section.classList.remove('hidden');
+                return;
+            }
+
+            const filteredProducts = products.filter(product => product.type === recommendedType);
+            
+            productsList.innerHTML = filteredProducts.map(product => `
+                <div class="card-hover bg-white rounded-xl shadow-lg overflow-hidden">
+                    <div class="p-6">
+                        <div class="flex justify-between items-start mb-4">
+                            <h4 class="text-xl font-bold text-gray-800">${product.name}</h4>
+                            <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">${product.type}</span>
+                        </div>
+                        <p class="text-gray-600 mb-4">${product.description}</p>
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="text-2xl font-bold text-green-600">${product.price} บาท/กรัม</span>
+                            <span class="text-sm text-gray-500">คงเหลือ: ${product.stock} กรัม</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <input type="number" id="qty-${product.id}" min="1" max="${product.stock}" value="1" 
+                                   class="w-20 px-3 py-2 border border-gray-300 rounded-lg text-center">
+                            <button onclick="addToCart(${product.id})" 
+                                    class="flex-1 gradient-bg text-white py-2 px-4 rounded-lg font-medium hover:opacity-90 transition"
+                                    ${product.stock <= 0 ? 'disabled' : ''}>
+                                ${product.stock <= 0 ? 'สินค้าหมด' : 'เพิ่มในตะกร้า'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            
+            section.classList.remove('hidden');
+        }
+
+        /**
+         * เพิ่มสินค้าลงในตะกร้า
+         * @param {number} productId - ID ของสินค้าที่ต้องการเพิ่ม
+         */
+        function addToCart(productId) {
+            const product = products.find(p => p.id === productId);
+            if (!product) {
+                showModal('ข้อผิดพลาด', 'ไม่พบสินค้าที่เลือก');
+                return;
+            }
+
+            const qtyInput = document.getElementById(`qty-${productId}`);
+            const quantity = parseInt(qtyInput.value);
+            
+            if (quantity <= 0 || isNaN(quantity)) {
+                showModal('ข้อผิดพลาด', 'กรุณาระบุจำนวนสินค้าที่ถูกต้อง');
+                return;
+            }
+
+            if (quantity > product.stock) {
+                showModal('ข้อผิดพลาด', `จำนวนที่เลือกเกินสต็อกที่มี (${product.stock} กรัม)`);
+                return;
+            }
+            
+            const existingItem = cart.find(item => item.id === productId);
+            
+            if (existingItem) {
+                if (existingItem.quantity + quantity > product.stock) {
+                    showModal('ข้อผิดพลาด', `จำนวนรวมในตะกร้าเกินสต็อกที่มี (${product.stock} กรัม)`);
+                    return;
+                }
+                existingItem.quantity += quantity;
+            } else {
+                cart.push({
+                    id: productId,
+                    name: product.name,
+                    price: product.price,
+                    quantity: quantity,
+                    stock: product.stock // เก็บ stock ไว้เพื่อตรวจสอบในตะกร้า
+                });
+            }
+            
+            updateCartDisplay();
+            showCartSection();
+        }
+
+        /**
+         * อัปเดตการแสดงผลของตะกร้าสินค้า
+         */
+        function updateCartDisplay() {
+            const cartCount = document.getElementById('cartCount');
+            const cartItems = document.getElementById('cartItems');
+            const totalPrice = document.getElementById('totalPrice');
+            const orderBtn = document.getElementById('orderBtn');
+            
+            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+            const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            
+            cartCount.textContent = totalItems;
+            totalPrice.textContent = `${total.toLocaleString()} บาท`;
+            
+            cartItems.innerHTML = cart.map(item => `
+                <div class="cart-item bg-white p-4 rounded-lg shadow flex justify-between items-center">
+                    <div class="flex-1">
+                        <h5 class="font-bold text-gray-800">${item.name}</h5>
+                        <p class="text-gray-600">${item.price} บาท/กรัม</p>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <button onclick="updateQuantity(${item.id}, -1)" 
+                                class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center hover:bg-gray-300">-</button>
+                        <span class="w-12 text-center font-bold">${item.quantity}</span>
+                        <button onclick="updateQuantity(${item.id}, 1)" 
+                                class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center hover:bg-gray-300">+</button>
+                        <span class="w-20 text-right font-bold text-green-600">${(item.price * item.quantity).toLocaleString()} บาท</span>
+                        <button onclick="removeFromCart(${item.id})" 
+                                class="text-red-500 hover:text-red-700 ml-2">🗑️</button>
+                    </div>
+                </div>
+            `).join('');
+            
+            orderBtn.disabled = cart.length === 0;
+        }
+
+        /**
+         * อัปเดตจำนวนสินค้าในตะกร้า
+         * @param {number} productId - ID ของสินค้า
+         * @param {number} change - จำนวนที่ต้องการเปลี่ยนแปลง (เช่น 1 หรือ -1)
+         */
+        function updateQuantity(productId, change) {
+            const item = cart.find(item => item.id === productId);
+            if (!item) return;
+            
+            const newQuantity = item.quantity + change;
+            
+            if (newQuantity <= 0) {
+                removeFromCart(productId);
+                return;
+            }
+            
+            if (newQuantity > item.stock) { // ตรวจสอบกับสต็อกจริงของสินค้านั้น
+                showModal('ข้อผิดพลาด', `จำนวนเกินสต็อกที่มี (${item.stock} กรัม)`);
+                return;
+            }
+            
+            item.quantity = newQuantity;
+            updateCartDisplay();
+        }
+
+        /**
+         * ลบสินค้าออกจากตะกร้า
+         * @param {number} productId - ID ของสินค้าที่ต้องการลบ
+         */
+        function removeFromCart(productId) {
+            cart = cart.filter(item => item.id !== productId);
+            updateCartDisplay();
+            
+            if (cart.length === 0) {
+                document.getElementById('cartSection').classList.add('hidden');
+            }
+        }
+
+        /**
+         * แสดงส่วนตะกร้าสินค้า
+         */
+        function showCartSection() {
+            document.getElementById('cartSection').classList.remove('hidden');
+        }
+
+        /**
+         * ตั้งค่า Event Listener สำหรับปุ่มตะกร้าสินค้าในส่วนหัว
+         */
+        function setupCartButton() {
+            document.getElementById('cartBtn').addEventListener('click', function() {
+                if (cart.length > 0) {
+                    document.getElementById('cartSection').scrollIntoView({ behavior: 'smooth' });
+                } else {
+                    showModal('ตะกร้าสินค้าว่างเปล่า', 'ยังไม่มีสินค้าในตะกร้าของคุณ');
+                }
+            });
+        }
+
+        /**
+         * ตั้งค่า Event Listener สำหรับปุ่มสั่งซื้อผ่าน LINE
+         */
+        function setupOrderButton() {
+            document.getElementById('orderBtn').addEventListener('click', async function() {
+                if (cart.length === 0) return;
+                
+                showLoading(); // แสดง loading ขณะกำลังประมวลผลคำสั่งซื้อ
+
+                const orderDetails = cart.map(item => 
+                    `  - ${item.name} จำนวน ${item.quantity} กรัม = ${(item.price * item.quantity).toLocaleString()} บาท`
+                ).join('\n');
+                
+                const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+                
+                // สร้างข้อความสำหรับ LINE OA
+                const message = `*คำสั่งซื้อจาก H!GH$OC!€T¥*\n\n` +
+                                `*รายการสินค้า:*\n${orderDetails}\n\n` +
+                                `*ราคารวมทั้งหมด: ${total.toLocaleString()} บาท*\n\n` +
+                                `*กรุณาแจ้งชื่อ-ที่อยู่จัดส่ง และเบอร์โทรศัพท์ เพื่อยืนยันการสั่งซื้อครับ/ค่ะ*`;
+                
+                const lineUrl = `https://line.me/R/ti/p/${LINE_OA_ID}?text=${encodeURIComponent(message)}`;
+                window.open(lineUrl, '_blank'); // เปิด LINE ในแท็บใหม่
+
+                // ส่งข้อมูลการลดสต็อกไปยัง Google Apps Script
+                try {
+                    // ตรวจสอบว่า URL ถูกตั้งค่าแล้ว
+                    if (APPS_SCRIPT_URL === 'YOUR_DEPLOYED_WEB_APP_URL_HERE' || !APPS_SCRIPT_URL.startsWith('https://script.google.com/macros/s/')) {
+                        throw new Error('กรุณาตั้งค่า APPS_SCRIPT_URL ให้ถูกต้องในโค้ด JavaScript');
+                    }
+
+                    const stockUpdateData = cart.map(item => ({ id: item.id, quantity: item.quantity }));
+                    const response = await fetch(APPS_SCRIPT_URL, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(stockUpdateData)
+                    });
+
+                    const result = await response.json();
+                    if (result.status === 'success') {
+                        console.log('Stock updated on Google Sheet:', result.message);
+                        // อัปเดตข้อมูลสินค้าในหน้าเว็บอีกครั้งหลังจากอัปเดตสต็อกสำเร็จ
+                        await fetchProductsFromSheet(); 
+                    } else {
+                        console.error('Error updating stock on Google Sheet:', result.message);
+                        showModal('ข้อผิดพลาดในการอัปเดตสต็อก', `เกิดข้อผิดพลาด: ${result.message}`);
+                    }
+                } catch (error) {
+                    console.error('Network error updating stock:', error);
+                    showModal('ข้อผิดพลาดในการเชื่อมต่อ', `ไม่สามารถอัปเดตสต็อกได้: ${error.message} กรุณาตรวจสอบ APPS_SCRIPT_URL และการตั้งค่า Apps Script`);
+                } finally {
+                    hideLoading(); // ซ่อน loading
+                }
+
+                // ล้างตะกร้าหลังจากสั่งซื้อ (ไม่ว่าจะอัปเดตสต็อกสำเร็จหรือไม่ก็ตาม)
+                cart = [];
+                updateCartDisplay();
+                document.getElementById('cartSection').classList.add('hidden');
+                showModal('สั่งซื้อสำเร็จ!', 'คำสั่งซื้อของคุณถูกส่งไปยัง LINE OA แล้ว กรุณารอการติดต่อกลับจากร้านค้าค่ะ');
+            });
+        }
+
+        /**
+         * ตั้งค่า Event Listener สำหรับโมดัล
+         */
+        function setupModal() {
+            document.getElementById('modalCloseBtn').addEventListener('click', hideModal);
+            document.getElementById('customModal').addEventListener('click', function(event) {
+                // ปิดโมดัลเมื่อคลิกที่โอเวอร์เลย์ (แต่ไม่ปิดเมื่อคลิกที่เนื้อหาโมดัล)
+                if (event.target === this) {
+                    hideModal();
+                }
+            });
+        }
+
+        /**
+         * แสดงโมดัลข้อความ
+         * @param {string} title - หัวข้อของโมดัล
+         * @param {string} message - ข้อความที่จะแสดงในโมดัล
+         */
+        function showModal(title, message) {
+            document.getElementById('modalTitle').textContent = title;
+            document.getElementById('modalMessage').textContent = message;
+            document.getElementById('customModal').classList.remove('hidden');
+        }
+
+        /**
+         * ซ่อนโมดัลข้อความ
+         */
+        function hideModal() {
+            document.getElementById('customModal').classList.add('hidden');
+        }
+
+        // Feeling to strain type mapping (ยังคงใช้เหมือนเดิม)
+        const feelingToStrain = {
+            'ดูหนัง': 'Hybrid',
+            'ฟังเพลง': 'Hybrid', 
+            'เล่นเกม': 'Hybrid',
+            'ลดความเครียด': 'Indica',
+            'ซึมเศร้า': 'Indica',
+            'เข้านอน': 'Indica',
+            'เพิ่มสมาธิ': 'Sativa',
+            'เสริมไอเดีย': 'Sativa'
+        };
+
+        // Strain descriptions (ยังคงใช้เหมือนเดิม)
+        const strainDescriptions = {
+            'Indica': {
+                title: 'อินดิกา (Indica)',
+                description: 'เหมาะสำหรับผ่อนคลาย ลดความเครียด และช่วยให้หลับลึก',
+                icon: '😴',
+                color: 'bg-purple-100 border-purple-300'
+            },
+            'Sativa': {
+                title: 'ซาติวา (Sativa)', 
+                description: 'เพิ่มพลัง เสริมสมาธิ และกระตุ้นความคิดสร้างสรรค์',
+                icon: '⚡',
+                color: 'bg-yellow-100 border-yellow-300'
+            },
+            'Hybrid': {
+                title: 'ไฮบริด (Hybrid)',
+                description: 'สมดุลระหว่างผ่อนคลายและมีพลัง ใช้ได้หลากหลายกิจกรรม',
+                icon: '🌿',
+                color: 'bg-green-100 border-green-300'
+            }
+        };
+    </script>
+</body>
+</html>
