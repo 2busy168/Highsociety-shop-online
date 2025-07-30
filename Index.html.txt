@@ -219,6 +219,7 @@
 
     <script>
         // *** สำคัญมาก: URL ของ Web App ที่คุณได้จาก Google Apps Script ***
+        // URL นี้ควรเป็น URL ที่คุณได้จากการ Deploy Apps Script ล่าสุด (ต้องเป็นเวอร์ชันที่ "Anyone" เข้าถึงได้)
         const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwV-WmEwyidcFuJQZ2I9Kbq-fNhIM3pWQosVVk79tnTPhFMp0ePGhcXE2Rw3wZfW48F4w/exec'; 
 
         // LINE ID ของร้านค้า
@@ -258,24 +259,27 @@
         async function fetchProductsFromSheet() {
             showLoading(); // แสดง loading
             try {
-                // ตรวจสอบว่า URL ถูกตั้งค่าแล้ว
-                if (APPS_SCRIPT_URL === 'YOUR_DEPLOYED_WEB_APP_URL_HERE' || !APPS_SCRIPT_URL.startsWith('https://script.google.com/macros/s/')) {
-                    throw new Error('กรุณาตั้งค่า APPS_SCRIPT_URL ให้ถูกต้องในโค้ด JavaScript');
+                // ตรวจสอบว่า URL ถูกตั้งค่าแล้วและเป็นรูปแบบที่ถูกต้อง
+                if (!APPS_SCRIPT_URL || !APPS_SCRIPT_URL.startsWith('https://script.google.com/macros/s/')) {
+                    throw new Error('APPS_SCRIPT_URL ไม่ถูกต้อง กรุณาตรวจสอบการตั้งค่าในโค้ด JavaScript');
                 }
 
                 const response = await fetch(APPS_SCRIPT_URL);
                 if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                    // หาก HTTP response ไม่ใช่ 2xx (เช่น 404, 500)
+                    throw new Error(`HTTP error! Status: ${response.status} - ${response.statusText}`);
                 }
                 const data = await response.json();
 
                 if (data.status === "error") {
                     // กรณี Apps Script ส่ง error กลับมา
-                    showModal('ข้อผิดพลาดในการโหลดสินค้า', `เกิดข้อผิดพลาด: ${data.message}`);
+                    showModal('ข้อผิดพลาดในการโหลดสินค้า', `เกิดข้อผิดพลาดจากเซิร์ฟเวอร์: ${data.message}`);
                     products = []; // เคลียร์สินค้าหากมีข้อผิดพลาด
                 } else {
-                    products = data; // อัปเดตตัวแปร products ด้วยข้อมูลจากชีต
+                    products = data; // อัปเดตตัวแคร่ products ด้วยข้อมูลจากชีต
                     console.log('Products loaded from Google Sheet:', products);
+                    // เพิ่ม console.table เพื่อดูข้อมูลสินค้าที่โหลดมา
+                    console.table(products); 
                 }
             } catch (error) {
                 console.error('Error fetching products:', error);
@@ -302,7 +306,7 @@
                     recommendedType = feelingToStrain[selectedFeeling];
                     
                     showRecommendation();
-                    showProducts();
+                    showProducts(); // เรียก showProducts เพื่อแสดงสินค้าที่กรองแล้ว
                 });
             });
         }
@@ -340,14 +344,20 @@
             
             // ตรวจสอบว่า products มีข้อมูลหรือไม่ก่อนทำการ filter
             if (products.length === 0) {
-                productsList.innerHTML = '<p class="text-center text-gray-500">ไม่พบข้อมูลสินค้า กรุณาลองโหลดหน้าเว็บใหม่</p>';
+                productsList.innerHTML = '<p class="text-center text-gray-500">ไม่พบข้อมูลสินค้า กรุณาลองโหลดหน้าเว็บใหม่ หรือตรวจสอบการเชื่อมต่อกับ Google Sheet</p>';
                 section.classList.remove('hidden');
                 return;
             }
 
             const filteredProducts = products.filter(product => product.type === recommendedType);
             
-            productsList.innerHTML = filteredProducts.map(product => `
+            productsList.innerHTML = filteredProducts.map(product => {
+                // กำหนดค่าเริ่มต้นของ input เป็น 1 หรือ 0 ถ้าสต็อกหมด
+                const initialQty = product.stock > 0 ? 1 : 0;
+                // กำหนดค่า max ของ input ให้เท่ากับสต็อกที่เหลืออยู่
+                const maxQty = product.stock;
+
+                return `
                 <div class="card-hover bg-white rounded-xl shadow-lg overflow-hidden">
                     <div class="p-6">
                         <div class="flex justify-between items-start mb-4">
@@ -360,8 +370,9 @@
                             <span class="text-sm text-gray-500">คงเหลือ: ${product.stock} กรัม</span>
                         </div>
                         <div class="flex items-center space-x-3">
-                            <input type="number" id="qty-${product.id}" min="1" max="${product.stock}" value="1" 
-                                   class="w-20 px-3 py-2 border border-gray-300 rounded-lg text-center">
+                            <input type="number" id="qty-${product.id}" min="1" max="${maxQty}" value="${initialQty}" 
+                                   class="w-20 px-3 py-2 border border-gray-300 rounded-lg text-center"
+                                   ${product.stock <= 0 ? 'disabled' : ''}>
                             <button onclick="addToCart(${product.id})" 
                                     class="flex-1 gradient-bg text-white py-2 px-4 rounded-lg font-medium hover:opacity-90 transition"
                                     ${product.stock <= 0 ? 'disabled' : ''}>
@@ -370,7 +381,8 @@
                         </div>
                     </div>
                 </div>
-            `).join('');
+                `;
+            }).join('');
             
             section.classList.remove('hidden');
         }
@@ -382,7 +394,9 @@
         function addToCart(productId) {
             const product = products.find(p => p.id === productId);
             if (!product) {
-                showModal('ข้อผิดพลาด', 'ไม่พบสินค้าที่เลือก');
+                // เพิ่มการแจ้งเตือนที่ชัดเจนขึ้นหากไม่พบสินค้า
+                showModal('ข้อผิดพลาด', `ไม่พบสินค้า ID: ${productId} ในฐานข้อมูล. กรุณาตรวจสอบ ID ใน Google Sheet`);
+                console.error(`Product with ID ${productId} not found in 'products' array.`);
                 return;
             }
 
@@ -436,6 +450,13 @@
             cartCount.textContent = totalItems;
             totalPrice.textContent = `${total.toLocaleString()} บาท`;
             
+            // ถ้าตะกร้าว่างเปล่า ให้ซ่อนส่วนตะกร้า
+            if (cart.length === 0) {
+                document.getElementById('cartSection').classList.add('hidden');
+            } else {
+                document.getElementById('cartSection').classList.remove('hidden');
+            }
+
             cartItems.innerHTML = cart.map(item => `
                 <div class="cart-item bg-white p-4 rounded-lg shadow flex justify-between items-center">
                     <div class="flex-1">
@@ -474,8 +495,10 @@
                 return;
             }
             
-            if (newQuantity > item.stock) { // ตรวจสอบกับสต็อกจริงของสินค้านั้น
-                showModal('ข้อผิดพลาด', `จำนวนเกินสต็อกที่มี (${item.stock} กรัม)`);
+            // ตรวจสอบกับสต็อกจริงของสินค้านั้น (ที่ดึงมาจาก Google Sheet)
+            const productInMasterList = products.find(p => p.id === productId);
+            if (productInMasterList && newQuantity > productInMasterList.stock) { 
+                showModal('ข้อผิดพลาด', `จำนวนเกินสต็อกที่มี (${productInMasterList.stock} กรัม)`);
                 return;
             }
             
@@ -543,8 +566,8 @@
                 // ส่งข้อมูลการลดสต็อกไปยัง Google Apps Script
                 try {
                     // ตรวจสอบว่า URL ถูกตั้งค่าแล้ว
-                    if (APPS_SCRIPT_URL === 'YOUR_DEPLOYED_WEB_APP_URL_HERE' || !APPS_SCRIPT_URL.startsWith('https://script.google.com/macros/s/')) {
-                        throw new Error('กรุณาตั้งค่า APPS_SCRIPT_URL ให้ถูกต้องในโค้ด JavaScript');
+                    if (!APPS_SCRIPT_URL || !APPS_SCRIPT_URL.startsWith('https://script.google.com/macros/s/')) {
+                        throw new Error('APPS_SCRIPT_URL ไม่ถูกต้อง กรุณาตั้งค่าในโค้ด JavaScript');
                     }
 
                     const stockUpdateData = cart.map(item => ({ id: item.id, quantity: item.quantity }));
@@ -575,7 +598,7 @@
                 // ล้างตะกร้าหลังจากสั่งซื้อ (ไม่ว่าจะอัปเดตสต็อกสำเร็จหรือไม่ก็ตาม)
                 cart = [];
                 updateCartDisplay();
-                document.getElementById('cartSection').classList.add('hidden');
+                // ไม่ต้องซ่อน cartSection ตรงนี้ เพราะ updateCartDisplay() จะจัดการเอง
                 showModal('สั่งซื้อสำเร็จ!', 'คำสั่งซื้อของคุณถูกส่งไปยัง LINE OA แล้ว กรุณารอการติดต่อกลับจากร้านค้าค่ะ');
             });
         }
