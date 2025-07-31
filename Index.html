@@ -93,6 +93,18 @@
             <div class="flex items-center justify-between">
                 <h1 class="text-3xl md:text-4xl font-bold">H!GH$OC!€T¥</h1>
                 <div class="flex items-center space-x-4">
+                    <!-- ปุ่มนำทางสำหรับหน้าสายพันธุ์ -->
+                    <button id="strainsNavBtn" class="bg-white bg-opacity-20 px-4 py-2 rounded-full hover:bg-opacity-30 transition font-medium">
+                        สายพันธุ์
+                    </button>
+                    <!-- ปุ่มนำทางสำหรับหน้าอุปกรณ์ใช้งาน -->
+                    <button id="equipmentNavBtn" class="bg-white bg-opacity-20 px-4 py-2 rounded-full hover:bg-opacity-30 transition font-medium">
+                        อุปกรณ์ใช้งาน
+                    </button>
+                    <!-- ปุ่มนำทางสำหรับหน้าโปรไฟล์ -->
+                    <button id="profileNavBtn" class="bg-white bg-opacity-20 px-4 py-2 rounded-full hover:bg-opacity-30 transition font-medium">
+                        โปรไฟล์ของฉัน
+                    </button>
                     <div class="relative">
                         <!-- ปุ่มตะกร้าสินค้าพร้อมจำนวนสินค้า -->
                         <button id="cartBtn" class="bg-white bg-opacity-20 px-4 py-2 rounded-full flex items-center space-x-2 hover:bg-opacity-30 transition">
@@ -105,16 +117,16 @@
         </div>
     </header>
 
-    <!-- ส่วนฮีโร่ - แนะนำการค้นหาสายพันธุ์ -->
-    <section class="gradient-bg text-white py-16">
+    <!-- ส่วนฮีโร่ - แนะนำการค้นหาสายพันธุ์ (แสดงเฉพาะหน้าสายพันธุ์) -->
+    <section id="heroSection" class="gradient-bg text-white py-16">
         <div class="container mx-auto px-4 text-center">
             <h2 class="text-4xl md:text-6xl font-bold mb-6">ค้นหาสายพันธุ์ที่เหมาะกับคุณ</h2>
             <p class="text-xl md:text-2xl mb-8 opacity-90">เลือกความรู้สึกที่ต้องการ เราจะแนะนำสายพันธุ์ที่ดีที่สุดให้คุณ</p>
         </div>
     </section>
 
-    <!-- ส่วนเลือกความรู้สึก -->
-    <section class="py-16 bg-white">
+    <!-- ส่วนเลือกความรู้สึก (แสดงเฉพาะหน้าสายพันธุ์) -->
+    <section id="feelingSelectionSection" class="py-16 bg-white">
         <div class="container mx-auto px-4">
             <h3 class="text-3xl font-bold text-center mb-12 text-gray-800">คุณต้องการความรู้สึกแบบไหน?</h3>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
@@ -155,22 +167,59 @@
         </div>
     </section>
 
-    <!-- ส่วนแสดงคำแนะนำสายพันธุ์ -->
+    <!-- ส่วนแสดงคำแนะนำสายพันธุ์ (แสดงเฉพาะหน้าสายพันธุ์) -->
     <section id="recommendationSection" class="py-16 bg-gray-50 hidden">
         <div class="container mx-auto px-4">
             <div class="text-center mb-12">
                 <h3 class="text-3xl font-bold mb-4 text-gray-800">แนะนำสำหรับคุณ</h3>
                 <div id="recommendationText" class="text-xl text-gray-600 mb-6"></div>
-                <!-- strainTypeCard ถูกลบออกเนื่องจากรองรับหลายตัวเลือก -->
             </div>
         </div>
     </section>
 
-    <!-- ส่วนแสดงสินค้าที่แนะนำ -->
-    <section id="productsSection" class="py-16 bg-white hidden">
+    <!-- ส่วนแสดงสินค้าสายพันธุ์ที่แนะนำ (แสดงเฉพาะหน้าสายพันธุ์) -->
+    <section id="strainProductsSection" class="py-16 bg-white hidden">
         <div class="container mx-auto px-4">
             <h3 class="text-3xl font-bold text-center mb-12 text-gray-800">สายพันธุ์ที่แนะนำ</h3>
-            <div id="productsList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
+            <div id="strainProductsList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
+        </div>
+    </section>
+
+    <!-- ส่วนแสดงอุปกรณ์ใช้งาน (แสดงเฉพาะหน้าอุปกรณ์) -->
+    <section id="equipmentSection" class="py-16 bg-white hidden">
+        <div class="container mx-auto px-4">
+            <h3 class="text-3xl font-bold text-center mb-12 text-gray-800">อุปกรณ์ใช้งาน</h3>
+            <div id="equipmentList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Equipment items will be loaded here -->
+            </div>
+        </div>
+    </section>
+
+    <!-- ส่วนโปรไฟล์ของฉัน -->
+    <section id="profileSection" class="py-16 bg-gray-50 hidden">
+        <div class="container mx-auto px-4">
+            <h3 class="text-3xl font-bold text-center mb-12 text-gray-800">โปรไฟล์ของฉัน</h3>
+            <div class="max-w-md mx-auto bg-white p-8 rounded-xl shadow-lg">
+                <div class="mb-6">
+                    <label for="profileName" class="block text-gray-700 text-sm font-bold mb-2">ชื่อของคุณ:</label>
+                    <input type="text" id="profileName" placeholder="เช่น สมชาย ใจดี"
+                           class="shadow appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-green-500">
+                </div>
+                <div class="mb-6">
+                    <label for="profileContact" class="block text-gray-700 text-sm font-bold mb-2">ข้อมูลติดต่อ LINE (ชื่อ LINE หรือเบอร์โทรศัพท์):</label>
+                    <input type="text" id="profileContact" placeholder="เช่น Somchai_LineID หรือ 0812345678"
+                           class="shadow appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-green-500">
+                </div>
+                <button id="saveProfileBtn" class="w-full gradient-bg text-white py-3 rounded-xl font-bold text-lg hover:opacity-90 transition">
+                    บันทึกโปรไฟล์
+                </button>
+                <div class="mt-8">
+                    <h4 class="text-xl font-bold text-gray-800 mb-4">ประวัติการสั่งซื้อ</h4>
+                    <div id="orderHistoryList" class="space-y-4 text-left">
+                        <p class="text-gray-500 text-center">ไม่มีประวัติการสั่งซื้อ</p>
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
 
@@ -219,7 +268,12 @@
         กำลังโหลด...
     </div>
 
-    <script>
+    <script type="module">
+        // Firebase SDK imports
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, addDoc, setDoc, collection, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
         // *** สำคัญมาก: URL ของ Web App ที่คุณได้จาก Google Apps Script ***
         // URL นี้ควรเป็น URL ที่คุณได้จากการ Deploy Apps Script ล่าสุด (ต้องเป็นเวอร์ชันที่ "Anyone" เข้าถึงได้)
         const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwV-WmEwyidcFuJQZ2I9Kbq-fNhIM3pWQosVVk79tnTPhFMp0ePGhcXE2Rw3wZfW48F4w/exec'; 
@@ -227,18 +281,66 @@
         // LINE ID ของร้านค้า
         const LINE_OA_ID = '@761qogmt'; 
 
-        let products = []; // จะโหลดข้อมูลสินค้ามาจาก Google Sheet
+        let products = []; // จะโหลดข้อมูลสินค้าทั้งหมด (สายพันธุ์และอุปกรณ์) มาจาก Google Sheet
         let cart = []; // ตะกร้าสินค้า
-        let selectedFeelings = []; // ความรู้สึกที่ผู้ใช้เลือก (เปลี่ยนเป็น Array เพื่อรองรับหลายตัวเลือก)
+        let selectedFeelings = []; // ความรู้สึกที่ผู้ใช้เลือก (สำหรับหน้าสายพันธุ์)
+        let currentView = 'strains'; // 'strains', 'equipment', หรือ 'profile' เพื่อติดตามว่ากำลังแสดงหน้าไหน
+
+        // Firebase variables (will be initialized from Canvas environment)
+        let app;
+        let db;
+        let auth;
+        let userId = null; // Firebase Auth UID
+        let userProfile = {}; // Store user's name, contact info etc.
+
+        // Global variables for Firebase config (provided by Canvas)
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
         // Event listeners
         document.addEventListener('DOMContentLoaded', function() {
+            // Initialize Firebase if config is available
+            if (Object.keys(firebaseConfig).length > 0) {
+                app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+
+                onAuthStateChanged(auth, async (user) => {
+                    if (user) {
+                        userId = user.uid;
+                        console.log('Firebase user signed in:', userId);
+                        await loadUserProfile(); // Load profile after sign-in
+                        await loadOrderHistory(); // Load order history after sign-in
+                    } else {
+                        // Sign in anonymously if no token, or if previous session ended
+                        try {
+                            if (initialAuthToken) {
+                                await signInWithCustomToken(auth, initialAuthToken);
+                            } else {
+                                await signInAnonymously(auth);
+                            }
+                        } catch (error) {
+                            console.error("Error signing in Firebase:", error);
+                            showModal('ข้อผิดพลาด', 'ไม่สามารถเข้าสู่ระบบได้ กรุณาลองใหม่');
+                        }
+                    }
+                    // Ensure initial view is shown only after auth state is determined
+                    showCurrentView();
+                });
+            } else {
+                console.warn("Firebase config not found. Running without persistence for user profiles and orders.");
+                // Fallback if Firebase is not configured (e.g., local testing without Canvas environment)
+                showCurrentView(); // Still show the default view
+            }
+
+            setupNavigationButtons(); // ตั้งค่าปุ่มนำทางใหม่
             setupFeelingButtons();
             setupCartButton();
             setupOrderButton();
+            setupProfileSection(); // ตั้งค่าส่วนโปรไฟล์
             setupModal(); // ตั้งค่าโมดัล
             fetchProductsFromSheet(); // โหลดข้อมูลสินค้าเมื่อหน้าเว็บโหลดเสร็จ
-            updateRecommendationsAndProducts(); // อัปเดตการแสดงผลเริ่มต้น
         });
 
         /**
@@ -280,7 +382,6 @@
                 } else {
                     products = data; // อัปเดตตัวแคร่ products ด้วยข้อมูลจากชีต
                     console.log('Products loaded from Google Sheet:', products);
-                    // เพิ่ม console.table เพื่อดูข้อมูลสินค้าที่โหลดมา
                     console.table(products); 
                 }
             } catch (error) {
@@ -289,8 +390,81 @@
                 products = []; // เคลียร์สินค้าหากมีข้อผิดพลาด
             } finally {
                 hideLoading(); // ซ่อน loading ไม่ว่าจะสำเร็จหรือล้มเหลว
-                updateRecommendationsAndProducts(); // อัปเดตการแสดงผลหลังจากโหลดสินค้า
+                // อัปเดตการแสดงผลหลังจากโหลดสินค้า
+                if (currentView === 'strains') {
+                    updateRecommendationsAndProducts(); 
+                } else if (currentView === 'equipment') {
+                    showEquipmentProducts();
+                }
             }
+        }
+
+        /**
+         * ตั้งค่า Event Listener สำหรับปุ่มนำทางหลัก
+         */
+        function setupNavigationButtons() {
+            document.getElementById('strainsNavBtn').addEventListener('click', showStrainsView);
+            document.getElementById('equipmentNavBtn').addEventListener('click', showEquipmentView);
+            document.getElementById('profileNavBtn').addEventListener('click', showProfileView);
+        }
+
+        /**
+         * ซ่อนทุกส่วนเนื้อหา
+         */
+        function hideAllSections() {
+            document.getElementById('heroSection').classList.add('hidden');
+            document.getElementById('feelingSelectionSection').classList.add('hidden');
+            document.getElementById('recommendationSection').classList.add('hidden');
+            document.getElementById('strainProductsSection').classList.add('hidden');
+            document.getElementById('equipmentSection').classList.add('hidden');
+            document.getElementById('profileSection').classList.add('hidden');
+            document.getElementById('cartSection').classList.add('hidden'); // ตะกร้าจะแสดงเมื่อมีสินค้าเท่านั้น
+        }
+
+        /**
+         * แสดงมุมมองปัจจุบัน
+         */
+        function showCurrentView() {
+            hideAllSections();
+            if (currentView === 'strains') {
+                document.getElementById('heroSection').classList.remove('hidden');
+                document.getElementById('feelingSelectionSection').classList.remove('hidden');
+                document.getElementById('recommendationSection').classList.remove('hidden');
+                document.getElementById('strainProductsSection').classList.remove('hidden');
+                updateRecommendationsAndProducts();
+            } else if (currentView === 'equipment') {
+                document.getElementById('equipmentSection').classList.remove('hidden');
+                showEquipmentProducts();
+            } else if (currentView === 'profile') {
+                document.getElementById('profileSection').classList.remove('hidden');
+                loadUserProfile(); // โหลดโปรไฟล์เมื่อเข้าหน้า
+                loadOrderHistory(); // โหลดประวัติการสั่งซื้อเมื่อเข้าหน้า
+            }
+            updateCartDisplay(); // อัปเดตการแสดงผลตะกร้าเสมอ
+        }
+
+        /**
+         * แสดงหน้าสินค้าสายพันธุ์
+         */
+        function showStrainsView() {
+            currentView = 'strains';
+            showCurrentView();
+        }
+
+        /**
+         * แสดงหน้าอุปกรณ์ใช้งาน
+         */
+        function showEquipmentView() {
+            currentView = 'equipment';
+            showCurrentView();
+        }
+
+        /**
+         * แสดงหน้าโปรไฟล์
+         */
+        function showProfileView() {
+            currentView = 'profile';
+            showCurrentView();
         }
 
         /**
@@ -316,17 +490,17 @@
         }
 
         /**
-         * อัปเดตส่วนคำแนะนำและรายการสินค้าตามความรู้สึกที่เลือก
+         * อัปเดตส่วนคำแนะนำและรายการสินค้าสายพันธุ์ตามความรู้สึกที่เลือก
          */
         function updateRecommendationsAndProducts() {
             const recommendationSection = document.getElementById('recommendationSection');
-            const productsSection = document.getElementById('productsSection');
+            const strainProductsSection = document.getElementById('strainProductsSection');
             const recommendationText = document.getElementById('recommendationText');
 
             if (selectedFeelings.length === 0) {
                 // ถ้าไม่มีความรู้สึกใดๆ ถูกเลือก ให้ซ่อนส่วนแนะนำและสินค้า
                 recommendationSection.classList.add('hidden');
-                productsSection.classList.add('hidden');
+                strainProductsSection.classList.add('hidden');
                 recommendationText.textContent = 'กรุณาเลือกความรู้สึกที่ต้องการ เพื่อให้เราแนะนำสายพันธุ์ที่เหมาะสม';
                 return;
             }
@@ -346,38 +520,40 @@
             // แสดงส่วนคำแนะนำ
             recommendationSection.classList.remove('hidden');
 
-            // กรองและแสดงสินค้า
-            showProducts(Array.from(recommendedTypes));
+            // กรองและแสดงสินค้าสายพันธุ์
+            showStrainProducts(Array.from(recommendedTypes));
         }
 
         /**
-         * แสดงสินค้าที่กรองแล้วตามประเภทสายพันธุ์ที่แนะนำ
+         * แสดงสินค้าสายพันธุ์ที่กรองแล้วตามประเภทสายพันธุ์ที่แนะนำ
          * @param {Array<string>} typesToFilter - อาร์เรย์ของประเภทสายพันธุ์ที่ต้องการกรอง
          */
-        function showProducts(typesToFilter) {
-            const section = document.getElementById('productsSection');
-            const productsList = document.getElementById('productsList');
+        function showStrainProducts(typesToFilter) {
+            const section = document.getElementById('strainProductsSection');
+            const productsList = document.getElementById('strainProductsList');
             
             // ตรวจสอบว่า products มีข้อมูลหรือไม่ก่อนทำการ filter
             if (products.length === 0) {
-                productsList.innerHTML = '<p class="text-center text-gray-500">ไม่พบข้อมูลสินค้า กรุณาลองโหลดหน้าเว็บใหม่ หรือตรวจสอบการเชื่อมต่อกับ Google Sheet</p>';
+                productsList.innerHTML = '<p class="text-center text-gray-500">ไม่พบข้อมูลสินค้าสายพันธุ์ กรุณาลองโหลดหน้าเว็บใหม่ หรือตรวจสอบการเชื่อมต่อกับ Google Sheet</p>';
                 section.classList.remove('hidden');
                 return;
             }
 
             let filteredProducts = [];
             if (typesToFilter && typesToFilter.length > 0) {
-                // กรองสินค้าที่ประเภทตรงกับหนึ่งในประเภทที่แนะนำ
-                filteredProducts = products.filter(product => typesToFilter.includes(product.type));
+                // กรองสินค้าที่ประเภทตรงกับหนึ่งในประเภทที่แนะนำ และเป็นประเภท 'Strain'
+                filteredProducts = products.filter(product => 
+                    product.type === 'Strain' && typesToFilter.includes(product.type)
+                );
             } else {
                 // กรณีที่ไม่มีประเภทให้กรอง (เช่น ไม่มีปุ่มความรู้สึกที่เลือก)
-                productsList.innerHTML = '<p class="text-center text-gray-500">กรุณาเลือกความรู้สึกที่ต้องการเพื่อดูสินค้าที่แนะนำ</p>';
+                productsList.innerHTML = '<p class="text-center text-gray-500">กรุณาเลือกความรู้สึกที่ต้องการเพื่อดูสินค้าสายพันธุ์ที่แนะนำ</p>';
                 section.classList.remove('hidden');
                 return;
             }
 
             if (filteredProducts.length === 0) {
-                productsList.innerHTML = '<p class="text-center text-gray-500">ไม่พบสินค้าที่ตรงกับความรู้สึกที่คุณเลือก</p>';
+                productsList.innerHTML = '<p class="text-center text-gray-500">ไม่พบสินค้าสายพันธุ์ที่ตรงกับความรู้สึกที่คุณเลือก</p>';
             } else {
                 productsList.innerHTML = filteredProducts.map(product => {
                     // กำหนดค่าเริ่มต้นของ input เป็น 1 หรือ 0 ถ้าสต็อกหมด
@@ -385,12 +561,18 @@
                     // กำหนดค่า max ของ input ให้เท่ากับสต็อกที่เหลืออยู่
                     const maxQty = product.stock;
 
+                    const strainInfo = strainDescriptions[product.type]; // ดึงข้อมูลสำหรับประเภทสายพันธุ์
+                    const tagClass = strainInfo ? strainInfo.tagColor : 'bg-gray-100 text-gray-800';
+                    const tagIcon = strainInfo ? strainInfo.tagIcon : '';
+
                     return `
                     <div class="card-hover bg-white rounded-xl shadow-lg overflow-hidden">
                         <div class="p-6">
                             <div class="flex justify-between items-start mb-4">
                                 <h4 class="text-xl font-bold text-gray-800">${product.name}</h4>
-                                <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">${product.type}</span>
+                                <span class="${tagClass} px-3 py-1 rounded-full text-sm font-medium flex items-center space-x-1">
+                                    ${tagIcon}<span>${product.type}</span>
+                                </span>
                             </div>
                             <p class="text-gray-600 mb-4">${product.description}</p>
                             <div class="flex justify-between items-center mb-4">
@@ -416,13 +598,70 @@
         }
 
         /**
+         * แสดงสินค้าอุปกรณ์ใช้งาน
+         */
+        function showEquipmentProducts() {
+            const section = document.getElementById('equipmentSection');
+            const equipmentList = document.getElementById('equipmentList');
+
+            if (products.length === 0) {
+                equipmentList.innerHTML = '<p class="text-center text-gray-500">ไม่พบข้อมูลอุปกรณ์ใช้งาน กรุณาลองโหลดหน้าเว็บใหม่ หรือตรวจสอบการเชื่อมต่อกับ Google Sheet</p>';
+                section.classList.remove('hidden');
+                return;
+            }
+
+            const filteredEquipment = products.filter(product => product.type === 'Equipment');
+
+            if (filteredEquipment.length === 0) {
+                equipmentList.innerHTML = '<p class="text-center text-gray-500">ไม่พบอุปกรณ์ใช้งานในขณะนี้</p>';
+            } else {
+                equipmentList.innerHTML = filteredEquipment.map(product => {
+                    const initialQty = product.stock > 0 ? 1 : 0;
+                    const maxQty = product.stock;
+
+                    const tagClass = equipmentDescription.tagColor;
+                    const tagIcon = equipmentDescription.tagIcon;
+
+                    return `
+                    <div class="card-hover bg-white rounded-xl shadow-lg overflow-hidden">
+                        <div class="p-6">
+                            <div class="flex justify-between items-start mb-4">
+                                <h4 class="text-xl font-bold text-gray-800">${product.name}</h4>
+                                <span class="${tagClass} px-3 py-1 rounded-full text-sm font-medium flex items-center space-x-1">
+                                    ${tagIcon}<span>${product.type}</span>
+                                </span>
+                            </div>
+                            <p class="text-gray-600 mb-4">${product.description}</p>
+                            <div class="flex justify-between items-center mb-4">
+                                <span class="text-2xl font-bold text-green-600">${product.price} บาท/ชิ้น</span>
+                                <span class="text-sm text-gray-500">คงเหลือ: ${product.stock} ชิ้น</span>
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <input type="number" id="qty-${product.id}" min="1" max="${maxQty}" value="${initialQty}" 
+                                       class="w-20 px-3 py-2 border border-gray-300 rounded-lg text-center"
+                                       ${product.stock <= 0 ? 'disabled' : ''}>
+                                <button onclick="addToCart(${product.id})" 
+                                        class="flex-1 gradient-bg text-white py-2 px-4 rounded-lg font-medium hover:opacity-90 transition"
+                                        ${product.stock <= 0 ? 'disabled' : ''}>
+                                    ${product.stock <= 0 ? 'สินค้าหมด' : 'เพิ่มในตะกร้า'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    `;
+                }).join('');
+            }
+            section.classList.remove('hidden');
+        }
+
+
+        /**
          * เพิ่มสินค้าลงในตะกร้า
          * @param {number} productId - ID ของสินค้าที่ต้องการเพิ่ม
          */
         function addToCart(productId) {
             const product = products.find(p => p.id === productId);
             if (!product) {
-                // เพิ่มการแจ้งเตือนที่ชัดเจนขึ้นหากไม่พบสินค้า
                 showModal('ข้อผิดพลาด', `ไม่พบสินค้า ID: ${productId} ในฐานข้อมูล. กรุณาตรวจสอบ ID ใน Google Sheet`);
                 console.error(`Product with ID ${productId} not found in 'products' array.`);
                 return;
@@ -437,7 +676,7 @@
             }
 
             if (quantity > product.stock) {
-                showModal('ข้อผิดพลาด', `จำนวนที่เลือกเกินสต็อกที่มี (${product.stock} กรัม)`);
+                showModal('ข้อผิดพลาด', `จำนวนที่เลือกเกินสต็อกที่มี (${product.stock} ${product.type === 'Strain' ? 'กรัม' : 'ชิ้น'})`);
                 return;
             }
             
@@ -445,7 +684,7 @@
             
             if (existingItem) {
                 if (existingItem.quantity + quantity > product.stock) {
-                    showModal('ข้อผิดพลาด', `จำนวนรวมในตะกร้าเกินสต็อกที่มี (${product.stock} กรัม)`);
+                    showModal('ข้อผิดพลาด', `จำนวนรวมในตะกร้าเกินสต็อกที่มี (${product.stock} ${product.type === 'Strain' ? 'กรัม' : 'ชิ้น'})`);
                     return;
                 }
                 existingItem.quantity += quantity;
@@ -455,7 +694,8 @@
                     name: product.name,
                     price: product.price,
                     quantity: quantity,
-                    stock: product.stock // เก็บ stock ไว้เพื่อตรวจสอบในตะกร้า
+                    stock: product.stock, // เก็บ stock ไว้เพื่อตรวจสอบในตะกร้า
+                    unit: product.type === 'Strain' ? 'กรัม' : 'ชิ้น' // เพิ่มหน่วยนับ
                 });
             }
             
@@ -489,7 +729,7 @@
                 <div class="cart-item bg-white p-4 rounded-lg shadow flex justify-between items-center">
                     <div class="flex-1">
                         <h5 class="font-bold text-gray-800">${item.name}</h5>
-                        <p class="text-gray-600">${item.price} บาท/กรัม</p>
+                        <p class="text-gray-600">${item.price} บาท/${item.unit}</p>
                     </div>
                     <div class="flex items-center space-x-3">
                         <button onclick="updateQuantity(${item.id}, -1)" 
@@ -526,7 +766,7 @@
             // ตรวจสอบกับสต็อกจริงของสินค้านั้น (ที่ดึงมาจาก Google Sheet)
             const productInMasterList = products.find(p => p.id === productId);
             if (productInMasterList && newQuantity > productInMasterList.stock) { 
-                showModal('ข้อผิดพลาด', `จำนวนเกินสต็อกที่มี (${productInMasterList.stock} กรัม)`);
+                showModal('ข้อผิดพลาด', `จำนวนเกินสต็อกที่มี (${productInMasterList.stock} ${productInMasterList.type === 'Strain' ? 'กรัม' : 'ชิ้น'})`);
                 return;
             }
             
@@ -577,13 +817,15 @@
                 showLoading(); // แสดง loading ขณะกำลังประมวลผลคำสั่งซื้อ
 
                 const orderDetails = cart.map(item => 
-                    `  - ${item.name} จำนวน ${item.quantity} กรัม = ${(item.price * item.quantity).toLocaleString()} บาท`
+                    `  - ${item.name} จำนวน ${item.quantity} ${item.unit} = ${(item.price * item.quantity).toLocaleString()} บาท`
                 ).join('\n');
                 
                 const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
                 
                 // สร้างข้อความสำหรับ LINE OA
                 const message = `*คำสั่งซื้อจาก H!GH$OC!€T¥*\n\n` +
+                                `*ลูกค้า:* ${userProfile.name || 'ไม่ระบุชื่อ'}\n` +
+                                `*ข้อมูลติดต่อ LINE:* ${userProfile.contactInfo || 'ไม่ระบุ'}\n\n` +
                                 `*รายการสินค้า:*\n${orderDetails}\n\n` +
                                 `*ราคารวมทั้งหมด: ${total.toLocaleString()} บาท*\n\n` +
                                 `*กรุณาแจ้งชื่อ-ที่อยู่จัดส่ง และเบอร์โทรศัพท์ เพื่อยืนยันการสั่งซื้อครับ/ค่ะ*`;
@@ -591,9 +833,34 @@
                 const lineUrl = `https://line.me/R/ti/p/${LINE_OA_ID}?text=${encodeURIComponent(message)}`;
                 window.open(lineUrl, '_blank'); // เปิด LINE ในแท็บใหม่
 
+                // บันทึกคำสั่งซื้อลง Firestore
+                if (db && userId) {
+                    try {
+                        const orderRef = collection(db, `artifacts/${appId}/users/${userId}/orders`);
+                        await addDoc(orderRef, {
+                            timestamp: serverTimestamp(), // ใช้ server timestamp
+                            items: cart.map(item => ({
+                                id: item.id,
+                                name: item.name,
+                                quantity: item.quantity,
+                                price: item.price,
+                                unit: item.unit
+                            })),
+                            totalPrice: total,
+                            customerName: userProfile.name || 'ไม่ระบุชื่อ',
+                            customerContact: userProfile.contactInfo || 'ไม่ระบุข้อมูลติดต่อ'
+                        });
+                        console.log("Order saved to Firestore.");
+                    } catch (error) {
+                        console.error("Error saving order to Firestore:", error);
+                        showModal('ข้อผิดพลาด', 'ไม่สามารถบันทึกคำสั่งซื้อได้ กรุณาลองใหม่');
+                    }
+                } else {
+                    console.warn("Firestore not initialized or user not authenticated. Order not saved to database.");
+                }
+
                 // ส่งข้อมูลการลดสต็อกไปยัง Google Apps Script
                 try {
-                    // ตรวจสอบว่า URL ถูกตั้งค่าแล้ว
                     if (!APPS_SCRIPT_URL || !APPS_SCRIPT_URL.startsWith('https://script.google.com/macros/s/')) {
                         throw new Error('APPS_SCRIPT_URL ไม่ถูกต้อง กรุณาตั้งค่าในโค้ด JavaScript');
                     }
@@ -626,8 +893,9 @@
                 // ล้างตะกร้าหลังจากสั่งซื้อ (ไม่ว่าจะอัปเดตสต็อกสำเร็จหรือไม่ก็ตาม)
                 cart = [];
                 updateCartDisplay();
-                // ไม่ต้องซ่อน cartSection ตรงนี้ เพราะ updateCartDisplay() จะจัดการเอง
-                showModal('สั่งซื้อสำเร็จ!', 'คำสั่งซื้อของคุณถูกส่งไปยัง LINE OA แล้ว กรุณารอการติดต่อกลับจากร้านค้าค่ะ');
+                // อัปเดตข้อความในโมดัลให้ชัดเจนยิ่งขึ้น
+                showModal('สั่งซื้อสำเร็จ!', 'คำสั่งซื้อของคุณถูกส่งไปยัง LINE Official Account ของร้านค้าแล้วค่ะ ทางร้านจะติดต่อกลับเพื่อสรุปยอดและยืนยันการสั่งซื้ออีกครั้ง');
+                loadOrderHistory(); // อัปเดตประวัติการสั่งซื้อทันที
             });
         }
 
@@ -674,26 +942,35 @@
             'เสริมไอเดีย': 'Sativa'
         };
 
-        // Strain descriptions (ยังคงใช้เหมือนเดิม)
+        // Strain descriptions (เพิ่ม tagIcon และ tagColor)
         const strainDescriptions = {
             'Indica': {
                 title: 'อินดิกา (Indica)',
                 description: 'เหมาะสำหรับผ่อนคลาย ลดความเครียด และช่วยให้หลับลึก',
-                icon: '😴',
-                color: 'bg-purple-100 border-purple-300'
+                icon: '😴', // สำหรับส่วนแนะนำ
+                tagIcon: '😴', // สำหรับป้ายสินค้า
+                tagColor: 'bg-purple-100 text-purple-800'
             },
             'Sativa': {
                 title: 'ซาติวา (Sativa)', 
                 description: 'เพิ่มพลัง เสริมสมาธิ และกระตุ้นความคิดสร้างสรรค์',
                 icon: '⚡',
-                color: 'bg-yellow-100 border-yellow-300'
+                tagIcon: '⚡',
+                tagColor: 'bg-yellow-100 text-yellow-800'
             },
             'Hybrid': {
                 title: 'ไฮบริด (Hybrid)',
                 description: 'สมดุลระหว่างผ่อนคลายและมีพลัง ใช้ได้หลากหลายกิจกรรม',
                 icon: '🌿',
-                color: 'bg-green-100 border-green-300'
+                tagIcon: '🌿',
+                tagColor: 'bg-green-100 text-green-800'
             }
+        };
+
+        // Equipment description (สำหรับอุปกรณ์)
+        const equipmentDescription = {
+            tagIcon: '🛠️', // ไอคอนสำหรับอุปกรณ์
+            tagColor: 'bg-blue-100 text-blue-800' // สีสำหรับอุปกรณ์
         };
     </script>
 </body>
