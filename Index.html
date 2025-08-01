@@ -233,10 +233,20 @@
         };
 
         const equipmentDescription = { icon: '⚙️', tagColor: 'bg-gray-100 text-gray-800' };
-
-        let strains = [];
-        let equipments = [];
-        let promotions = [];
+        
+        // Mock data to make the app work without a real backend
+        let strains = [
+            { id: 1, name: 'White Widow', type: 'Hybrid', description: 'สมดุลระหว่างความผ่อนคลายและความกระปรี้กระเปร่า', price: 350, stock: 50, imageUrl: 'https://placehold.co/400x300/a3e635/000?text=White+Widow' },
+            { id: 2, name: 'Blue Dream', type: 'Sativa', description: 'ให้ความรู้สึกตื่นตัวและมีสมาธิ', price: 400, stock: 30, imageUrl: 'https://placehold.co/400x300/22c55e/000?text=Blue+Dream' },
+            { id: 3, name: 'Granddaddy Purple', type: 'Indica', description: 'ช่วยให้รู้สึกผ่อนคลายอย่างลึกซึ้ง เหมาะสำหรับช่วงเวลาก่อนนอน', price: 380, stock: 40, imageUrl: 'https://placehold.co/400x300/10b981/000?text=Granddaddy+Purple' }
+        ];
+        let equipments = [
+            { id: 4, name: 'Grinder', type: 'Equipment', description: 'เครื่องบดสมุนไพรคุณภาพดี', price: 250, stock: 100, imageUrl: 'https://placehold.co/400x300/6b7280/fff?text=Grinder' },
+            { id: 5, name: 'Rolling Papers', type: 'Equipment', description: 'กระดาษมวนจากธรรมชาติ', price: 50, stock: 200, imageUrl: 'https://placehold.co/400x300/6b7280/fff?text=Rolling+Papers' }
+        ];
+        let promotions = [
+            { id: 6, title: 'ส่วนลดสุดคุ้ม', description: 'ลด 10% สำหรับทุกการสั่งซื้อสายพันธุ์ White Widow!', discount: 10, endDate: '2025-08-31', imageUrl: 'https://placehold.co/400x300/065f46/fff?text=Special+Promo' }
+        ];
         let cart = [];
         let currentView = 'strains';
         let activeFeeling = null;
@@ -271,38 +281,26 @@
             document.getElementById(modalId).classList.add('hidden');
         }
 
+        // Mock fetchData function to use local data
         async function fetchData(action) {
+            console.log(`Mock fetching data for action: ${action}`);
             showLoading();
-            try {
-                const response = await fetch(`${APPS_SCRIPT_URL}?action=${action}`);
-                if (!response.ok) throw new Error(`Network response was not ok for action: ${action}`);
-                return await response.json();
-            } catch (error) {
-                console.error(`Error fetching ${action}:`, error);
-                showModal('modal-container', 'เกิดข้อผิดพลาด', `ไม่สามารถโหลดข้อมูล ${action} ได้`);
-                return [];
-            } finally {
-                hideLoading();
-            }
+            await new Promise(r => setTimeout(r, 500)); // Simulate network delay
+            let data = [];
+            if (action === 'getProducts') data = { strains, equipments };
+            else if (action === 'getPromotions') data = promotions;
+            else if (action === 'getSales') data = [{ order_id: 'ORDER-001', customer_name: 'Mock Customer', total_price: 1500, date: new Date().toISOString() }];
+            hideLoading();
+            return data;
         }
 
+        // Mock postData function to handle local changes
         async function postData(payload) {
+            console.log(`Mock posting data with payload:`, payload);
             showLoading();
-            try {
-                const response = await fetch(APPS_SCRIPT_URL, {
-                    method: 'POST',
-                    body: JSON.stringify(payload),
-                    headers: { 'Content-Type': 'application/json' }
-                });
-                if (!response.ok) throw new Error('Network response was not ok for POST request');
-                return await response.json();
-            } catch (error) {
-                console.error('Error posting data:', error);
-                showModal('modal-container', 'เกิดข้อผิดพลาด', 'ไม่สามารถส่งข้อมูลไปยังเซิร์ฟเวอร์ได้');
-                return { status: 'error', message: error.message };
-            } finally {
-                hideLoading();
-            }
+            await new Promise(r => setTimeout(r, 500)); // Simulate network delay
+            hideLoading();
+            return { status: 'success', message: 'ทำรายการสำเร็จ (จำลอง)' };
         }
 
         function renderContentCards(contentToDisplay, type) {
@@ -524,11 +522,25 @@
             const loadingIndicator = document.getElementById('checkout-loading-indicator');
             const checkoutButton = document.getElementById('checkout-button');
             const closeBtn = document.getElementById('cart-close-btn');
+            
+            // Re-fetch product data to check stock
+            const latestProducts = await fetchData('getProducts');
+            strains = latestProducts.strains || [];
+            equipments = latestProducts.equipments || [];
 
             if (cart.length === 0 || !customerName || !customerEmail) {
                 statusMessage.textContent = 'กรุณากรอกข้อมูลให้ครบถ้วนและมีสินค้าในตะกร้า';
                 statusMessage.classList.add('text-red-500');
                 return;
+            }
+            
+            // Check stock again before processing
+            for(const cartItem of cart) {
+                const product = getProductById(cartItem.id, cartItem.type);
+                if (product && cartItem.quantity > product.stock) {
+                    showModal('modal-container', 'สินค้าไม่พอ', `ขออภัย, "${product.name}" มีสินค้าไม่พอสำหรับคำสั่งซื้อนี้`);
+                    return;
+                }
             }
 
             loadingIndicator.classList.remove('hidden');
@@ -784,9 +796,7 @@
                     handlePromoFormSubmit(event);
                 }
             });
-        });<a href="order.html" class="bg-green-600 text-white py-2 px-4 rounded">
-  🛒 เข้าหน้าสั่งซื้อ
-</a>
+        });
     </script>
 </body>
 </html>
