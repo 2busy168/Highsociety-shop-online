@@ -1,64 +1,74 @@
-<script>
-const sheetURL = 'https://script.google.com/macros/s/AKfycbwuCr0gtLosLfZ7v_fGrJlheswCuiznEAH2C81wgZFPp1PQ3rBgdO0Al-13CidUHUzjQQ/exec';
+<body class="p-6 text-gray-800">
+  <h1 class="text-2xl font-bold mb-4">🛒 เลือกสินค้าที่ต้องการ</h1>
 
-let products = [];
-const selected = {};
-const listEl = document.getElementById("product-list");
-const btn = document.getElementById("submit-order");
+  <div id="product-list" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6"></div>
 
-async function fetchProducts() {
-  try {
-    const res = await fetch(sheetURL + '?action=getProducts');
-    const data = await res.json();
-    products = [...(data.strains || []), ...(data.equipments || [])];
-    renderProducts();
-  } catch (err) {
-    listEl.innerHTML = `<p class="text-red-500">โหลดสินค้าล้มเหลว: ${err.message}</p>`;
-  }
-}
+  <button id="submit-order" class="bg-green-600 text-white py-2 px-4 rounded">
+    ส่งคำสั่งซื้อผ่าน LINE
+  </button>
 
-function renderProducts() {
-  listEl.innerHTML = "";
-  products.forEach(p => {
-    const div = document.createElement("div");
-    div.className = "border p-4 bg-white rounded shadow";
-    div.innerHTML = `
-      <h2 class="font-semibold text-lg mb-2">${p.name}</h2>
-      <p>ประเภท: ${p.type}</p>
-      <p>ราคา: ${p.price} บาท</p>
-      <p class="text-sm text-gray-600 mb-2">${p.desc}</p>
-      <input type="number" min="0" value="0" id="qty-${p.name}" class="w-20 border px-2 py-1 rounded" />
-    `;
-    listEl.appendChild(div);
-  });
-}
+  <script>
+    const sheetURL = 'https://script.google.com/macros/s/AKfycbwuCr0gtLosLfZ7v_fGrJlheswCuiznEAH2C81wgZFPp1PQ3rBgdO0Al-13CidUHUzjQQ/exec';
 
-function buildOrderSummary() {
-  let total = 0;
-  let text = `🧾 รายการที่คุณสั่งซื้อ\n------------------------\n`;
-  products.forEach(p => {
-    const qty = parseInt(document.getElementById(`qty-${p.name}`).value);
-    if (qty > 0) {
-      const subtotal = qty * parseFloat(p.price);
-      total += subtotal;
-      text += `• ${p.name} x ${qty} = ${subtotal}฿\n`;
+    let products = [];
+    const selected = {};
+    const listEl = document.getElementById("product-list");
+    const btn = document.getElementById("submit-order");
+
+    async function fetchProducts() {
+      try {
+        const res = await fetch(sheetURL + '?action=getProducts');
+        const data = await res.json();
+        products = [...(data.strains || []), ...(data.equipments || [])];
+        renderProducts();
+      } catch (err) {
+        listEl.innerHTML = `<p class="text-red-500">โหลดสินค้าล้มเหลว: ${err.message}</p>`;
+      }
     }
-  });
-  const discount = total >= 1000 ? 100 : 0;
-  const final = total - discount;
-  if (discount > 0) {
-    text += `\n🔻 ส่วนลด: -${discount}฿`;
-  }
-  text += `\n💵 รวมทั้งสิ้น: ${final}฿`;
-  text += `\n\nคิดจะเมา คิดถึงเรา H!GH$OC!€T¥`;
-  return encodeURIComponent(text);
-}
 
-btn.addEventListener("click", () => {
-  const message = buildOrderSummary();
-  const lineURL = `https://line.me/R/oaMessage/@761qogmt/?${message}`;
-  window.open(lineURL, '_blank');
-});
+    function renderProducts() {
+      listEl.innerHTML = "";
+      products.forEach(p => {
+        const div = document.createElement("div");
+        div.className = "border p-4 bg-white rounded shadow";
+        div.innerHTML = `
+          <h2 class="font-semibold text-lg mb-2">${p.name}</h2>
+          <p>ประเภท: ${p.type}</p>
+          <p>ราคา: ${p.price} บาท</p>
+          <p class="text-sm text-gray-600 mb-2">${p.desc}</p>
+          <input type="number" min="0" value="0" id="qty-${p.name}" class="w-20 border px-2 py-1 rounded" />
+        `;
+        listEl.appendChild(div);
+      });
+    }
 
-fetchProducts();
-</script>
+    function buildOrderSummary() {
+      let total = 0;
+      let text = `🧾 รายการที่คุณสั่งซื้อ\n------------------------\n`;
+      products.forEach(p => {
+        const qty = parseInt(document.getElementById(`qty-${p.name}`).value);
+        if (qty > 0) {
+          const subtotal = qty * parseFloat(p.price);
+          total += subtotal;
+          text += `• ${p.name} x ${qty} = ${subtotal}฿\n`;
+        }
+      });
+      const discount = total >= 1000 ? 100 : 0;
+      const final = total - discount;
+      if (discount > 0) {
+        text += `\n🔻 ส่วนลด: -${discount}฿`;
+      }
+      text += `\n💵 รวมทั้งสิ้น: ${final}฿`;
+      text += `\n\nคิดจะเมา คิดถึงเรา H!GH$OC!€T¥`;
+      return encodeURIComponent(text);
+    }
+
+    btn.addEventListener("click", () => {
+      const message = buildOrderSummary();
+      const lineURL = `https://line.me/R/oaMessage/@761qogmt/?${message}`;
+      window.open(lineURL, '_blank');
+    });
+
+    fetchProducts();
+  </script>
+</body>
