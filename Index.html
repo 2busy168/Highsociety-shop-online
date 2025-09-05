@@ -1,802 +1,389 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>H!GH$OC!€T¥ - Cannabis E-commerce</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Kanit Font from Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        /* กำหนดฟอนต์ Kanit สำหรับทั้งหน้า */
-        body {
-            font-family: 'Kanit', sans-serif;
-        }
-        /* กำหนดสีพื้นหลังแบบไล่ระดับสำหรับส่วนหัวและส่วนฮีโร่ */
-        .gradient-bg {
-            background: linear-gradient(135deg, #065f46 0%, #10b981 100%);
-        }
-        /* เพิ่มเอฟเฟกต์โฮเวอร์สำหรับบัตรสินค้า */
-        .card-hover {
-            transition: all 0.3s ease;
-        }
-        .card-hover:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-        }
-        /* เพิ่มเอฟเฟกต์โฮเวอร์สำหรับปุ่มเลือกความรู้สึก */
-        .feeling-btn {
-            transition: all 0.2s ease;
-        }
-        .feeling-btn:hover {
-            background-color: #d1fae5;
-            transform: scale(1.05);
-        }
-        .feeling-btn.active {
-            background-color: #047857;
-            color: white;
-            transform: scale(1.1);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-        }
-        /* สไตล์สำหรับแท็กสินค้า */
-        .tag {
-            padding: 0.25rem 0.75rem;
-            border-radius: 9999px;
-            font-size: 0.75rem;
-            font-weight: 500;
-            white-space: nowrap;
-        }
-        /* สไตล์สำหรับ Loading Spinner */
-        #loading-spinner {
-            display: none; /* ซ่อนไว้เป็นค่าเริ่มต้น */
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>H!GH$OC!€T¥ - Cannabis E-commerce</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Kanit', sans-serif; }
+    .gradient-bg { background: linear-gradient(135deg, #065f46 0%, #10b981 100%); }
+    .card-hover { transition: all 0.3s ease; }
+    .card-hover:hover { transform: translateY(-5px); box-shadow: 0 20px 25px -5px rgba(0,0,0,.1); }
+    .feeling-btn { transition: all 0.2s ease; }
+    .feeling-btn:hover { background-color: #d1fae5; transform: scale(1.05); }
+    .feeling-btn.active { background-color: #047857; color: white; transform: scale(1.1);
+      box-shadow: 0 10px 15px -3px rgba(0,0,0,.1), 0 4px 6px -2px rgba(0,0,0,.05); }
+    .tag { padding: .25rem .75rem; border-radius: 9999px; font-size: .75rem; font-weight: 500; white-space: nowrap; }
+    #loading-spinner { display: none; }
+  </style>
 </head>
 <body class="bg-gray-50 text-gray-800">
 
-    <!-- Header Section -->
-    <header class="gradient-bg text-white shadow-lg p-4 sticky top-0 z-50">
-        <div class="container mx-auto flex justify-between items-center px-4">
-            <div class="text-2xl font-bold flex items-center cursor-pointer" onclick="window.location.reload();">
-                <span class="mr-2">🌱</span>H!GH$OC!€T¥
-            </div>
-            <nav class="hidden md:flex space-x-6 font-medium">
-                <button id="strains-btn" class="hover:text-green-200 transition-colors" onclick="toggleView('strains')">สายพันธุ์</button>
-                <button id="equipments-btn" class="hover:text-green-200 transition-colors" onclick="toggleView('equipments')">อุปกรณ์</button>
-                <button id="promotions-btn" class="hover:text-green-200 transition-colors" onclick="toggleView('promotions')">โปรโมชั่น</button>
-            </nav>
-            <div class="flex items-center space-x-4">
-                <button id="line-login-btn" class="bg-white text-green-600 font-semibold py-2 px-4 rounded-full text-sm hover:bg-gray-100 transition-colors">
-                    เข้าสู่ระบบด้วย LINE
-                </button>
-                <button id="admin-login-btn" class="text-white hover:text-green-200 transition-colors text-sm">
-                    Admin
-                </button>
-                <span class="relative cursor-pointer" id="cart-icon-container">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-                    </svg>
-                    <span id="cart-count" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-4 w-4 flex items-center justify-center">0</span>
-                </span>
-                <button id="mobile-menu-btn" class="md:hidden ml-4">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                    </svg>
-                </button>
-            </div>
-        </div>
-        <!-- Admin Panel Buttons (hidden by default) -->
-        <div id="admin-panel-link-container" class="mt-4 hidden text-center space-x-2 md:space-x-4">
-            <button onclick="showAdminPanel('products')" class="bg-gray-700 text-white font-semibold py-2 px-4 md:px-6 rounded-full hover:bg-gray-600 transition-colors text-xs md:text-sm">จัดการสินค้า</button>
-            <button onclick="showAdminPanel('stock')" class="bg-gray-700 text-white font-semibold py-2 px-4 md:px-6 rounded-full hover:bg-gray-600 transition-colors text-xs md:text-sm">จัดการสต็อก</button>
-            <button onclick="showAdminPanel('promotions')" class="bg-gray-700 text-white font-semibold py-2 px-4 md:px-6 rounded-full hover:bg-gray-600 transition-colors text-xs md:text-sm">จัดการโปรโมชั่น</button>
-            <button onclick="showAdminPanel('sales')" class="bg-gray-700 text-white font-semibold py-2 px-4 md:px-6 rounded-full hover:bg-gray-600 transition-colors text-xs md:text-sm">ดูยอดขาย</button>
-        </div>
-    </header>
-    
-    <!-- Loading Spinner -->
-    <div id="loading-spinner" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50">
-        <div class="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-green-500"></div>
+  <header class="gradient-bg text-white shadow-lg p-4 sticky top-0 z-50">
+    <div class="container mx-auto flex justify-between items-center px-4">
+      <div class="text-2xl font-bold flex items-center cursor-pointer" onclick="window.location.reload();">
+        <span class="mr-2">🌱</span>H!GH$OC!€T¥
+      </div>
+      <nav class="hidden md:flex space-x-6 font-medium">
+        <button id="strains-btn" class="hover:text-green-200 transition-colors" onclick="toggleView('strains')">สายพันธุ์</button>
+        <button id="equipments-btn" class="hover:text-green-200 transition-colors" onclick="toggleView('equipments')">อุปกรณ์</button>
+        <button id="promotions-btn" class="hover:text-green-200 transition-colors" onclick="toggleView('promotions')">โปรโมชั่น</button>
+      </nav>
+      <div class="flex items-center space-x-4">
+        <a id="my-orders-link" href="profile.html" class="hidden text-white/90 hover:text-green-200 text-sm">ประวัติคำสั่งซื้อของฉัน</a>
+        <button id="line-login-btn" class="bg-white text-green-600 font-semibold py-2 px-4 rounded-full text-sm hover:bg-gray-100 transition-colors">
+          เข้าสู่ระบบด้วย LINE
+        </button>
+        <a id="admin-login-btn" class="text-white hover:text-green-200 transition-colors text-sm" href="admin.html">
+          Admin
+        </a>
+        <span class="relative cursor-pointer" id="cart-icon-container">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+          </svg>
+          <span id="cart-count" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-4 w-4 flex items-center justify-center">0</span>
+        </span>
+        <button id="mobile-menu-btn" class="md:hidden ml-4">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+      </div>
     </div>
+  </header>
 
-    <!-- Hero Section -->
-    <section id="hero-section" class="gradient-bg text-white py-12 md:py-24 text-center px-4">
-        <h1 id="hero-title" class="text-3xl md:text-5xl font-bold mb-4 animate-pulse">ค้นหาสายพันธุ์ที่เหมาะกับคุณ</h1>
-        <p id="hero-subtitle" class="text-lg md:text-xl font-light mb-8">เลือกความรู้สึกที่ต้องการ เราจะแนะนำสายพันธุ์ที่ดีที่สุดให้คุณ</p>
-    </section>
+  <div id="loading-spinner" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50">
+    <div class="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-green-500"></div>
+  </div>
 
-    <!-- Feelings Section -->
-    <section id="feelings-section" class="py-8 md:py-16 bg-white shadow-lg -mt-8 md:-mt-16 mx-auto rounded-xl max-w-7xl relative z-20">
-        <h2 class="text-center text-xl md:text-2xl font-semibold mb-6 px-4">คุณต้องการความรู้สึกแบบไหน?</h2>
-        <div id="feelings-container" class="flex flex-wrap justify-center gap-2 md:gap-4 px-4">
-            <!-- Feelings buttons will be generated here -->
-        </div>
-    </section>
+  <section id="hero-section" class="gradient-bg text-white py-12 md:py-24 text-center px-4">
+    <h1 id="hero-title" class="text-3xl md:text-5xl font-bold mb-4 animate-pulse">ค้นหาสายพันธุ์ที่เหมาะกับคุณ</h1>
+    <p id="hero-subtitle" class="text-lg md:text-xl font-light mb-8">เลือกความรู้สึกที่ต้องการ เราจะแนะนำสายพันธุ์ที่ดีที่สุดให้คุณ</p>
+  </section>
 
-    <!-- Main Content -->
-    <main class="container mx-auto py-8 md:py-12 px-4">
-        <h2 id="main-content-title" class="text-2xl md:text-3xl font-bold text-center mb-6">สินค้าทั้งหมด</h2>
-        <div id="main-content-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            <!-- Product/Promotion cards will be generated here -->
-        </div>
-    </main>
+  <section id="feelings-section" class="py-8 md:py-16 bg-white shadow-lg -mt-8 md:-mt-16 mx-auto rounded-xl max-w-7xl relative z-20">
+    <h2 class="text-center text-xl md:text-2xl font-semibold mb-6 px-4">คุณต้องการความรู้สึกแบบไหน?</h2>
+    <div id="feelings-container" class="flex flex-wrap justify-center gap-2 md:gap-4 px-4"></div>
+  </section>
 
-    <!-- Footer Section -->
-    <footer class="bg-gray-800 text-white py-8 px-4">
-        <div class="container mx-auto text-center">
-            <h3 class="text-xl font-bold mb-2">H!GH$OC!€T¥</h3>
-            <p class="text-sm text-gray-400">คุณภาพดี ราคาเป็นธรรม บริการเป็นมิตร</p>
-            <p class="text-xs text-gray-500 mt-4">⚠️ สำหรับผู้ที่มีอายุ 20 ปีขึ้นไปเท่านั้น</p>
-        </div>
-    </footer>
+  <main class="container mx-auto py-8 md:py-12 px-4">
+    <h2 id="main-content-title" class="text-2xl md:text-3xl font-bold text-center mb-6">สินค้าทั้งหมด</h2>
+    <div id="main-content-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
+  </main>
 
-    <!-- Modal for Error/Info Messages -->
-    <div id="modal-container" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 hidden">
-        <div class="bg-white p-8 rounded-lg shadow-xl max-w-sm w-full mx-4">
-            <h3 id="modal-title" class="text-xl font-bold mb-4 text-center"></h3>
-            <p id="modal-message" class="text-gray-700 text-center mb-6"></p>
-            <div class="flex justify-center">
-                <button id="modal-ok-btn" class="bg-green-600 text-white font-semibold py-2 px-6 rounded-lg hover:bg-green-700 transition-colors">ตกลง</button>
-            </div>
-        </div>
+  <footer class="bg-gray-800 text-white py-8 px-4">
+    <div class="container mx-auto text-center">
+      <h3 class="text-xl font-bold mb-2">H!GH$OC!€T¥</h3>
+      <p class="text-sm text-gray-400">คุณภาพดี ราคาเป็นธรรม บริการเป็นมิตร</p>
+      <p class="text-xs text-gray-500 mt-4">⚠️ สำหรับผู้ที่มีอายุ 20 ปีขึ้นไปเท่านั้น</p>
     </div>
+  </footer>
 
-    <!-- Admin Login Modal -->
-    <div id="admin-login-modal-container" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 hidden">
-        <div class="bg-white p-8 rounded-lg shadow-xl max-w-sm w-full mx-4">
-            <h3 class="text-xl font-bold mb-4 text-center">เข้าสู่ระบบ Admin</h3>
-            <input type="text" id="admin-username" class="w-full p-2 mb-4 border rounded-md" placeholder="Username">
-            <input type="password" id="admin-password" class="w-full p-2 mb-4 border rounded-md" placeholder="Password">
-            <div class="flex justify-between items-center">
-                <button id="admin-login-submit" class="bg-green-600 text-white font-semibold py-2 px-6 rounded-lg hover:bg-green-700 transition-colors">เข้าสู่ระบบ</button>
-                <button id="admin-login-cancel" class="text-gray-500 font-semibold py-2 px-4 rounded-lg hover:bg-gray-100 transition-colors">ยกเลิก</button>
-            </div>
-        </div>
+  <div id="modal-container" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 hidden">
+    <div class="bg-white p-8 rounded-lg shadow-xl max-w-sm w-full mx-4">
+      <h3 id="modal-title" class="text-xl font-bold mb-4 text-center"></h3>
+      <p id="modal-message" class="text-gray-700 text-center mb-6"></p>
+      <div class="flex justify-center">
+        <button id="modal-ok-btn" class="bg-green-600 text-white font-semibold py-2 px-6 rounded-lg hover:bg-green-700 transition-colors">ตกลง</button>
+      </div>
     </div>
+  </div>
 
-    <!-- Shopping Cart and Order Modal -->
-    <div id="cart-modal-container" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 hidden">
-        <div class="bg-white p-8 rounded-lg shadow-xl max-w-lg w-full mx-4 overflow-y-auto max-h-[90vh]">
-            <h3 class="text-2xl font-bold mb-4 text-center">ตะกร้าสินค้า</h3>
-            <div id="cart-items-list" class="space-y-4 mb-6"></div>
-            <div id="cart-summary" class="border-t pt-4 text-right">
-                <span class="text-lg font-bold">ยอดรวม: <span id="cart-total-price">฿0</span></span>
-            </div>
-            
-            <!-- Order Form -->
-            <div id="order-form-container" class="mt-6">
-                <h4 class="text-xl font-bold mb-4">ข้อมูลสำหรับจัดส่ง</h4>
-                <div class="mb-4">
-                    <label for="customerName" class="block text-gray-700 font-semibold mb-2">ชื่อ - นามสกุล</label>
-                    <input type="text" id="customerName" placeholder="กรุณากรอกชื่อของคุณ" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500">
-                </div>
-                <div class="mb-4">
-                    <label for="customerEmail" class="block text-gray-700 font-semibold mb-2">อีเมล</label>
-                    <input type="email" id="customerEmail" placeholder="สำหรับส่งใบเสร็จ" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500">
-                </div>
-            </div>
-            
-            <!-- Action Buttons -->
-            <div class="relative mt-6">
-                <button id="checkout-button" class="w-full bg-green-600 text-white font-bold py-3 px-6 rounded-xl shadow-lg hover:bg-green-700 focus:outline-none focus:ring-4 focus:ring-green-300 transition-all duration-300 transform hover:scale-105">
-                    ยืนยันคำสั่งซื้อ
-                </button>
-                <div id="checkout-loading-indicator" class="absolute inset-0 flex items-center justify-center bg-green-600 bg-opacity-75 rounded-xl hidden">
-                    <div class="w-8 h-8 border-4 border-white border-solid rounded-full animate-spin border-t-transparent"></div>
-                </div>
-            </div>
-            <p id="checkout-status-message" class="text-center mt-4 text-sm text-gray-600"></p>
-            
-            <div class="flex justify-end mt-4">
-                <button id="cart-close-btn" class="bg-gray-200 text-gray-700 font-semibold py-2 px-6 rounded-lg hover:bg-gray-300 transition-colors">ปิด</button>
-            </div>
+  <div id="cart-modal-container" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 hidden">
+    <div class="bg-white p-8 rounded-lg shadow-xl max-w-lg w-full mx-4 overflow-y-auto max-h-[90vh]">
+      <h3 class="text-2xl font-bold mb-4 text-center">ตะกร้าสินค้า</h3>
+      <div id="cart-items-list" class="space-y-4 mb-6"></div>
+      <div id="cart-summary" class="border-t pt-4 text-right">
+        <span class="text-lg font-bold">ยอดรวม: <span id="cart-total-price">฿0</span></span>
+      </div>
+      <div id="order-form-container" class="mt-6">
+        <h4 class="text-xl font-bold mb-4">ข้อมูลสำหรับจัดส่ง</h4>
+        <div class="mb-4">
+          <label for="customerName" class="block text-gray-700 font-semibold mb-2">ชื่อ - นามสกุล</label>
+          <input type="text" id="customerName" placeholder="กรุณากรอกชื่อของคุณ" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500">
         </div>
-    </div>
-
-    <!-- Admin Panel Modal -->
-    <div id="admin-panel-modal-container" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 hidden">
-        <div class="bg-white p-8 rounded-lg shadow-xl max-w-3xl w-full mx-4 overflow-y-auto max-h-[90vh]">
-            <h3 id="admin-panel-title" class="text-xl font-bold mb-4 text-center">แผงควบคุมแอดมิน</h3>
-            <div id="admin-panel-content">
-                <!-- Admin content will be rendered here -->
-            </div>
-            <div class="flex justify-end mt-6">
-                <button id="admin-panel-close-btn" class="bg-green-600 text-white font-semibold py-2 px-6 rounded-lg hover:bg-green-700 transition-colors">ปิด</button>
-            </div>
+        <div class="mb-4">
+          <label for="customerEmail" class="block text-gray-700 font-semibold mb-2">อีเมล</label>
+          <input type="email" id="customerEmail" placeholder="สำหรับส่งใบเสร็จ" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500">
         </div>
+      </div>
+      <div class="relative mt-6">
+        <button id="checkout-button" class="w-full bg-green-600 text-white font-bold py-3 px-6 rounded-xl shadow-lg hover:bg-green-700 focus:outline-none focus:ring-4 focus:ring-green-300 transition-all duration-300 transform hover:scale-105">
+          ยืนยันคำสั่งซื้อ
+        </button>
+        <div id="checkout-loading-indicator" class="absolute inset-0 flex items-center justify-center bg-green-600 bg-opacity-75 rounded-xl hidden">
+          <div class="w-8 h-8 border-4 border-white border-solid rounded-full animate-spin border-t-transparent"></div>
+        </div>
+      </div>
+      <p id="checkout-status-message" class="text-center mt-4 text-sm text-gray-600"></p>
+      <div class="flex justify-end mt-4">
+        <button id="cart-close-btn" class="bg-gray-200 text-gray-700 font-semibold py-2 px-6 rounded-lg hover:bg-gray-300 transition-colors">ปิด</button>
+      </div>
     </div>
+  </div>
 
-    <script>
-        // ===================================================================================
-        // CONFIGURATION
-        // ===================================================================================
-        // *** สำคัญ: กรุณาเปลี่ยน URL นี้เป็น URL ของ Google Apps Script ที่คุณ Deploy ไว้ ***
-        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw_oHsHd4k_-q1pC8vcWthq_Qrozb8KhxTchvpeqSEVXnIfPq5uR0mOAos9DCQJ3Jd4Og/exec';
-        
-        // *** สำคัญ: กรุณาเปลี่ยน 'your_line_oa_id' เป็น ID ของ Line OA ของคุณเอง (ไม่ต้องมี @) ***
-        const LINE_OA_ID = '761qogmt';
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <script>
+  const APP_URL = "https://script.google.com/macros/s/AKfycbzis9Isw6XXUsi7k8MQmI4rJI8gnFnPS0VIDpuvsgw88dC8SwQ4VOHKK5TfeQMDKgLotA/exec";          // ตั้งค่าแล้ว
+  const LIFF_ID = "PASTE_YOUR_LIFF_ID";   // TODO: ถ้าไม่มีจะข้าม LIFF อัตโนมัติ
+  const LINE_OA_ID = "761qogmt";
 
-        // ===================================================================================
-        // STATIC DATA & GLOBAL VARIABLES
-        // ===================================================================================
-        const feelingToStrain = {
-            'ดูหนัง': 'Hybrid', 'ฟังเพลง': 'Hybrid', 'เล่นเกม': 'Hybrid',
-            'ลดเครียด': 'Indica', 'ซึมเศร้า': 'Indica', 'นอนไม่หลับ': 'Indica',
-            'มีสมาธิ': 'Sativa', 'ไอเดียใหม่': 'Sativa', 'ปาร์ตี้': 'Sativa'
-        };
+  const feelingToStrain = {
+    "ดูหนัง":"Hybrid","ฟังเพลง":"Hybrid","เล่นเกม":"Hybrid",
+    "ลดเครียด":"Indica","ซึมเศร้า":"Indica","นอนไม่หลับ":"Indica",
+    "มีสมาธิ":"Sativa","ไอเดียใหม่":"Sativa","ปาร์ตี้":"Sativa"
+  };
+  const strainDescriptions = {
+    "Indica": { "icon":"😴", "tagColor":"bg-purple-100 text-purple-800" },
+    "Sativa": { "icon":"⚡", "tagColor":"bg-yellow-100 text-yellow-800" },
+    "Hybrid": { "icon":"🌿", "tagColor":"bg-green-100 text-green-800" }
+  };
+  const equipmentDescription = { icon:"⚙️", tagColor:"bg-gray-100 text-gray-800" };
+  let strains=[], equipments=[], promotions=[], cart=[], currentView="strains", activeFeeling=null;
 
-        const strainDescriptions = {
-            'Indica': { icon: '😴', tagColor: 'bg-purple-100 text-purple-800' },
-            'Sativa': { icon: '⚡', tagColor: 'bg-yellow-100 text-yellow-800' },
-            'Hybrid': { icon: '🌿', tagColor: 'bg-green-100 text-green-800' }
-        };
+  const loadingSpinner = document.getElementById('loading-spinner');
+  const mainContentList = document.getElementById('main-content-list');
+  const mainContentTitle = document.getElementById('main-content-title');
+  const feelingsSection = document.getElementById('feelings-section');
+  const heroTitle = document.getElementById('hero-title');
+  const heroSubtitle = document.getElementById('hero-subtitle');
+  const lineLoginBtn = document.getElementById('line-login-btn');
+  const myOrdersLink = document.getElementById('my-orders-link');
 
-        const equipmentDescription = { icon: '⚙️', tagColor: 'bg-gray-100 text-gray-800' };
-        
-        // Mock data to make the app work without a real backend
-        let strains = [
-            { id: 1, name: 'White Widow', type: 'Hybrid', description: 'สมดุลระหว่างความผ่อนคลายและความกระปรี้กระเปร่า', price: 350, stock: 50, imageUrl: 'https://placehold.co/400x300/a3e635/000?text=White+Widow' },
-            { id: 2, name: 'Blue Dream', type: 'Sativa', description: 'ให้ความรู้สึกตื่นตัวและมีสมาธิ', price: 400, stock: 30, imageUrl: 'https://placehold.co/400x300/22c55e/000?text=Blue+Dream' },
-            { id: 3, name: 'Granddaddy Purple', type: 'Indica', description: 'ช่วยให้รู้สึกผ่อนคลายอย่างลึกซึ้ง เหมาะสำหรับช่วงเวลาก่อนนอน', price: 380, stock: 40, imageUrl: 'https://placehold.co/400x300/10b981/000?text=Granddaddy+Purple' }
-        ];
-        let equipments = [
-            { id: 4, name: 'Grinder', type: 'Equipment', description: 'เครื่องบดสมุนไพรคุณภาพดี', price: 250, stock: 100, imageUrl: 'https://placehold.co/400x300/6b7280/fff?text=Grinder' },
-            { id: 5, name: 'Rolling Papers', type: 'Equipment', description: 'กระดาษมวนจากธรรมชาติ', price: 50, stock: 200, imageUrl: 'https://placehold.co/400x300/6b7280/fff?text=Rolling+Papers' }
-        ];
-        let promotions = [
-            { id: 6, title: 'ส่วนลดสุดคุ้ม', description: 'ลด 10% สำหรับทุกการสั่งซื้อสายพันธุ์ White Widow!', discount: 10, endDate: '2025-08-31', imageUrl: 'https://placehold.co/400x300/065f46/fff?text=Special+Promo' }
-        ];
-        let cart = [];
-        let currentView = 'strains';
-        let activeFeeling = null;
-        let isAdminLoggedIn = false;
+  function showLoading(){ loadingSpinner.style.display='flex'; }
+  function hideLoading(){ loadingSpinner.style.display='none'; }
+  function showModal(id,title='',message=''){
+    const m=document.getElementById(id);
+    if(id==='modal-container'){
+      document.getElementById('modal-title').textContent=title;
+      document.getElementById('modal-message').textContent=message;
+    }
+    m.classList.remove('hidden');
+  }
+  function hideModal(id){ document.getElementById(id).classList.add('hidden'); }
+  function isStrainProduct(p){ return ['Indica','Sativa','Hybrid'].includes(String(p.type||'').trim()); }
 
-        // ===================================================================================
-        // DOM ELEMENTS
-        // ===================================================================================
-        const loadingSpinner = document.getElementById('loading-spinner');
-        const mainContentList = document.getElementById('main-content-list');
-        const mainContentTitle = document.getElementById('main-content-title');
-        const feelingsSection = document.getElementById('feelings-section');
-        const heroTitle = document.getElementById('hero-title');
-        const heroSubtitle = document.getElementById('hero-subtitle');
+  async function apiGet(params){
+    const url=APP_URL+'?'+new URLSearchParams(params).toString();
+    const res=await fetch(url,{cache:'no-store'}); return res.json();
+  }
+  async function apiPost(payload){
+    const res=await fetch(APP_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    return res.json();
+  }
 
-        // ===================================================================================
-        // CORE FUNCTIONS (MODALS, FETCHING, RENDERING)
-        // ===================================================================================
-        function showLoading() { loadingSpinner.style.display = 'flex'; }
-        function hideLoading() { loadingSpinner.style.display = 'none'; }
+  function updateHeroSection(title,subtitle){ heroTitle.textContent=title; heroSubtitle.textContent=subtitle; }
+  function toggleView(view){
+    currentView=view;
+    document.querySelectorAll('nav button').forEach(b=>b.classList.remove('text-green-200'));
+    const btn=document.getElementById(view+'-btn'); if(btn) btn.classList.add('text-green-200');
+    if(view==='strains'){
+      mainContentTitle.textContent='สายพันธุ์ทั้งหมด';
+      feelingsSection.style.display='block';
+      updateHeroSection('ค้นหาสายพันธุ์ที่เหมาะกับคุณ','เลือกความรู้สึกที่ต้องการ เราจะแนะนำสายพันธุ์ที่ดีที่สุดให้คุณ');
+      filterProductsByFeeling(activeFeeling);
+    }else if(view==='equipments'){
+      mainContentTitle.textContent='อุปกรณ์ทั้งหมด';
+      feelingsSection.style.display='none';
+      updateHeroSection('เลือกอุปกรณ์ที่ใช่','อุปกรณ์เสริมคุณภาพสูงสำหรับการใช้งานของคุณ');
+      renderContentCards(equipments,'equipments');
+    }else if(view==='promotions'){
+      mainContentTitle.textContent='โปรโมชั่นพิเศษ';
+      feelingsSection.style.display='none';
+      updateHeroSection('โปรโมชั่นสุดคุ้ม','ห้ามพลาดข้อเสนอดีๆ ที่นี่');
+      renderContentCards(promotions,'promotions');
+    }
+  }
 
-        function showModal(modalId, title = '', message = '') {
-            const modalContainer = document.getElementById(modalId);
-            if (modalId === 'modal-container') {
-                document.getElementById('modal-title').textContent = title;
-                document.getElementById('modal-message').textContent = message;
-            }
-            modalContainer.classList.remove('hidden');
-        }
+  function createFeelingButtons(){
+    const wrap=document.getElementById('feelings-container'); wrap.innerHTML='';
+    Object.keys(feelingToStrain).forEach(feeling=>{
+      const st=feelingToStrain[feeling]; const info=strainDescriptions[st];
+      const b=document.createElement('button');
+      b.className='feeling-btn bg-green-50 text-gray-800 font-semibold py-2 px-4 rounded-full flex items-center shadow-sm hover:shadow-md';
+      b.dataset.feeling=feeling;
+      b.innerHTML='<span class="mr-2 text-lg">'+info.icon+'</span>'+feeling;
+      b.addEventListener('click',handleFeelingClick);
+      wrap.appendChild(b);
+    });
+  }
+  function handleFeelingClick(e){
+    document.querySelectorAll('.feeling-btn').forEach(b=>b.classList.remove('active'));
+    const feeling=e.currentTarget.dataset.feeling;
+    if(activeFeeling===feeling) activeFeeling=null; else { activeFeeling=feeling; e.currentTarget.classList.add('active'); }
+    filterProductsByFeeling(activeFeeling);
+  }
+  function filterProductsByFeeling(feeling){
+    let filtered=strains||[];
+    if(feeling){
+      const required=feelingToStrain[feeling];
+      filtered=strains.filter(s=>String(s.type)===required);
+      const info=strainDescriptions[required];
+      mainContentTitle.innerHTML=info.icon+' สายพันธุ์สำหรับ <span class="text-green-600">"'+feeling+'"</span>';
+    }else mainContentTitle.textContent='สายพันธุ์ทั้งหมด';
+    renderContentCards(filtered,'strains');
+  }
 
-        function hideModal(modalId) {
-            document.getElementById(modalId).classList.add('hidden');
-        }
+  function renderContentCards(items,type){
+    mainContentList.innerHTML='';
+    if(!items||!items.length){
+      mainContentList.innerHTML='<p class="col-span-full text-center text-gray-500">ไม่พบข้อมูลในหมวดหมู่นี้</p>';
+      return;
+    }
+    items.forEach(it=>{ const card=(type==='promotions')?createPromotionCard(it):createProductCard(it); if(card) mainContentList.appendChild(card); });
+  }
+  function createProductCard(p){
+    const info=isStrainProduct(p)?strainDescriptions[p.type]:equipmentDescription;
+    const out=Number(p.stock||0)<=0;
+    const stock= out?'<span class="text-red-500 font-semibold">สินค้าหมด</span>' : '<span class="text-gray-500">เหลือ '+p.stock+' ชิ้น</span>';
+    const btn= out?'<button class="bg-gray-400 text-white font-semibold py-2 px-4 rounded-lg cursor-not-allowed" disabled>สินค้าหมด</button>'
+                  :'<button class="add-to-cart-btn bg-green-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-700 transition-colors" data-id="'+p.id+'" data-type="'+(isStrainProduct(p)?'strains':'equipments')+'">เพิ่มลงตะกร้า</button>';
+    const d=document.createElement('div');
+    d.className='bg-white rounded-lg shadow-md p-6 card-hover flex flex-col justify-between';
+    d.innerHTML = ''
+      + '<div>'
+      +   '<img src="'+(p.imageUrl||'')+'" onerror="this.onerror=null;this.src=\'https://placehold.co/400x300/cccccc/333333?text=Image+Not+Found\';" alt="'+(p.name||'')+'" class="rounded-md mb-4 object-cover w-full h-48">'
+      +   '<div class="flex justify-between items-center mb-2">'
+      +     '<h3 class="text-xl font-bold text-green-700">'+(p.name||'-')+'</h3>'
+      +     '<div class="tag '+info.tagColor+' flex items-center"><span class="mr-1">'+info.icon+'</span><span>'+(p.type||'')+'</span></div>'
+      +   '</div>'
+      +   '<p class="text-sm text-gray-500 mb-4">'+(p.description||'')+'</p>'
+      + '</div>'
+      + '<div class="flex justify-between items-end mt-4">'
+      +   '<div><span class="text-2xl font-bold text-gray-900">฿'+Number(p.price||0)+'</span> '+stock+'</div>'
+      +   btn
+      + '</div>';
+    return d;
+  }
+  function createPromotionCard(pm){
+    const d=document.createElement('div');
+    d.className='bg-white rounded-lg shadow-md p-6 card-hover flex flex-col justify-between';
+    const end=pm.endDate?new Date(pm.endDate):null;
+    d.innerHTML = ''
+      + '<div>'
+      +   '<img src="'+(pm.imageUrl||'')+'" onerror="this.onerror=null;this.src=\'https://placehold.co/400x300/cccccc/333333?text=Image+Not+Found\';" alt="'+(pm.title||'')+'" class="rounded-md mb-4 object-cover w-full h-48">'
+      +   '<h3 class="text-xl font-bold text-green-700 mb-2">'+(pm.title||'-')+'</h3>'
+      +   '<p class="text-sm text-gray-500 mb-4">'+(pm.description||'')+'</p>'
+      + '</div>'
+      + '<div class="flex items-center space-x-2 text-sm text-gray-600 mt-4">'
+      +   (pm.discount?'<span class="tag bg-red-100 text-red-800 font-semibold">ส่วนลด '+pm.discount+'%</span>':'')
+      +   (end?'<span class="tag bg-gray-100 text-gray-800">ถึง '+end.toLocaleDateString('th-TH')+'</span>':'')
+      + '</div>';
+    return d;
+  }
 
-        // Mock fetchData function to use local data
-        async function fetchData(action) {
-            console.log(`Mock fetching data for action: ${action}`);
-            showLoading();
-            await new Promise(r => setTimeout(r, 500)); // Simulate network delay
-            let data = [];
-            if (action === 'getProducts') data = { strains, equipments };
-            else if (action === 'getPromotions') data = promotions;
-            else if (action === 'getSales') data = [{ order_id: 'ORDER-001', customer_name: 'Mock Customer', total_price: 1500, date: new Date().toISOString() }];
-            hideLoading();
-            return data;
-        }
+  function getProductById(id,type){ const pool=(type==='strains')?strains:equipments; return pool.find(x=>String(x.id)===String(id)); }
+  function addToCart(id,type){
+    const p=getProductById(id,type); if(!p) return;
+    const key=type+':'+p.id; const ex=cart.find(i=>i.key===key);
+    if(Number(p.stock||0)<=0){ showModal('modal-container','สินค้าหมด','"'+p.name+'" หมดสต็อก'); return; }
+    if(ex){ if(ex.quantity<Number(p.stock||0)) ex.quantity++; else return showModal('modal-container','สินค้าไม่พอ','"'+p.name+'" เกินสต็อก'); }
+    else { cart.push({key,type,id:p.id,name:p.name,price:Number(p.price||0),quantity:1,imageUrl:p.imageUrl||''}); }
+    updateCartUI(); showModal('modal-container','เพิ่มสินค้าสำเร็จ','เพิ่ม "'+p.name+'" ลงตะกร้าแล้ว');
+  }
+  function updateCartUI(){
+    const c=cart.reduce((t,i)=>t+i.quantity,0);
+    document.getElementById('cart-count').textContent=c;
+    renderCartItems();
+  }
+  function renderCartItems(){
+    const list=document.getElementById('cart-items-list'); const btn=document.getElementById('checkout-button');
+    list.innerHTML=''; let total=0;
+    if(!cart.length){
+      list.innerHTML='<p class="text-center text-gray-500">ไม่มีสินค้าในตะกร้า</p>';
+      btn.disabled=true; btn.classList.add('bg-gray-400','cursor-not-allowed'); btn.classList.remove('bg-green-600','hover:bg-green-700');
+    }else{
+      cart.forEach(i=>{
+        const line=i.price*i.quantity; total+=line;
+        list.innerHTML += ''
+          + '<div class="flex items-center justify-between p-2 bg-gray-50 rounded-lg">'
+          +   '<div class="flex items-center space-x-4">'
+          +     '<img src="'+i.imageUrl+'" alt="'+i.name+'" class="w-16 h-16 object-cover rounded-md">'
+          +     '<div><h4 class="font-semibold">'+i.name+'</h4><p class="text-sm text-gray-500">฿'+i.price+' x '+i.quantity+'</p></div>'
+          +   '</div>'
+          +   '<div class="flex items-center gap-2">'
+          +     '<button class="px-2 py-1 border rounded" data-qty="-1" data-key="'+i.key+'">-</button>'
+          +     '<span class="font-bold">฿'+line+'</span>'
+          +     '<button class="px-2 py-1 border rounded" data-qty="+1" data-key="'+i.key+'">+</button>'
+          +     '<button class="px-2 py-1 border rounded text-red-600" data-remove="1" data-key="'+i.key+'">ลบ</button>'
+          +   '</div>'
+          + '</div>';
+      });
+      btn.disabled=false; btn.classList.remove('bg-gray-400','cursor-not-allowed'); btn.classList.add('bg-green-600','hover:bg-green-700');
+    }
+    document.getElementById('cart-total-price').textContent='฿'+total;
+  }
+  function changeQty(key,delta){ const it=cart.find(i=>i.key===key); if(!it) return; it.quantity=Math.max(1,it.quantity+delta); updateCartUI(); }
+  function removeItem(key){ cart=cart.filter(i=>i.key!==key); updateCartUI(); }
 
-        // Mock postData function to handle local changes
-        async function postData(payload) {
-            console.log(`Mock posting data with payload:`, payload);
-            showLoading();
-            await new Promise(r => setTimeout(r, 500)); // Simulate network delay
-            hideLoading();
-            return { status: 'success', message: 'ทำรายการสำเร็จ (จำลอง)' };
-        }
+  async function handleCheckout(){
+    const name=document.getElementById('customerName').value.trim();
+    const email=document.getElementById('customerEmail').value.trim();
+    const msg=document.getElementById('checkout-status-message');
+    const loader=document.getElementById('checkout-loading-indicator');
+    const btn=document.getElementById('checkout-button');
+    const closeBtn=document.getElementById('cart-close-btn');
+    const u=getLineUser();
+    if(!cart.length||!name||!email){ msg.textContent='กรุณากรอกข้อมูลให้ครบถ้วนและมีสินค้าในตะกร้า'; msg.className='text-center mt-4 text-sm text-red-500'; return; }
+    try{ showLoading(); const r=await apiGet({action:'getProducts'}); strains=r.products||[]; equipments=r.equipments||[]; }finally{ hideLoading(); }
+    loader.classList.remove('hidden'); btn.disabled=true; closeBtn.disabled=true; msg.textContent='กำลังยืนยันคำสั่งซื้อ...'; msg.className='text-center mt-4 text-sm text-blue-600';
+    const items=cart.map(i=>({id:i.id,name:i.name,price:i.price,qty:i.quantity}));
+    const total=cart.reduce((s,i)=>s+i.price*i.quantity,0);
+    try{
+      const res=await apiPost({action:'placeOrder',user_id:u.userId||'',email,items,total});
+      if(res.ok){
+        msg.textContent='สั่งซื้อสำเร็จ! เลขออเดอร์: '+res.order_id; msg.className='text-center mt-4 text-sm text-green-600';
+        cart=[]; updateCartUI(); setTimeout(()=>hideModal('cart-modal-container'),1200);
+        setTimeout(()=>{ window.location.href='https://line.me/R/ti/p/@'+LINE_OA_ID; },1500);
+      }else{ msg.textContent='เกิดข้อผิดพลาด: '+(res.error||'ไม่สามารถทำรายการได้'); msg.className='text-center mt-4 text-sm text-red-500'; }
+    }catch(e){ msg.textContent='ผิดพลาด: '+(e.message||e); msg.className='text-center mt-4 text-sm text-red-500'; }
+    finally{ loader.classList.add('hidden'); btn.disabled=false; closeBtn.disabled=false; }
+  }
 
-        function renderContentCards(contentToDisplay, type) {
-            mainContentList.innerHTML = '';
-            if (contentToDisplay.length > 0) {
-                contentToDisplay.forEach(item => {
-                    let card;
-                    if (type === 'promotions') card = createPromotionCard(item);
-                    else card = createProductCard(item);
-                    if (card) mainContentList.appendChild(card);
-                });
-            } else {
-                mainContentList.innerHTML = `<p class="col-span-full text-center text-gray-500">ไม่พบข้อมูลในหมวดหมู่นี้</p>`;
-            }
-        }
+  async function initLiff(){
+    try{
+      await liff.init({ liffId: LIFF_ID });
+      if(!liff.isLoggedIn()){ liff.login(); return; }
+      const profile=await liff.getProfile();
+      const u={ userId: profile.userId, displayName: profile.displayName, pictureUrl: profile.pictureUrl };
+      localStorage.setItem('lineUser', JSON.stringify(u));
+      paintUser(u);
+    }catch(err){ console.warn('LIFF init error', err); }
+  }
+  function maybeInitLiff(){ if(!LIFF_ID || LIFF_ID.startsWith('PASTE_')) return; initLiff(); }
+  function getLineUser(){ try{ return JSON.parse(localStorage.getItem('lineUser')||'{}'); }catch{ return {}; } }
+  function paintUser(u){
+    if(u && u.userId){
+      lineLoginBtn.textContent='สวัสดี, '+(u.displayName||'เพื่อน');
+      myOrdersLink.href='profile.html?userId='+encodeURIComponent(u.userId);
+      myOrdersLink.classList.remove('hidden');
+    }
+  }
 
-        function createProductCard(product) {
-            const isStrain = product.type !== 'Equipment';
-            const descriptionData = isStrain ? strainDescriptions[product.type] : equipmentDescription;
-            if (!descriptionData) return null;
+  async function initializeData(){
+    showLoading();
+    try{
+      const r1=await apiGet({action:'getProducts'}); strains=r1.products||[]; equipments=r1.equipments||[];
+      const r2=await apiGet({action:'getPromotions'}); promotions=r2.promotions||[];
+      toggleView(currentView);
+    } finally { hideLoading(); }
+  }
 
-            const isOutOfStock = product.stock <= 0;
-            const stockText = isOutOfStock ? `<span class="text-red-500 font-semibold">สินค้าหมด</span>` : `<span class="text-gray-500">เหลือ ${product.stock} ชิ้น</span>`;
-            const buttonHtml = isOutOfStock 
-                ? `<button class="bg-gray-400 text-white font-semibold py-2 px-4 rounded-lg cursor-not-allowed" disabled>สินค้าหมด</button>`
-                : `<button class="add-to-cart-btn bg-green-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-700 transition-colors" data-id="${product.id}" data-type="${isStrain ? 'strains' : 'equipments'}">เพิ่มลงตะกร้า</button>`;
-
-            const card = document.createElement('div');
-            card.className = 'bg-white rounded-lg shadow-md p-6 card-hover flex flex-col justify-between';
-            card.innerHTML = `
-                <div>
-                    <img src="${product.imageUrl}" onerror="this.onerror=null;this.src='https://placehold.co/400x300/cccccc/333333?text=Image+Not+Found';" alt="${product.name}" class="rounded-md mb-4 object-cover w-full h-48">
-                    <div class="flex justify-between items-center mb-2">
-                        <h3 class="text-xl font-bold text-green-700">${product.name}</h3>
-                        <div class="tag ${descriptionData.tagColor} flex items-center">
-                            <span class="mr-1">${descriptionData.icon}</span>
-                            <span>${product.type}</span>
-                        </div>
-                    </div>
-                    <p class="text-sm text-gray-500 mb-4">${product.description}</p>
-                </div>
-                <div class="flex justify-between items-end mt-4">
-                    <div>
-                        <span class="text-2xl font-bold text-gray-900">฿${product.price}</span>
-                        ${stockText}
-                    </div>
-                    ${buttonHtml}
-                </div>`;
-            return card;
-        }
-
-        function createPromotionCard(promotion) {
-            const card = document.createElement('div');
-            card.className = 'bg-white rounded-lg shadow-md p-6 card-hover flex flex-col justify-between';
-            card.innerHTML = `
-                <div>
-                    <img src="${promotion.imageUrl}" onerror="this.onerror=null;this.src='https://placehold.co/400x300/cccccc/333333?text=Image+Not+Found';" alt="${promotion.title}" class="rounded-md mb-4 object-cover w-full h-48">
-                    <h3 class="text-xl font-bold text-green-700 mb-2">${promotion.title}</h3>
-                    <p class="text-sm text-gray-500 mb-4">${promotion.description}</p>
-                </div>
-                <div class="flex items-center space-x-2 text-sm text-gray-600 mt-4">
-                    <span class="tag bg-red-100 text-red-800 font-semibold">ส่วนลด ${promotion.discount}%</span>
-                    <span class="tag bg-gray-100 text-gray-800">ถึง ${new Date(promotion.endDate).toLocaleDateString('th-TH')}</span>
-                </div>`;
-            return card;
-        }
-
-        // ===================================================================================
-        // UI & VIEW MANAGEMENT
-        // ===================================================================================
-        function updateHeroSection(title, subtitle) {
-            heroTitle.textContent = title;
-            heroSubtitle.textContent = subtitle;
-        }
-
-        function toggleView(view) {
-            currentView = view;
-            const navButtons = document.querySelectorAll('nav button');
-            navButtons.forEach(btn => btn.classList.remove('text-green-200'));
-            document.getElementById(`${view}-btn`).classList.add('text-green-200');
-
-            if (view === 'strains') {
-                mainContentTitle.textContent = 'สายพันธุ์ทั้งหมด';
-                feelingsSection.style.display = 'block';
-                updateHeroSection('ค้นหาสายพันธุ์ที่เหมาะกับคุณ', 'เลือกความรู้สึกที่ต้องการ เราจะแนะนำสายพันธุ์ที่ดีที่สุดให้คุณ');
-                filterProductsByFeeling(activeFeeling);
-            } else if (view === 'equipments') {
-                mainContentTitle.textContent = 'อุปกรณ์ทั้งหมด';
-                feelingsSection.style.display = 'none';
-                updateHeroSection('เลือกอุปกรณ์ที่ใช่', 'อุปกรณ์เสริมคุณภาพสูงสำหรับการใช้งานของคุณ');
-                renderContentCards(equipments, 'equipments');
-            } else if (view === 'promotions') {
-                mainContentTitle.textContent = 'โปรโมชั่นพิเศษ';
-                feelingsSection.style.display = 'none';
-                updateHeroSection('โปรโมชั่นสุดคุ้ม', 'ห้ามพลาดข้อเสนอดีๆ ที่นี่');
-                renderContentCards(promotions, 'promotions');
-            }
-        }
-
-        function createFeelingButtons() {
-            const feelingsContainer = document.getElementById('feelings-container');
-            feelingsContainer.innerHTML = '';
-            for (const feeling in feelingToStrain) {
-                const strainType = feelingToStrain[feeling];
-                const strainInfo = strainDescriptions[strainType];
-                const button = document.createElement('button');
-                button.className = 'feeling-btn bg-green-50 text-gray-800 font-semibold py-2 px-4 rounded-full flex items-center shadow-sm hover:shadow-md';
-                button.dataset.feeling = feeling;
-                button.innerHTML = `<span class="mr-2 text-lg">${strainInfo.icon}</span>${feeling}`;
-                button.addEventListener('click', handleFeelingClick);
-                feelingsContainer.appendChild(button);
-            }
-        }
-
-        function handleFeelingClick(event) {
-            const allFeelingButtons = document.querySelectorAll('.feeling-btn');
-            allFeelingButtons.forEach(btn => btn.classList.remove('active'));
-            const clickedButton = event.currentTarget;
-            const feeling = clickedButton.dataset.feeling;
-
-            if (activeFeeling === feeling) {
-                activeFeeling = null;
-            } else {
-                activeFeeling = feeling;
-                clickedButton.classList.add('active');
-            }
-            filterProductsByFeeling(activeFeeling);
-        }
-
-        function filterProductsByFeeling(feeling) {
-            let filtered = strains;
-            if (feeling) {
-                const requiredType = feelingToStrain[feeling];
-                filtered = strains.filter(strain => strain.type === requiredType);
-                const strainInfo = strainDescriptions[requiredType];
-                mainContentTitle.innerHTML = `${strainInfo.icon} สายพันธุ์สำหรับ <span class="text-green-600">"${feeling}"</span>`;
-            } else {
-                mainContentTitle.textContent = 'สายพันธุ์ทั้งหมด';
-            }
-            renderContentCards(filtered, 'strains');
-        }
-
-        // ===================================================================================
-        // CART & CHECKOUT
-        // ===================================================================================
-        function getProductById(id, type) {
-            const products = type === 'strains' ? strains : equipments;
-            return products.find(p => p.id == id);
-        }
-
-        function addToCart(productId, productType) {
-            const product = getProductById(productId, productType);
-            if (!product) return;
-
-            if (product.stock <= 0) {
-                showModal('modal-container', 'สินค้าหมด', `ขออภัย, "${product.name}" สินค้าหมดสต็อกแล้ว`);
-                return;
-            }
-
-            const existingItem = cart.find(item => item.id === product.id);
-            if (existingItem) {
-                if (existingItem.quantity < product.stock) {
-                    existingItem.quantity++;
-                } else {
-                    showModal('modal-container', 'สินค้าไม่พอ', `คุณไม่สามารถเพิ่ม "${product.name}" เกินจำนวนที่มีในสต็อก`);
-                    return;
-                }
-            } else {
-                cart.push({ ...product, quantity: 1 });
-            }
-            updateCartUI();
-            showModal('modal-container', 'เพิ่มสินค้าสำเร็จ', `คุณได้เพิ่ม "${product.name}" ลงในตะกร้า`);
-        }
-
-        function updateCartUI() {
-            const count = cart.reduce((total, item) => total + item.quantity, 0);
-            document.getElementById('cart-count').textContent = count;
-            renderCartItems();
-        }
-
-        function renderCartItems() {
-            const cartItemsList = document.getElementById('cart-items-list');
-            const checkoutButton = document.getElementById('checkout-button');
-            cartItemsList.innerHTML = '';
-            let total = 0;
-
-            if (cart.length === 0) {
-                cartItemsList.innerHTML = '<p class="text-center text-gray-500">ไม่มีสินค้าในตะกร้า</p>';
-                checkoutButton.disabled = true;
-                checkoutButton.classList.add('bg-gray-400', 'cursor-not-allowed');
-                checkoutButton.classList.remove('bg-green-600', 'hover:bg-green-700');
-            } else {
-                cart.forEach(item => {
-                    const itemTotal = item.price * item.quantity;
-                    total += itemTotal;
-                    cartItemsList.innerHTML += `
-                        <div class="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
-                            <div class="flex items-center space-x-4">
-                                <img src="${item.imageUrl}" alt="${item.name}" class="w-16 h-16 object-cover rounded-md">
-                                <div>
-                                    <h4 class="font-semibold">${item.name}</h4>
-                                    <p class="text-sm text-gray-500">฿${item.price} x ${item.quantity}</p>
-                                </div>
-                            </div>
-                            <span class="font-bold">฿${itemTotal}</span>
-                        </div>`;
-                });
-                checkoutButton.disabled = false;
-                checkoutButton.classList.remove('bg-gray-400', 'cursor-not-allowed');
-                checkoutButton.classList.add('bg-green-600', 'hover:bg-green-700');
-            }
-            document.getElementById('cart-total-price').textContent = `฿${total}`;
-        }
-
-        async function handleCheckout() {
-            const customerName = document.getElementById('customerName').value.trim();
-            const customerEmail = document.getElementById('customerEmail').value.trim();
-            const statusMessage = document.getElementById('checkout-status-message');
-            const loadingIndicator = document.getElementById('checkout-loading-indicator');
-            const checkoutButton = document.getElementById('checkout-button');
-            const closeBtn = document.getElementById('cart-close-btn');
-            
-            // Re-fetch product data to check stock
-            const latestProducts = await fetchData('getProducts');
-            strains = latestProducts.strains || [];
-            equipments = latestProducts.equipments || [];
-
-            if (cart.length === 0 || !customerName || !customerEmail) {
-                statusMessage.textContent = 'กรุณากรอกข้อมูลให้ครบถ้วนและมีสินค้าในตะกร้า';
-                statusMessage.classList.add('text-red-500');
-                return;
-            }
-            
-            // Check stock again before processing
-            for(const cartItem of cart) {
-                const product = getProductById(cartItem.id, cartItem.type);
-                if (product && cartItem.quantity > product.stock) {
-                    showModal('modal-container', 'สินค้าไม่พอ', `ขออภัย, "${product.name}" มีสินค้าไม่พอสำหรับคำสั่งซื้อนี้`);
-                    return;
-                }
-            }
-
-            loadingIndicator.classList.remove('hidden');
-            checkoutButton.disabled = true;
-            closeBtn.disabled = true;
-            statusMessage.textContent = 'กำลังยืนยันคำสั่งซื้อ...';
-            statusMessage.className = 'text-center mt-4 text-sm text-blue-600';
-
-            const totalAmount = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
-            const orderData = {
-                action: 'processOrder',
-                customerName,
-                customerEmail,
-                orderItems: cart.map(item => ({ id: item.id, name: item.name, price: item.price, quantity: item.quantity })),
-                totalAmount
-            };
-
-            const result = await postData(orderData);
-
-            if (result.status === 'success') {
-                statusMessage.textContent = 'สั่งซื้อสำเร็จ! กำลังนำคุณไปยัง LINE...';
-                statusMessage.classList.replace('text-blue-600', 'text-green-600');
-                cart = [];
-                updateCartUI();
-                setTimeout(() => {
-                    window.location.href = `https://line.me/R/ti/p/@${LINE_OA_ID}`;
-                }, 2000);
-            } else {
-                statusMessage.textContent = `เกิดข้อผิดพลาด: ${result.message || 'ไม่สามารถทำรายการได้'}`;
-                statusMessage.classList.replace('text-blue-600', 'text-red-500');
-                loadingIndicator.classList.add('hidden');
-                checkoutButton.disabled = false;
-                closeBtn.disabled = false;
-            }
-        }
-
-        // ===================================================================================
-        // ADMIN & LINE LOGIN
-        // ===================================================================================
-        function handleAdminLogin() {
-            const username = document.getElementById('admin-username').value;
-            const password = document.getElementById('admin-password').value;
-            if (username === 'admin' && password === 'admin123') { // Mock login
-                isAdminLoggedIn = true;
-                hideModal('admin-login-modal-container');
-                document.getElementById('admin-panel-link-container').classList.remove('hidden');
-                showModal('modal-container', 'ล็อกอินสำเร็จ', 'ยินดีต้อนรับแอดมิน!');
-            } else {
-                showModal('modal-container', 'ล็อกอินไม่สำเร็จ', 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง');
-            }
-        }
-
-        function handleLineLogin() {
-            const CHANNEL_ID = '2002862659'; // Channel ID from your screenshot
-            const REDIRECT_URI = APPS_SCRIPT_URL;
-            const state = crypto.randomUUID();
-            const lineAuthUrl = `https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=${CHANNEL_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&state=${state}&scope=openid%20profile`;
-            window.location.href = lineAuthUrl;
-        }
-
-        async function showAdminPanel(panelType) {
-            if (!isAdminLoggedIn) return;
-            const adminPanelContent = document.getElementById('admin-panel-content');
-            adminPanelContent.innerHTML = ''; // Clear previous content
-            showLoading();
-
-            if (panelType === 'products') {
-                document.getElementById('admin-panel-title').textContent = 'จัดการสินค้า';
-                const allProducts = [...strains, ...equipments];
-                adminPanelContent.innerHTML = allProducts.map(product => `
-                    <div class="p-4 border rounded-lg bg-gray-50 flex items-center space-x-4">
-                        <img src="${product.imageUrl}" onerror="this.onerror=null;this.src='https://placehold.co/100x100/ccc/333?text=Img';" alt="${product.name}" class="w-16 h-16 object-cover rounded-md">
-                        <div class="flex-grow">
-                            <h4 class="font-semibold">${product.name}</h4>
-                            <p class="text-sm text-gray-500">ID: ${product.id}</p>
-                            <input type="text" class="w-full mt-2 p-1 border rounded-md text-sm" value="${product.imageUrl}" id="admin-url-${product.id}">
-                        </div>
-                        <button class="admin-update-btn bg-blue-600 text-white font-semibold py-1 px-3 rounded-lg" data-action="updateProductImageUrl" data-id="${product.id}">อัปเดต</button>
-                    </div>
-                `).join('');
-            } else if (panelType === 'stock') {
-                document.getElementById('admin-panel-title').textContent = 'จัดการสต็อก';
-                const allProducts = [...strains, ...equipments];
-                adminPanelContent.innerHTML = allProducts.map(product => `
-                    <div class="p-4 border rounded-lg bg-gray-50 flex items-center space-x-4">
-                        <img src="${product.imageUrl}" onerror="this.onerror=null;this.src='https://placehold.co/100x100/ccc/333?text=Img';" alt="${product.name}" class="w-16 h-16 object-cover rounded-md">
-                        <div class="flex-grow">
-                            <h4 class="font-semibold">${product.name}</h4>
-                            <p class="text-sm text-gray-500">ID: ${product.id}</p>
-                            <input type="number" class="w-full mt-2 p-1 border rounded-md text-sm" value="${product.stock}" id="admin-stock-${product.id}">
-                        </div>
-                        <button class="admin-update-btn bg-blue-600 text-white font-semibold py-1 px-3 rounded-lg" data-action="updateStock" data-id="${product.id}">อัปเดต</button>
-                    </div>
-                `).join('');
-            } else if (panelType === 'promotions') {
-                document.getElementById('admin-panel-title').textContent = 'จัดการโปรโมชั่น';
-                adminPanelContent.innerHTML = `
-                    <form id="admin-promo-form" class="space-y-4 mb-8 p-4 bg-gray-100 rounded-lg">
-                        <h4 id="promo-form-title" class="text-lg font-bold">เพิ่มโปรโมชั่นใหม่</h4>
-                        <input type="hidden" id="promo-id">
-                        <input type="text" id="promo-title" placeholder="ชื่อโปรโมชั่น" required class="w-full p-2 border rounded-md">
-                        <textarea id="promo-description" placeholder="รายละเอียด" required class="w-full p-2 border rounded-md"></textarea>
-                        <input type="url" id="promo-imageUrl" placeholder="URL รูปภาพ" required class="w-full p-2 border rounded-md">
-                        <div class="grid grid-cols-2 gap-4">
-                            <input type="number" id="promo-discount" placeholder="ส่วนลด %" required class="w-full p-2 border rounded-md">
-                            <input type="date" id="promo-endDate" required class="w-full p-2 border rounded-md">
-                        </div>
-                        <div class="flex justify-end space-x-2">
-                            <button type="button" id="promo-cancel-btn" class="hidden bg-gray-500 text-white py-2 px-4 rounded-lg">ยกเลิก</button>
-                            <button type="submit" class="bg-blue-600 text-white py-2 px-4 rounded-lg">บันทึก</button>
-                        </div>
-                    </form>
-                    <div id="admin-promotions-list" class="space-y-4">${promotions.map(promo => `
-                        <div class="p-4 border rounded-lg bg-white flex items-center space-x-4">
-                            <div class="flex-grow">
-                                <h4 class="font-semibold">${promo.title}</h4>
-                                <p class="text-sm text-gray-500">${promo.description.substring(0,50)}...</p>
-                            </div>
-                            <button class="admin-edit-promo-btn bg-yellow-500 text-white py-1 px-3 rounded-lg" data-id="${promo.id}">แก้ไข</button>
-                        </div>
-                    `).join('')}</div>
-                `;
-            } else if (panelType === 'sales') {
-                document.getElementById('admin-panel-title').textContent = 'ข้อมูลยอดขาย';
-                const sales = await fetchData('getSales');
-                adminPanelContent.innerHTML = `
-                    <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50"><tr>
-                            <th class="px-4 py-2 text-left text-xs font-medium">Order ID</th>
-                            <th class="px-4 py-2 text-left text-xs font-medium">Customer</th>
-                            <th class="px-4 py-2 text-left text-xs font-medium">Total</th>
-                            <th class="px-4 py-2 text-left text-xs font-medium">Date</th>
-                        </tr></thead>
-                        <tbody class="bg-white divide-y divide-gray-200">${sales.map(sale => `
-                            <tr>
-                                <td class="px-4 py-2 text-sm">${sale.order_id}</td>
-                                <td class="px-4 py-2 text-sm">${sale.customer_name}</td>
-                                <td class="px-4 py-2 text-sm">฿${sale.total_price}</td>
-                                <td class="px-4 py-2 text-sm">${new Date(sale.date).toLocaleString('th-TH')}</td>
-                            </tr>
-                        `).join('')}</tbody>
-                    </table></div>
-                `;
-            }
-            
-            hideLoading();
-            showModal('admin-panel-modal-container');
-        }
-
-        async function handleAdminUpdate(event) {
-            const button = event.target.closest('.admin-update-btn');
-            if (!button) return;
-            
-            const action = button.dataset.action;
-            const id = button.dataset.id;
-            let value;
-
-            if (action === 'updateProductImageUrl') value = document.getElementById(`admin-url-${id}`).value;
-            else if (action === 'updateStock') value = document.getElementById(`admin-stock-${id}`).value;
-            
-            const result = await postData({ action, id, value });
-            if (result.status === 'success') {
-                showModal('modal-container', 'สำเร็จ', result.message);
-                await initializeData();
-                hideModal('admin-panel-modal-container');
-            } else {
-                showModal('modal-container', 'ผิดพลาด', result.message);
-            }
-        }
-        
-        async function handlePromoFormSubmit(event) {
-            event.preventDefault();
-            const id = document.getElementById('promo-id').value;
-            const payload = {
-                action: id ? 'updatePromotion' : 'addPromotion',
-                id: id,
-                title: document.getElementById('promo-title').value,
-                description: document.getElementById('promo-description').value,
-                imageUrl: document.getElementById('promo-imageUrl').value,
-                discount: document.getElementById('promo-discount').value,
-                endDate: document.getElementById('promo-endDate').value,
-            };
-            const result = await postData(payload);
-            if(result.status === 'success') {
-                showModal('modal-container', 'สำเร็จ', result.message);
-                document.getElementById('admin-promo-form').reset();
-                await initializeData();
-                showAdminPanel('promotions');
-            } else {
-                showModal('modal-container', 'ผิดพลาด', result.message);
-            }
-        }
-        
-        function handleEditPromoClick(event) {
-            const button = event.target.closest('.admin-edit-promo-btn');
-            if(!button) return;
-            const promo = promotions.find(p => p.id == button.dataset.id);
-            if(!promo) return;
-            
-            document.getElementById('promo-form-title').textContent = 'แก้ไขโปรโมชั่น';
-            document.getElementById('promo-id').value = promo.id;
-            document.getElementById('promo-title').value = promo.title;
-            document.getElementById('promo-description').value = promo.description;
-            document.getElementById('promo-imageUrl').value = promo.imageUrl;
-            document.getElementById('promo-discount').value = promo.discount;
-            document.getElementById('promo-endDate').value = promo.endDate.split('T')[0]; // Format for date input
-            document.getElementById('promo-cancel-btn').classList.remove('hidden');
-        }
-
-        // ===================================================================================
-        // INITIALIZATION
-        // ===================================================================================
-        async function initializeData() {
-            showLoading();
-            const productsData = await fetchData('getProducts');
-            strains = productsData.strains || [];
-            equipments = productsData.equipments || [];
-            promotions = await fetchData('getPromotions');
-            toggleView(currentView);
-            hideLoading();
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            createFeelingButtons();
-            initializeData();
-
-            // Event Listeners
-            document.getElementById('cart-icon-container').addEventListener('click', () => showModal('cart-modal-container'));
-            document.getElementById('cart-close-btn').addEventListener('click', () => hideModal('cart-modal-container'));
-            document.getElementById('checkout-button').addEventListener('click', handleCheckout);
-
-            document.getElementById('admin-login-btn').addEventListener('click', () => showModal('admin-login-modal-container'));
-            document.getElementById('admin-login-submit').addEventListener('click', handleAdminLogin);
-            document.getElementById('admin-login-cancel').addEventListener('click', () => hideModal('admin-login-modal-container'));
-            
-            document.getElementById('line-login-btn').addEventListener('click', handleLineLogin);
-
-            document.getElementById('admin-panel-close-btn').addEventListener('click', () => hideModal('admin-panel-modal-container'));
-            document.getElementById('modal-ok-btn').addEventListener('click', () => hideModal('modal-container'));
-
-            // Event delegation for dynamically created elements
-            document.body.addEventListener('click', (event) => {
-                if (event.target.classList.contains('add-to-cart-btn')) {
-                    addToCart(event.target.dataset.id, event.target.dataset.type);
-                }
-                handleAdminUpdate(event);
-                handleEditPromoClick(event);
-            });
-            
-            document.body.addEventListener('submit', (event) => {
-                if(event.target.id === 'admin-promo-form') {
-                    handlePromoFormSubmit(event);
-                }
-            });
-        });
-    </script>
+  document.addEventListener('DOMContentLoaded', ()=>{
+    createFeelingButtons(); initializeData(); maybeInitLiff();
+    document.getElementById('cart-icon-container').addEventListener('click', ()=> showModal('cart-modal-container'));
+    document.getElementById('cart-close-btn').addEventListener('click', ()=> hideModal('cart-modal-container'));
+    document.getElementById('checkout-button').addEventListener('click', handleCheckout);
+    document.getElementById('modal-ok-btn').addEventListener('click', ()=> hideModal('modal-container'));
+    document.body.addEventListener('click', (e)=>{
+      const t=e.target;
+      if (t.classList.contains('add-to-cart-btn')) addToCart(t.dataset.id, t.dataset.type);
+      if (t.hasAttribute('data-qty')) changeQty(t.getAttribute('data-key'), t.getAttribute('data-qty')==='+1'?1:-1);
+      if (t.hasAttribute('data-remove')) removeItem(t.getAttribute('data-key'));
+    });
+  });
+  </script>
 </body>
 </html>
