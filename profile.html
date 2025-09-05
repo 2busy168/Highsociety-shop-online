@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ประวัติคำสั่งซื้อ | HIGHSOCIETY</title>
+<script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50">
+<div class="max-w-3xl mx-auto p-6">
+  <h1 class="text-2xl font-bold mb-4">ประวัติคำสั่งซื้อ</h1>
+  <div class="bg-white p-4 rounded shadow">
+    <div class="flex gap-2 mb-3">
+      <input id="uid" class="border p-2 rounded flex-1" placeholder="ใส่ userId (หรือ login ด้วย LIFF แล้วส่งผ่าน query)">
+      <button id="load" class="border px-3 py-2 rounded">โหลด</button>
+    </div>
+    <div class="overflow-auto">
+      <table class="min-w-full text-sm">
+        <thead><tr class="bg-gray-100">
+          <th class="p-2 text-left">เวลา</th>
+          <th class="p-2 text-left">Order</th>
+          <th class="p-2 text-left">รวม</th>
+          <th class="p-2 text-left">สถานะ</th>
+          <th class="p-2 text-left">ใบเสร็จ</th>
+        </tr></thead>
+        <tbody id="tb"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+const APP_URL = "https://script.google.com/macros/s/AKfycbzis9Isw6XXUsi7k8MQmI4rJI8gnFnPS0VIDpuvsgw88dC8SwQ4VOHKK5TfeQMDKgLotA/exec";
+
+async function get(params){
+  const url = APP_URL + '?' + new URLSearchParams(params).toString();
+  const res = await fetch(url); return res.json();
+}
+
+async function load(u){
+  if(!u){ alert('กรุณาใส่ userId'); return; }
+  const r = await get({ action:'getUserOrders', userId: u });
+  const tb = document.getElementById('tb'); tb.innerHTML = '';
+  (r.orders||[]).forEach(o=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="p-2">${o.createdAt||''}</td>
+      <td class="p-2">${o.order_id}</td>
+      <td class="p-2">${o.total||0}</td>
+      <td class="p-2">${o.status}</td>
+      <td class="p-2">${o.receiptUrl ? `<a class="text-blue-600" href="${o.receiptUrl}" target="_blank">ดาวน์โหลด</a>` : '-'}</td>`;
+    tb.appendChild(tr);
+  });
+}
+
+document.getElementById('load').onclick = ()=>{
+  load(document.getElementById('uid').value.trim());
+};
+(function(){ const u = new URLSearchParams(location.search).get('userId') || ''; if(u){ document.getElementById('uid').value = u; load(u); } })();
+</script>
+</body>
+</html>

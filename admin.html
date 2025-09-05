@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin | HIGHSOCIETY</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gray-50">
+<div class="max-w-5xl mx-auto p-6">
+  <h1 class="text-2xl font-bold mb-4">HIGHSOCIETY — Admin</h1>
+
+  <div id="loginBox" class="bg-white p-4 rounded shadow mb-6">
+    <h2 class="font-semibold mb-2">เข้าสู่ระบบแอดมิน</h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+      <input id="u" class="border p-2 rounded" placeholder="username">
+      <input id="p" type="password" class="border p-2 rounded" placeholder="password">
+      <button id="loginBtn" class="bg-black text-white px-4 py-2 rounded">ล็อกอิน</button>
+    </div>
+    <p id="loginMsg" class="text-red-500 mt-2"></p>
+  </div>
+
+  <div id="dash" class="hidden">
+    <div class="bg-white p-4 rounded shadow mb-6">
+      <div class="flex items-center gap-3 mb-4">
+        <h2 class="font-semibold">ยอดขายรายวัน (เดือน)</h2>
+        <input id="month" type="month" class="border p-1 rounded">
+        <button id="reload" class="border px-3 py-1 rounded">รีเฟรช</button>
+      </div>
+      <canvas id="chart"></canvas>
+    </div>
+
+    <div class="bg-white p-4 rounded shadow">
+      <h2 class="font-semibold mb-3">ออร์เดอร์ล่าสุด</h2>
+      <div class="overflow-auto">
+        <table class="min-w-full text-sm">
+          <thead><tr class="bg-gray-100">
+            <th class="p-2 text-left">เวลา</th>
+            <th class="p-2 text-left">Order</th>
+            <th class="p-2 text-left">User</th>
+            <th class="p-2 text-left">รวม</th>
+            <th class="p-2 text-left">สถานะ</th>
+            <th class="p-2 text-left">ใบเสร็จ</th>
+            <th class="p-2 text-left">จัดการ</th>
+          </tr></thead>
+          <tbody id="orders"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const APP_URL = "https://script.google.com/macros/s/AKfycbzis9Isw6XXUsi7k8MQmI4rJI8gnFnPS0VIDpuvsgw88dC8SwQ4VOHKK5TfeQMDKgLotA/exec";
+let ADMIN_TOKEN = localStorage.getItem('ADMIN_TOKEN') || '';
+
+const loginBox = document.getElementById('loginBox');
+const dash = document.getElementById('dash');
+const loginBtn = document.getElementById('loginBtn');
+const loginMsg = document.getElementById('loginMsg');
+const ordersTbody = document.getElementById('orders');
+const monthInput = document.getElementById('month');
+const reloadBtn = document.getElementById('reload');
+let chart;
+
+function showDash(){ loginBox.classList.add('hidden'); dash.classList.remove('hidden'); loadChart(); loadOrders(); }
+function showLogin(){ dash.classList.add('hidden'); loginBox.classList.remove('hidden'); }
+
+async function post(action, body={}){
+  const res = await fetch(APP_URL, { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ action, ...body }) });
+  return res.json();
+}
+async function get(params){
+  const url = APP_URL + '?' + new URLSearchParams(params).toString();
+  const res = await fetch(url); return res.json();
+}
+
+loginBtn.onclick = async ()=>{
+  const username = document.getElementById('u').value.trim();
+  const password = document.getElementById('p').value.trim();
+  const r = await post('adminLogin',{username,password});
+  if(!r.ok){ loginMsg.textContent = 'ล็อกอินไม่สำเร็จ'; return; }
+  ADMIN_TOKEN = r.token; localStorage.setItem('ADMIN_TOKEN', ADMIN_TOKEN);
+  showDash();
+};
+
+async function loadOrders(){
+  const r = await get({ action:'adminListOrders', limit: 100 });
+  ordersTbody.innerHTML = '';
+  (r.orders||[]).forEach(o=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="p-2">${o.createdAt||''}</td>
+      <td class="p-2">${o.order_id}</td>
+      <td class="p-2">${o.user_id}</td>
+      <td class="p-2">${o.total||0}</td>
+      <td class="p-2">${o.status}</td>
+      <td class="p-2">${o.receiptUrl ? `<a class="text-blue-600" href="${o.receiptUrl}" target="_blank">เปิด</a>` : '-'}</td>
+      <td class="p-2">
+        ${o.status==='paid' ? '-' :
+          `<button class="px-2 py-1 border rounded" data-id="${o.order_id}">ยืนยันชำระ</button>`}
+      </td>`;
+    ordersTbody.appendChild(tr);
+  });
+
+  ordersTbody.querySelectorAll('button[data-id]').forEach(btn=>{
+    btn.onclick = async ()=>{
+      if(!confirm('ยืนยันการชำระเงิน?')) return;
+      const r = await post('confirmPayment',{ order_id: btn.dataset.id, adminToken: ADMIN_TOKEN });
+      if(r.ok){ alert('สร้างใบเสร็จแล้ว: ' + r.receiptUrl); loadOrders(); loadChart(); }
+      else { alert('ผิดพลาด: '+ (r.error || r.message)); }
+    };
+  });
+}
+
+async function loadChart(){
+  const ym = monthInput.value || (new Date().toISOString().slice(0,7));
+  const r = await get({ action:'getSalesChartData', month: ym });
+  const ctx = document.getElementById('chart');
+  if(chart) chart.destroy();
+  chart = new Chart(ctx, {
+    type: 'bar',
+    data: { labels: r.labels, datasets: [{ label: 'ยอดขาย (บาท)', data: r.values }] },
+    options: { scales: { y: { beginAtZero: true } } }
+  });
+}
+
+reloadBtn.onclick = ()=> loadChart();
+(function init(){
+  const m = new Date().toISOString().slice(0,7);
+  monthInput.value = m;
+  if(ADMIN_TOKEN){ showDash(); } else { showLogin(); }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <style>
+      body { font-family: Arial, sans-serif; font-size: 12px; padding: 24px; }
+      h1 { font-size: 18px; margin: 0 0 8px; }
+      .muted { color: #666; }
+      table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+      th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+      th { background: #f5f5f5; }
+      .right { text-align: right; }
+      .total { font-weight: bold; }
+    </style>
+  </head>
+  <body>
+    <h1>HIGHSOCIETY — ใบเสร็จรับเงิน</h1>
+    <div class="muted">
+      เลขที่ใบเสร็จ: <?= order.order_id ?><br>
+      วันที่: <?= Utilities.formatDate(new Date(order.createdAt), Session.getScriptTimeZone(), 'yyyy-MM-dd HH:mm') ?><br>
+      ลูกค้า (LINE userId): <?= order.user_id ?>
+    </div>
+
+    <table>
+      <thead>
+        <tr><th>รายการ</th><th class="right">จำนวน</th><th class="right">ราคา/หน่วย</th><th class="right">รวม</th></tr>
+      </thead>
+      <tbody>
+        <? var sum = 0;
+           items.forEach(function(it){
+             var qty = Number(it.qty||1);
+             var price = Number(it.price||0);
+             var line = qty*price; sum += line; ?>
+          <tr>
+            <td><?= it.name || it.id ?></td>
+            <td class="right"><?= qty ?></td>
+            <td class="right"><?= price.toFixed(2) ?></td>
+            <td class="right"><?= line.toFixed(2) ?></td>
+          </tr>
+        <? }); ?>
+        <tr>
+          <td colspan="3" class="right total">ยอดสุทธิ</td>
+          <td class="right total"><?= (Number(order.total)||sum).toFixed(2) ?></td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="muted">ขอบคุณที่อุดหนุน HIGHSOCIETY</p>
+  </body>
+</html>
