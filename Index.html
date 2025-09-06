@@ -42,7 +42,19 @@
   /* 6) กันการ์ดรูปบวมตอน CSS โหลดช้าใน WebView */
   .fallback-card-img{width:100%;height:12rem;object-fit:cover;border-radius:.5rem;display:block}
 </style>
-
+  <style>
+  /* รูปสินค้า/โปรโมชันให้คงสัดส่วน 4:3 เสมอ ไม่ยืดบนมือถือ */
+  .card-img{
+    aspect-ratio: 4 / 3;     /* ใช้ได้บน iOS/Safari แล้ว */
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    display: block;
+    border-radius: .5rem;
+  }
+  /* กันหน้าล้นแนวนอนบนมือถือ */
+  html, body { max-width: 100%; overflow-x: hidden; }
+</style>
 <script>
   // FIX: ใช้ความกว้างจริงของ viewport แทน 100vw (ซึ่งกว้างเกินใน LINE WebView)
   (function() {
