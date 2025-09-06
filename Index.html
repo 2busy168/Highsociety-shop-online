@@ -113,8 +113,8 @@
           <input type="text" id="customerName" placeholder="กรุณากรอกชื่อของคุณ" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500">
         </div>
         <div class="mb-4">
-          <label for="customerEmail" class="block text-gray-700 font-semibold mb-2">อีเมล</label>
-          <input type="email" id="customerEmail" placeholder="สำหรับส่งใบเสร็จ" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500">
+          <label for="customerEmail" class="block text-gray-700 font-semibold mb-2">ที่อยู่สำหรับจัดส่ง</label>
+          <input type="text" id="customerEmail" placeholder="สำหรับส่งใบเสร็จ" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500">
         </div>
       </div>
       <div class="relative mt-6">
@@ -437,7 +437,7 @@ function buildOrderSummary(items, total, name, email){
   items.forEach(it => lines.push(`• ${it.name} x ${it.quantity} = ฿${it.price * it.quantity}`));
   lines.push(`ยอดรวม: ฿${total}`);
   if (name)  lines.push(`ชื่อผู้สั่ง: ${name}`);
-  if (email) lines.push(`อีเมล: ${email}`);
+  if (email) lines.push(`ที่อยู่: ${email}`);
   return lines.join('\n');
 }
 
