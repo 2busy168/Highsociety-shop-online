@@ -85,7 +85,33 @@
   }
 
   // ... โค้ดอื่น ๆ ที่เป็น initialization/main logic ...
-  document.addEventListener('DOMContentLoaded', ()=>{
+  document.addEventListener('DOMContentLoaded', ()=>{// === bind mobile drawer ===
+document.getElementById('mobile-menu-btn')?.addEventListener('click', openDrawer);
+document.getElementById('mobile-drawer-backdrop')?.addEventListener('click', closeDrawer);
+document.getElementById('mobile-drawer-close')?.addEventListener('click', closeDrawer);
+document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeDrawer(); });
+
+drawer?.addEventListener('click', (e)=>{
+  const btn = e.target.closest('.drawer-link'); if(!btn) return;
+  const action = btn.dataset.action;
+
+  if(action === 'go'){
+    const target = btn.dataset.target; // strains|equipments|promotions
+    toggleView(target);
+    closeDrawer();
+  } else if(action === 'line-login'){
+    handleLineLogin(); closeDrawer();
+  } else if(action === 'order-history'){
+    try { window.location.href = 'profile.html'; }
+    catch { showModal('modal-container','เร็วๆ นี้','ประวัติคำสั่งซื้อจะพร้อมใช้งานเร็วๆ นี้'); }
+    closeDrawer();
+  } else if(action === 'admin'){
+    if(isAdminLoggedIn) showAdminPanel('products');
+    else showModal('admin-login-modal-container');
+    closeDrawer();
+  }
+});
+
     // ... ส่วน event handler ต่าง ๆ ...
   });
 </script>
