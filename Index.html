@@ -429,6 +429,40 @@
          const r2=await apiGet({action:'getPromotions'}); promotions=r2.promotions||[]; toggleView(currentView); }
     finally { hideLoading(); }
   }
+// === ส่งสรุปออร์เดอร์เข้า LINE OA ===
+function buildOrderSummary(items, total, name, email){
+  const lines = ['🛒 คำสั่งซื้อใหม่'];
+  items.forEach(it => lines.push(`• ${it.name} x ${it.quantity} = ฿${it.price * it.quantity}`));
+  lines.push(`ยอดรวม: ฿${total}`);
+  if (name)  lines.push(`ชื่อผู้สั่ง: ${name}`);
+  if (email) lines.push(`อีเมล: ${email}`);
+  return lines.join('\n');
+}
+
+async function sendOrderToOA(text){
+  // init LIFF (เรียกครั้งเดียว)
+  if (!window.__liffInited) { await liff.init({ liffId: LIFF_ID }); window.__liffInited = true; }
+
+  const inClient = liff.isInClient?.();
+  const ctx = liff.getContext?.() || { type:'none' };
+
+  // เปิดจากห้องแชตร้าน → ส่งได้เลย
+  if (inClient && (ctx.type==='utou' || ctx.type==='room' || ctx.type==='group')) {
+    await liff.sendMessages([{ type:'text', text }]);
+    return true;
+  }
+
+  // ไม่ใช่แชต → ให้เลือกห้อง (ต้องเปิด scope chat_message.write ใน LIFF)
+  if (inClient && liff.shareTargetPicker) {
+    const res = await liff.shareTargetPicker([{ type:'text', text }]);
+    if (res) return true;
+  }
+
+  // สำรองสุดท้าย: เปิดห้อง OA ให้ลูกค้าวาง-ส่งเอง
+  try { await navigator.clipboard.writeText(text); } catch(_) {}
+  location.href = `https://line.me/R/ti/p/@${LINE_OA_ID.replace(/^@?/, '')}`;
+  return false;
+}
 
   document.addEventListener('DOMContentLoaded', ()=>{
     createFeelingButtons(); initializeData(); maybeInitLiff();
