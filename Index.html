@@ -2,6 +2,24 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="format-detection" content="telephone=no, email=no, address=no, date=no">
+<style>
+  /* กัน iOS ขยายฟอนต์อัตโนมัติใน WebView */
+  html{ -webkit-text-size-adjust:100%; text-size-adjust:100%; }
+  /* ป้องกัน default link style ใน LIFF */
+  a{ color:inherit; text-decoration:none; }
+  a:focus, a:hover{ text-decoration:none; }
+  /* รูป/SVG ไม่ล้น และคงสัดส่วน */
+  img, svg{ max-width:100%; height:auto; display:block; }
+  /* header เคารพ safe area (Dynamic Island) */
+  :root{ --safe-top: env(safe-area-inset-top); }
+  header{ padding-top: var(--safe-top); }
+  /* กันเมนูบนมือถือขึ้นบรรทัดมาก ๆ แล้วล้น */
+  header nav{ display:flex; flex-wrap:wrap; gap:.5rem; }
+  /* Fallback (กันตอน Tailwind ยังไม่โหลด) */
+  .fallback-card-img{ width:100%; height:12rem; object-fit:cover; border-radius:.5rem; display:block; }
+</style>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>H!GH$OC!€T¥ - Cannabis E-commerce</title>
