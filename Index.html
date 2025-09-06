@@ -24,39 +24,34 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>H!GH$OC!€T¥ - Cannabis E-commerce</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
-  <style>
-  /* ——— Base & Safe area ——— */
-  *, *::before, *::after { box-sizing: border-box; }
-  html, body { width:100%; max-width:100%; margin:0; padding:0; overflow-x:hidden;
-               -webkit-text-size-adjust:100%; text-size-adjust:100%; }
-  :root{
-    --safe-t: env(safe-area-inset-top);
-    --safe-r: env(safe-area-inset-right);
-    --safe-b: env(safe-area-inset-bottom);
-    --safe-l: env(safe-area-inset-left);
-  }
-  header, #hero-section, main, footer{
-    padding-left: max(1rem, var(--safe-l));
-    padding-right: max(1rem, var(--safe-r));
-  }
-  header{ padding-top: var(--safe-t); }
-
-  /* ——— Links & media (กันเส้นใต้/สีฟ้า iOS) ——— */
-  a{ color:inherit; text-decoration:none; }
-  a:focus, a:hover{ text-decoration:none; }
-  img, svg{ max-width:100%; height:auto; display:block; }
-
-  /* ——— Layout fixes that usually overflow ——— */
-  .gradient-bg{
-    background: linear-gradient(135deg,#065f46 0%,#10b981 100%);
-    background-size: cover; background-repeat: no-repeat;
-  }
-  header .container{ display:flex; flex-wrap:wrap; gap:.5rem 1rem; align-items:center; }
-  /* กันกริดสินค้าหาย/ล้นจอบน iOS */
-  #main-content-list{ min-height:10rem; }
-  /* เผื่อ moment ที่ tailwind ยังไม่ผูก class — ให้รูปการ์ดไม่บวม */
-  .fallback-card-img{ width:100%; height:12rem; object-fit:cover; border-radius:.5rem; display:block; }
+  <style id="ios-fit-fix">
+  /* 1) ห้ามมีแนวนอนล้นจอ */
+  html,body{width:100%!important;max-width:100%!important;overflow-x:hidden!important;
+            -webkit-text-size-adjust:100%;text-size-adjust:100%}
+  /* 2) อะไรที่ชอบกว้างเกิน viewport ให้บังคับ 100% */
+  header,#hero-section,main,footer,.container{width:100%!important;max-width:100%!important}
+  /* 3) กัน class w-screen/max-w-screen ที่ชอบกว้างเกินบน iOS WebView */
+  [class*="w-screen"],[class*="max-w-screen"],[class*="min-w-screen"]{width:100%!important;max-width:100%!important}
+  /* 4) รูป/วิดีโอไม่ยืด */
+  img,svg,video{max-width:100%;height:auto;display:block}
+  /* 5) safe area (Dynamic Island) */
+  :root{--safe-t:env(safe-area-inset-top);--safe-r:env(safe-area-inset-right);
+        --safe-b:env(safe-area-inset-bottom);--safe-l:env(safe-area-inset-left)}
+  header{padding-top:var(--safe-t)}
+  header,.gradient-bg,main,footer{padding-left:max(1rem,var(--safe-l));padding-right:max(1rem,var(--safe-r))}
+  /* 6) กันการ์ดรูปบวมตอน CSS โหลดช้าใน WebView */
+  .fallback-card-img{width:100%;height:12rem;object-fit:cover;border-radius:.5rem;display:block}
 </style>
+
+<script>
+  // FIX: ใช้ความกว้างจริงของ viewport แทน 100vw (ซึ่งกว้างเกินใน LINE WebView)
+  (function() {
+    function setVW() {
+      document.documentElement.style.setProperty('--vwpx', window.innerWidth + 'px');
+    }
+    setVW(); window.addEventListener('resize', setVW);
+  })();
+</script>
 
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
