@@ -190,6 +190,27 @@ drawer?.addEventListener('click', (e)=>{
       </div>
     </div>
   </header>
+  <!-- Mobile Drawer -->
+<div id="mobile-drawer" class="fixed inset-0 z-60 hidden">
+  <div id="mobile-drawer-backdrop" class="absolute inset-0 bg-black/50"></div>
+  <aside id="mobile-drawer-panel"
+         class="absolute inset-y-0 right-0 w-5/6 max-w-xs bg-white shadow-2xl
+                transform translate-x-full transition-transform duration-200 ease-out">
+    <div class="p-4 flex items-center justify-between border-b">
+      <span class="text-lg font-bold">เมนู</span>
+      <button id="mobile-drawer-close" class="p-2 rounded hover:bg-gray-100">✕</button>
+    </div>
+    <nav class="divide-y divide-gray-100">
+      <button class="drawer-link w-full text-left px-4 py-3" data-action="go" data-target="strains">สายพันธุ์</button>
+      <button class="drawer-link w-full text-left px-4 py-3" data-action="go" data-target="equipments">อุปกรณ์</button>
+      <button class="drawer-link w-full text-left px-4 py-3" data-action="go" data-target="promotions">โปรโมชั่น</button>
+      <button class="drawer-link w-full text-left px-4 py-3" data-action="order-history">ประวัติคำสั่งซื้อของฉัน</button>
+      <button class="drawer-link w-full text-left px-4 py-3" data-action="line-login">เข้าสู่ระบบด้วย LINE</button>
+      <button class="drawer-link w-full text-left px-4 py-3" data-action="admin">แอดมิน</button>
+    </nav>
+  </aside>
+</div>
+
 
   <!-- Loading -->
   <div id="loading-spinner" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50">
