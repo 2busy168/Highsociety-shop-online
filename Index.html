@@ -179,10 +179,16 @@
     const url=APP_URL+'?'+new URLSearchParams(params).toString();
     const res=await fetch(url,{cache:'no-store'}); return res.json();
   }
-  async function apiPost(payload){
-    const res=await fetch(APP_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-    return res.json();
-  }
+ async function apiPost(payload){
+  const res = await fetch(APP_URL, {
+    method: 'POST',
+    // ใช้ text/plain เพื่อตัด preflight ใน iOS/LIFF
+    headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
+    body: JSON.stringify(payload)
+  });
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  return res.json();
+}
 
   function updateHeroSection(title,subtitle){ heroTitle.textContent=title; heroSubtitle.textContent=subtitle; }
   function toggleView(view){
