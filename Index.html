@@ -384,6 +384,8 @@
     try{
       const result = await apiPost(orderData);
       if (result.ok || result.status === 'success') {
+      const summary = buildOrderSummary(cart, totalAmount, customerName, customerEmail);
+  await sendOrderToOA(summary);
         const orderId = result.order_id || '';
         const itemsForMsg = cart.map(i => ({ name:i.name, price:i.price, qty:i.quantity }));
         cart = []; updateCartUI();
