@@ -65,24 +65,28 @@
   })();
 </script>
 <script>
-  // ====== Mobile Drawer (hamburger) ======
-  const drawer = document.getElementById('mobile-drawer');
-  const drawerPanel = document.getElementById('mobile-drawer-panel');
+// ====== Mobile Drawer (hamburger) ======
+function el(id){ return document.getElementById(id); }
 
-  function openDrawer(){
-    if (!drawer || !drawerPanel) return;
-    drawer.classList.remove('hidden');
-    document.body.classList.add('overflow-hidden');
-    requestAnimationFrame(()=> drawerPanel.classList.remove('translate-x-full'));
-  }
-  function closeDrawer(){
-    if (!drawer || !drawerPanel) return;
-    drawerPanel.classList.add('translate-x-full');
-    setTimeout(()=>{
-      drawer.classList.add('hidden');
-      document.body.classList.remove('overflow-hidden');
-    }, 200);
-  }
+function openDrawer(){
+  const drawer = el('mobile-drawer');
+  const panel  = el('mobile-drawer-panel');
+  if(!drawer || !panel) return;
+  drawer.classList.remove('hidden');
+  document.body.classList.add('overflow-hidden');
+  requestAnimationFrame(()=> panel.classList.remove('translate-x-full'));
+}
+
+function closeDrawer(){
+  const drawer = el('mobile-drawer');
+  const panel  = el('mobile-drawer-panel');
+  if(!drawer || !panel) return;
+  panel.classList.add('translate-x-full');
+  setTimeout(()=>{
+    drawer.classList.add('hidden');
+    document.body.classList.remove('overflow-hidden');
+  }, 200);
+}
 
   // ... โค้ดอื่น ๆ ที่เป็น initialization/main logic ...
   document.addEventListener('DOMContentLoaded', ()=>{// === bind mobile drawer ===
@@ -190,16 +194,20 @@ drawer?.addEventListener('click', (e)=>{
       </div>
     </div>
   </header>
-  <!-- Mobile Drawer -->
-<div id="mobile-drawer" class="fixed inset-0 z-60 hidden">
-  <div id="mobile-drawer-backdrop" class="absolute inset-0 bg-black/50"></div>
+ <!-- Mobile Drawer -->
+<div id="mobile-drawer" class="fixed inset-0 hidden" style="z-index:9999;">
+  <!-- backdrop -->
+  <div id="mobile-drawer-backdrop" class="absolute inset-0 bg-black bg-opacity-50"></div>
+
+  <!-- panel -->
   <aside id="mobile-drawer-panel"
          class="absolute inset-y-0 right-0 w-5/6 max-w-xs bg-white shadow-2xl
-                transform translate-x-full transition-transform duration-200 ease-out">
+                transform translate-x-full transition duration-200 ease-out">
     <div class="p-4 flex items-center justify-between border-b">
       <span class="text-lg font-bold">เมนู</span>
-      <button id="mobile-drawer-close" class="p-2 rounded hover:bg-gray-100">✕</button>
+      <button id="mobile-drawer-close" class="p-2 rounded hover:bg-gray-100" aria-label="ปิดเมนู">✕</button>
     </div>
+
     <nav class="divide-y divide-gray-100">
       <button class="drawer-link w-full text-left px-4 py-3" data-action="go" data-target="strains">สายพันธุ์</button>
       <button class="drawer-link w-full text-left px-4 py-3" data-action="go" data-target="equipments">อุปกรณ์</button>
@@ -210,6 +218,7 @@ drawer?.addEventListener('click', (e)=>{
     </nav>
   </aside>
 </div>
+
 
 
   <!-- Loading -->
@@ -630,34 +639,28 @@ async function sendOrderToOA(text){
     document.getElementById('checkout-button').addEventListener('click', handleCheckout);
     document.getElementById('modal-ok-btn').addEventListener('click', ()=> hideModal('modal-container'));
 // === bind mobile drawer ===
-document.getElementById('mobile-menu-btn')?.addEventListener('click', openDrawer);
-document.getElementById('mobile-drawer-backdrop')?.addEventListener('click', closeDrawer);
-document.getElementById('mobile-drawer-close')?.addEventListener('click', closeDrawer);
+el('mobile-menu-btn') && el('mobile-menu-btn').addEventListener('click', openDrawer);
+el('mobile-drawer-backdrop') && el('mobile-drawer-backdrop').addEventListener('click', closeDrawer);
+el('mobile-drawer-close') && el('mobile-drawer-close').addEventListener('click', closeDrawer);
 document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeDrawer(); });
 
-drawer?.addEventListener('click', (e)=>{
+const drawerRoot = el('mobile-drawer');
+drawerRoot && drawerRoot.addEventListener('click', (e)=>{
   const btn = e.target.closest('.drawer-link'); if(!btn) return;
   const action = btn.dataset.action;
 
   if(action === 'go'){
-    const target = btn.dataset.target; // strains|equipments|promotions
-    toggleView(target);
-    closeDrawer();
-  }
-  else if(action === 'line-login'){
+    toggleView(btn.dataset.target);
+  } else if(action === 'line-login'){
     handleLineLogin();
-    closeDrawer();
-  }
-  else if(action === 'order-history'){
+  } else if(action === 'order-history'){
     try { window.location.href = 'profile.html'; }
-    catch(_) { showModal('modal-container','เร็วๆ นี้','ประวัติคำสั่งซื้อจะพร้อมใช้งานเร็วๆ นี้'); }
-    closeDrawer();
+    catch { showModal('modal-container','เร็วๆ นี้','ประวัติคำสั่งซื้อจะพร้อมใช้งานเร็วๆ นี้'); }
+  } else if(action === 'admin'){
+    if(isAdminLoggedIn) showAdminPanel('products'); else showModal('admin-login-modal-container');
   }
-  else if(action === 'admin'){
-    if(isAdminLoggedIn){ showAdminPanel('products'); }
-    else{ showModal('admin-login-modal-container'); }
-    closeDrawer();
-  }
+  closeDrawer();
+  
   // ถ้าคุณเพิ่มปุ่มย่อยของแอดมิน:
   else if(action === 'admin-products'){
     if(isAdminLoggedIn) showAdminPanel('products'); else showModal('admin-login-modal-container');
