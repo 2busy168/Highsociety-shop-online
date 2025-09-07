@@ -216,33 +216,6 @@
       </div>
     </div>
   </header>
-
-<!-- Mobile Drawer -->
-<div id="mobile-drawer" class="fixed inset-0 hidden" style="z-index:9999;">
-  <div id="mobile-drawer-backdrop" class="absolute inset-0 bg-black bg-opacity-50"></div>
-  <aside id="mobile-drawer-panel"
-         class="absolute inset-y-0 right-0 w-5/6 max-w-xs bg-white shadow-2xl
-                transform translate-x-full transition duration-200 ease-out">
-    <div class="p-4 flex items-center justify-between border-b">
-      <span class="text-lg font-bold">เมนู</span>
-      <button id="mobile-drawer-close" class="p-2 rounded hover:bg-gray-100" aria-label="ปิดเมนู">✕</button>
-    </div>
-    <nav class="divide-y divide-gray-100">
-      <!-- 1) เปลี่ยนไปหน้าอุปกรณ์ -->
-      <button class="drawer-link w-full text-left px-4 py-3 text-gray-800"
-              data-action="go" data-target="equipments">อุปกรณ์</button>
-      <!-- 2) ประวัติคำสั่งซื้อ -->
-      <button class="drawer-link w-full text-left px-4 py-3 text-gray-800"
-              data-action="order-history">ประวัติคำสั่งซื้อของฉัน</button>
-      <!-- 3) แอดมิน -->
-      <button class="drawer-link w-full text-left px-4 py-3 text-gray-800"
-              data-action="admin">แอดมิน</button>
-    </nav>
-  </aside>
-</div>
-
-
-
   <!-- Loading -->
   <div id="loading-spinner" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50">
     <div class="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-green-500"></div>
@@ -377,7 +350,32 @@
   if (!res.ok) throw new Error('HTTP ' + res.status);
   return res.json();
 }
+    <script>
+// ---- fetchData wrapper (วางใต้ apiGet/apiPost) ----
+async function fetchData(action, data = {}) {
+  switch (action) {
+    // อ่านข้อมูล
+    case 'getProducts':
+      return apiGet({ action: 'getProducts' });          // คืน { strains, equipments }
+    case 'getPromotions':
+      return apiGet({ action: 'getPromotions' });        // คืน array โปรโมชัน
+    case 'getSales':
+      return apiGet({ action: 'getSales' });             // ตารางยอดขาย (Sales)
 
+    // เขียน/อัปเดต (หน้าแอดมินจะเรียก)
+    case 'updateStock':
+      return apiPost({ action: 'updateStock', ...data });               // { id, value }
+    case 'updateProductImageUrl':
+      return apiPost({ action: 'updateProductImageUrl', ...data });     // { id, value:imageUrl }
+    case 'addPromotion':
+      return apiPost({ action: 'addPromotion', ...data });              // { title, ... }
+    case 'updatePromotion':
+      return apiPost({ action: 'updatePromotion', ...data });           // { id, ... }
+
+    default:
+      throw new Error('Unknown fetchData action: ' + action);
+  }
+}
   function updateHeroSection(title,subtitle){ heroTitle.textContent=title; heroSubtitle.textContent=subtitle; }
   function toggleView(view){
     currentView=view;
