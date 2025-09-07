@@ -55,6 +55,18 @@
   /* กันหน้าล้นแนวนอนบนมือถือ */
   html, body { max-width: 100%; overflow-x: hidden; }
 </style>
+  <style>
+  /* ซ่อนลิ้นชักจริง ๆ เมื่อปิด ไม่ให้บังคลิก */
+  #mobile-drawer.hidden { display: none; }
+  /* ตัวหนังสือเมนูให้เป็นสีเข้มเสมอ */
+  #mobile-drawer-panel { color:#111; }
+  #mobile-drawer-panel .drawer-link { color:#111 !important; font-size:16px; }
+  /* ให้ทุก modal อยู่เหนือ header/drawer */
+  #cart-modal-container,
+  #admin-login-modal-container,
+  #admin-panel-modal-container,
+  #modal-container { z-index:10000; }
+</style>
 <script>
   // FIX: ใช้ความกว้างจริงของ viewport แทน 100vw (ซึ่งกว้างเกินใน LINE WebView)
   (function() {
@@ -65,59 +77,61 @@
   })();
 </script>
 <script>
-// ====== Mobile Drawer (hamburger) ======
-function el(id){ return document.getElementById(id); }
-
-function openDrawer(){
-  const drawer = el('mobile-drawer');
-  const panel  = el('mobile-drawer-panel');
-  if(!drawer || !panel) return;
-  drawer.classList.remove('hidden');
-  document.body.classList.add('overflow-hidden');
-  requestAnimationFrame(()=> panel.classList.remove('translate-x-full'));
-}
-
-function closeDrawer(){
-  const drawer = el('mobile-drawer');
-  const panel  = el('mobile-drawer-panel');
-  if(!drawer || !panel) return;
-  panel.classList.add('translate-x-full');
-  setTimeout(()=>{
-    drawer.classList.add('hidden');
-    document.body.classList.remove('overflow-hidden');
-  }, 200);
-}
-
-  // ... โค้ดอื่น ๆ ที่เป็น initialization/main logic ...
-  document.addEventListener('DOMContentLoaded', ()=>{// === bind mobile drawer ===
-document.getElementById('mobile-menu-btn')?.addEventListener('click', openDrawer);
-document.getElementById('mobile-drawer-backdrop')?.addEventListener('click', closeDrawer);
-document.getElementById('mobile-drawer-close')?.addEventListener('click', closeDrawer);
-document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeDrawer(); });
-
-drawer?.addEventListener('click', (e)=>{
-  const btn = e.target.closest('.drawer-link'); if(!btn) return;
-  const action = btn.dataset.action;
-
-  if(action === 'go'){
-    const target = btn.dataset.target; // strains|equipments|promotions
-    toggleView(target);
-    closeDrawer();
-  } else if(action === 'line-login'){
-    handleLineLogin(); closeDrawer();
-  } else if(action === 'order-history'){
-    try { window.location.href = 'profile.html'; }
-    catch { showModal('modal-container','เร็วๆ นี้','ประวัติคำสั่งซื้อจะพร้อมใช้งานเร็วๆ นี้'); }
-    closeDrawer();
-  } else if(action === 'admin'){
-    if(isAdminLoggedIn) showAdminPanel('products');
-    else showModal('admin-login-modal-container');
-    closeDrawer();
+  /* ==== ฟังก์ชัน Drawer (อยู่นอก DOMContentLoaded) ==== */
+  function el(id){ return document.getElementById(id); }
+  function openDrawer(){
+    const drawer = el('mobile-drawer'), panel = el('mobile-drawer-panel');
+    if(!drawer || !panel) return;
+    drawer.classList.remove('hidden');
+    document.body.classList.add('overflow-hidden');
+    requestAnimationFrame(()=> panel.classList.remove('translate-x-full'));
   }
-});
+  function closeDrawer(){
+    const drawer = el('mobile-drawer'), panel = el('mobile-drawer-panel');
+    if(!drawer || !panel) return;
+    panel.classList.add('translate-x-full');
+    setTimeout(()=>{
+      drawer.classList.add('hidden');
+      document.body.classList.remove('overflow-hidden');
+    }, 200);
+  }
 
-    // ... ส่วน event handler ต่าง ๆ ...
+  /* ==== INITIALIZATION ==== */
+  document.addEventListener('DOMContentLoaded', async () => {
+    // --- bind mobile drawer ---
+    const menuBtn    = el('mobile-menu-btn');
+    const backdrop   = el('mobile-drawer-backdrop');
+    const closeBtn   = el('mobile-drawer-close');
+    const drawerRoot = el('mobile-drawer');
+
+    menuBtn?.addEventListener('click', openDrawer);
+    backdrop?.addEventListener('click', closeDrawer);
+    closeBtn?.addEventListener('click', closeDrawer);
+    document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeDrawer(); });
+
+    drawerRoot?.addEventListener('click', (e)=>{
+      const btn = e.target.closest('.drawer-link'); if(!btn) return;
+      const action = btn.dataset.action;
+      if(action==='go'){ toggleView(btn.dataset.target); }          // 'equipments'
+      else if(action==='order-history'){ try{ location.href='profile.html'; }catch{ showModal('modal-container','เร็วๆ นี้','ประวัติคำสั่งซื้อจะพร้อมใช้งานเร็วๆ นี้'); } }
+      else if(action==='admin'){ isAdminLoggedIn ? showAdminPanel('products') : showModal('admin-login-modal-container'); }
+      closeDrawer();
+    });
+
+    // --- ปุ่ม LINE login ที่หัวเว็บ ---
+    el('line-login-btn')?.addEventListener('click', handleLineLogin);
+
+    // --- ตะกร้า ---
+    el('cart-icon-container')?.addEventListener('click', ()=> showModal('cart-modal-container'));
+    el('cart-close-btn')?.addEventListener('click', ()=> hideModal('cart-modal-container'));
+
+    // --- แสดงหน้าแรกเป็น “สายพันธุ์” เสมอ ---
+    createFeelingButtons();
+    await initializeData();
+    currentView = 'strains'; activeFeeling = null;
+    toggleView('strains');
   });
+
 </script>
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
@@ -133,6 +147,13 @@ drawer?.addEventListener('click', (e)=>{
     .tag { padding: .25rem .75rem; border-radius: 9999px; font-size: .75rem; font-weight: 500; white-space: nowrap; }
     #loading-spinner { display: none; }
   </style>
+  <style>
+  #mobile-drawer.hidden{ display:none; }               /* ปิดจริง ไม่บังคลิก */
+  #mobile-drawer-panel{ color:#111; }                  /* เมนูอ่านออกแน่ */
+  #mobile-drawer-panel .drawer-link{ color:#111!important; font-size:16px; }
+  #cart-modal-container,#admin-login-modal-container,
+  #admin-panel-modal-container,#modal-container{ z-index:10000; } /* โมดัลอยู่บนสุด */
+</style>
 </head>
 <body class="bg-gray-50 text-gray-800">
 
@@ -195,12 +216,10 @@ drawer?.addEventListener('click', (e)=>{
       </div>
     </div>
   </header>
- <!-- Mobile Drawer -->
-<div id="mobile-drawer" class="fixed inset-0 hidden" style="z-index:9999;">
-  <!-- backdrop -->
-  <div id="mobile-drawer-backdrop" class="absolute inset-0 bg-black bg-opacity-50"></div>
 
-  <!-- panel -->
+<!-- Mobile Drawer -->
+<div id="mobile-drawer" class="fixed inset-0 hidden" style="z-index:9999;">
+  <div id="mobile-drawer-backdrop" class="absolute inset-0 bg-black bg-opacity-50"></div>
   <aside id="mobile-drawer-panel"
          class="absolute inset-y-0 right-0 w-5/6 max-w-xs bg-white shadow-2xl
                 transform translate-x-full transition duration-200 ease-out">
@@ -208,14 +227,16 @@ drawer?.addEventListener('click', (e)=>{
       <span class="text-lg font-bold">เมนู</span>
       <button id="mobile-drawer-close" class="p-2 rounded hover:bg-gray-100" aria-label="ปิดเมนู">✕</button>
     </div>
-
     <nav class="divide-y divide-gray-100">
-      <button class="drawer-link w-full text-left px-4 py-3" data-action="go" data-target="strains">สายพันธุ์</button>
-      <button class="drawer-link w-full text-left px-4 py-3" data-action="go" data-target="equipments">อุปกรณ์</button>
-      <button class="drawer-link w-full text-left px-4 py-3" data-action="go" data-target="promotions">โปรโมชั่น</button>
-      <button class="drawer-link w-full text-left px-4 py-3" data-action="order-history">ประวัติคำสั่งซื้อของฉัน</button>
-      <button class="drawer-link w-full text-left px-4 py-3" data-action="line-login">เข้าสู่ระบบด้วย LINE</button>
-      <button class="drawer-link w-full text-left px-4 py-3" data-action="admin">แอดมิน</button>
+      <!-- 1) เปลี่ยนไปหน้าอุปกรณ์ -->
+      <button class="drawer-link w-full text-left px-4 py-3 text-gray-800"
+              data-action="go" data-target="equipments">อุปกรณ์</button>
+      <!-- 2) ประวัติคำสั่งซื้อ -->
+      <button class="drawer-link w-full text-left px-4 py-3 text-gray-800"
+              data-action="order-history">ประวัติคำสั่งซื้อของฉัน</button>
+      <!-- 3) แอดมิน -->
+      <button class="drawer-link w-full text-left px-4 py-3 text-gray-800"
+              data-action="admin">แอดมิน</button>
     </nav>
   </aside>
 </div>
@@ -500,8 +521,9 @@ drawer?.addEventListener('click', (e)=>{
   }
   function changeQty(key,delta){ const it=cart.find(i=>i.key===key); if(!it) return; it.quantity=Math.max(1,it.quantity+delta); updateCartUI(); }
   function removeItem(key){ cart=cart.filter(i=>i.key!==key); updateCartUI(); }
+    function el(id){ return document.getElementById(id); }
 
-  // ===== LIFF helpers =====
+    // ===== LIFF helpers =====
   async function ensureLiffReady(){
     if(!LIFF_ID) return false;
     if(!window.__liffInited){ await liff.init({ liffId: LIFF_ID }); window.__liffInited = true; }
@@ -591,13 +613,23 @@ drawer?.addEventListener('click', (e)=>{
       myOrdersLink.classList.remove('hidden');
     }
   }
-
-  async function initializeData(){
-    showLoading();
-    try{ const r1=await apiGet({action:'getProducts'}); strains=r1.products||[]; equipments=r1.equipments||[];
-         const r2=await apiGet({action:'getPromotions'}); promotions=r2.promotions||[]; toggleView(currentView); }
-    finally { hideLoading(); }
+    async function initializeData() {
+  showLoading();
+  try {
+    const productsData = await fetchData('getProducts');
+    strains    = (productsData?.strains)    || [];
+    equipments = (productsData?.equipments) || [];
+    promotions = await fetchData('getPromotions') || [];
+  } catch (err) {
+    console.error('initializeData error:', err);
+    mainContentTitle.textContent = 'โหลดสินค้าไม่สำเร็จ';
+    mainContentList.innerHTML =
+      `<p class="col-span-full text-center text-red-500">เกิดข้อผิดพลาดในการโหลดสินค้า</p>`;
+  } finally {
+    hideLoading();
   }
+}
+
 // === ส่งสรุปออร์เดอร์เข้า LINE OA ===
 function buildOrderSummary(items, total, name, email){
   const lines = ['🛒 คำสั่งซื้อใหม่'];
@@ -632,14 +664,17 @@ async function sendOrderToOA(text){
   location.href = `https://line.me/R/ti/p/@${LINE_OA_ID.replace(/^@?/, '')}`;
   return false;
 }
-
+}
   document.addEventListener('DOMContentLoaded', ()=>{
     createFeelingButtons(); initializeData(); maybeInitLiff();
     document.getElementById('cart-icon-container').addEventListener('click', ()=> showModal('cart-modal-container'));
     document.getElementById('cart-close-btn').addEventListener('click', ()=> hideModal('cart-modal-container'));
     document.getElementById('checkout-button').addEventListener('click', handleCheckout);
     document.getElementById('modal-ok-btn').addEventListener('click', ()=> hideModal('modal-container'));
-// === bind mobile drawer ===
+    document.getElementById('line-login-btn')
+  ?.addEventListener('click', handleLineLogin);
+
+    // === bind mobile drawer ===
 el('mobile-menu-btn') && el('mobile-menu-btn').addEventListener('click', openDrawer);
 el('mobile-drawer-backdrop') && el('mobile-drawer-backdrop').addEventListener('click', closeDrawer);
 el('mobile-drawer-close') && el('mobile-drawer-close').addEventListener('click', closeDrawer);
@@ -671,6 +706,13 @@ drawerRoot && drawerRoot.addEventListener('click', (e)=>{
     if(isAdminLoggedIn) showAdminPanel('sales'); else showModal('admin-login-modal-container');
     closeDrawer();
   }
+  createFeelingButtons();
+await initializeData();           // โหลดข้อมูลจาก Apps Script
+
+currentView = 'strains';          // บังคับหน้าแรกเป็น “สายพันธุ์”
+activeFeeling = null;
+toggleView('strains');            // เรนเดอร์การ์ดสินค้าเริ่มต้น
+
 });
 
     document.getElementById('line-login-btn').addEventListener('click', async ()=>{
