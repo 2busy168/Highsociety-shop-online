@@ -57,13 +57,22 @@
     #mobile-drawer.hidden{ display:none; }            /* ปิดจริง ไม่บังคลิก */
     #mobile-drawer-panel{ color:#111; }               /* เมนูอ่านออกแน่ */
     #mobile-drawer-panel .drawer-link{ color:#111!important; font-size:16px; }
+    #mobile-drawer{ z-index: 9999; }                  /* อยู่เหนือ header z-50 เสมอ */
+
+    /* ===== Header actions (ปุ่ม/ไอคอนด้านขวา) ไม่ห่อบรรทัด ===== */
+    #header-actions{ display:flex; align-items:center; gap:1rem; flex-wrap:nowrap; }
+    #header-actions > *{ flex-shrink:0; }             /* ไอคอนอย่าหด */
+    #line-login-btn{
+      flex-shrink:1; min-width:0;
+      max-width:48vw; overflow:hidden; white-space:nowrap; text-overflow:ellipsis;
+    }
 
     /* ให้ทุก modal อยู่เหนือ header/drawer */
     #cart-modal-container, #modal-container { z-index:10000; }
   </style>
 
   <script>
-    // FIX: ใช้ความกว้างจริงของ viewport แทน 100vw (ซึ่งกว้างเกินใน LINE WebView)
+    // ใช้ความกว้างจริงของ viewport แทน 100vw (กว้างเกินใน LINE WebView)
     (function() {
       function setVW() { document.documentElement.style.setProperty('--vwpx', window.innerWidth + 'px'); }
       setVW(); window.addEventListener('resize', setVW);
@@ -76,7 +85,7 @@
   <header class="gradient-bg text-white shadow-lg p-4 sticky top-0 z-50">
 
     <!-- ===== Mobile Drawer (สามขีด) ===== -->
-    <div id="mobile-drawer" class="fixed inset-0 z-60 hidden">
+    <div id="mobile-drawer" class="fixed inset-0 hidden">
       <div id="mobile-drawer-backdrop" class="absolute inset-0 bg-black bg-opacity-50"></div>
       <aside id="mobile-drawer-panel"
              class="absolute inset-y-0 right-0 w-5/6 max-w-xs bg-white shadow-2xl transform translate-x-full
@@ -100,18 +109,21 @@
       <div class="text-2xl font-bold flex items-center cursor-pointer" onclick="window.location.reload();">
         <span class="mr-2">🌱</span>H!GH$OC!€T¥
       </div>
+
       <nav class="hidden md:flex space-x-6 font-medium">
         <button id="strains-btn" class="hover:text-green-200 transition-colors" onclick="toggleView('strains')">สายพันธุ์</button>
         <button id="equipments-btn" class="hover:text-green-200 transition-colors" onclick="toggleView('equipments')">อุปกรณ์</button>
         <button id="promotions-btn" class="hover:text-green-200 transition-colors" onclick="toggleView('promotions')">โปรโมชั่น</button>
       </nav>
-      <div class="flex items-center space-x-4">
-        <a id="my-orders-link" href="profile.html" class="hidden text-white/90 hover:text-green-200 text-sm">ประวัติคำสั่งซื้อของฉัน</a>
+
+      <!-- กลุ่มปุ่ม/ไอคอนด้านขวา: ไม่ห่อบรรทัด -->
+      <div id="header-actions" class="flex items-center space-x-4">
+        <!-- (ลบ my-orders-link ออก: ให้ไปอยู่ในเมนูสามขีดเท่านั้น) -->
         <button id="line-login-btn" class="bg-white text-green-600 font-semibold py-2 px-4 rounded-full text-sm hover:bg-gray-100 transition-colors">
           เข้าสู่ระบบด้วย LINE
         </button>
-        <a id="admin-login-btn" class="text-white hover:text-green-200 transition-colors text-sm" href="admin.html">Admin</a>
-        <span class="relative cursor-pointer" id="cart-icon-container">
+        <a id="admin-login-btn" class="hidden md:inline text-white hover:text-green-200 transition-colors text-sm" href="admin.html">Admin</a>
+        <span class="relative cursor-pointer" id="cart-icon-container" aria-label="ตะกร้าสินค้า">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
           </svg>
@@ -233,7 +245,6 @@
   const heroTitle = el('hero-title');
   const heroSubtitle = el('hero-subtitle');
   const lineLoginBtn = el('line-login-btn');
-  const myOrdersLink = el('my-orders-link');
   const loadingSpinner = el('loading-spinner');
 
   function showLoading(){ loadingSpinner.style.display='flex'; }
@@ -414,8 +425,7 @@
   function paintUser(u){
     if(u && u.userId){
       lineLoginBtn.textContent='สวัสดี, '+(u.displayName||'เพื่อน');
-      myOrdersLink.href='profile.html?userId='+encodeURIComponent(u.userId);
-      myOrdersLink.classList.remove('hidden');
+      // ย้ายประวัติคำสั่งซื้อไปเมนูสามขีดแล้ว ไม่โชว์ในหัวเว็บอีก
     }
   }
   async function initLiff(){
