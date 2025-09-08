@@ -292,7 +292,6 @@
       </div>
     </div>
   </div>
-
   <script>
   /* ===== CONFIG ===== */
   const APP_URL = "https://script.google.com/macros/s/AKfycbzis9Isw6XXUsi7k8MQmI4rJI8gnFnPS0VIDpuvsgw88dC8SwQ4VOHKK5TfeQMDKgLotA/exec";
@@ -610,6 +609,27 @@ async function fetchData(action, data = {}) {
       myOrdersLink.classList.remove('hidden');
     }
   }
+    // ===== ฟังก์ชันล็อกอิน LINE (ตัวเดียว ใช้ซ้ำ) =====
+async function handleLineLogin(){
+  try{
+    if (!LIFF_ID) {
+      location.href = 'https://line.me/R/ti/p/@' + (LINE_OA_ID||'').replace(/^@/,'');
+      return;
+    }
+    if (!window.__liffInited) { await liff.init({ liffId: LIFF_ID }); window.__liffInited = true; }
+    if (!liff.isLoggedIn()) { liff.login({ redirectUri: location.href }); return; }
+
+    const p = await liff.getProfile();
+    const user = { userId: p.userId, displayName: p.displayName, pictureUrl: p.pictureUrl };
+    localStorage.setItem('lineUser', JSON.stringify(user));
+    paintUser(user);
+    alert('ล็อกอินสำเร็จ');
+  }catch(e){
+    console.error('LINE login error', e);
+    alert('ล็อกอิน LINE ไม่สำเร็จ: ' + (e.message || e));
+  }
+}
+
     async function initializeData() {
   showLoading();
   try {
@@ -668,10 +688,10 @@ async function sendOrderToOA(text){
     document.getElementById('cart-close-btn').addEventListener('click', ()=> hideModal('cart-modal-container'));
     document.getElementById('checkout-button').addEventListener('click', handleCheckout);
     document.getElementById('modal-ok-btn').addEventListener('click', ()=> hideModal('modal-container'));
-    document.getElementById('line-login-btn')
-  ?.addEventListener('click', handleLineLogin);
+    document.getElementById('line-login-btn').addEventListener('click', handleLineLogin));
 
     // === bind mobile drawer ===
+el('line-login-btn')?.addEventListener('click', handleLineLogin);
 el('mobile-menu-btn') && el('mobile-menu-btn').addEventListener('click', openDrawer);
 el('mobile-drawer-backdrop') && el('mobile-drawer-backdrop').addEventListener('click', closeDrawer);
 el('mobile-drawer-close') && el('mobile-drawer-close').addEventListener('click', closeDrawer);
@@ -711,18 +731,6 @@ activeFeeling = null;
 toggleView('strains');            // เรนเดอร์การ์ดสินค้าเริ่มต้น
 
 });
-
-    document.getElementById('line-login-btn').addEventListener('click', async ()=>{
-      try{
-        if(!LIFF_ID){ window.location.href = 'https://line.me/R/ti/p/@'+oaIdNoAt(); return; }
-        if(!window.__liffInited) { await liff.init({ liffId: LIFF_ID }); window.__liffInited = true; }
-        if(!liff.isLoggedIn()){ liff.login({ redirectUri: location.href }); return; }
-        const p = await liff.getProfile();
-        const user = { userId: p.userId, displayName: p.displayName, pictureUrl: p.pictureUrl };
-        localStorage.setItem('lineUser', JSON.stringify(user)); paintUser(user);
-        alert('ล็อกอินสำเร็จ');
-      } catch(e){ console.error('LINE login error', e); alert('ล็อกอิน LINE ไม่สำเร็จ: ' + (e.message || e)); }
-    });
 
     document.body.addEventListener('click', (e)=>{
       const t=e.target;
