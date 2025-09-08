@@ -50,6 +50,42 @@
     </div>
   </div>
 </div>
+ 
+  <div class="bg-white p-4 rounded shadow mt-6">
+  <h2 class="font-semibold mb-3">อัปโหลดรูปสินค้า (Cloudinary)</h2>
+  <button id="uploadBtn" class="bg-black text-white px-4 py-2 rounded">เลือกรูป / ลากวาง</button>
+  <input id="uploadedUrl" class="border p-2 rounded w-full mt-3" placeholder="URL จะโชว์ที่นี่ พร้อมคัดลอกอัตโนมัติ">
+  <p class="text-sm text-gray-500 mt-2">คัดลอก URL แล้ว นำไปวางในคอลัมน์ <code>imageUrl</code> ของชีต</p>
+</div>
+
+<script src="https://widget.cloudinary.com/v2.0/global/all.js"></script>
+<script>
+// <<< เปลี่ยนตามบัญชีของคุณ >>>
+const CLOUD_NAME   = 'ใส่-cloud-name-ของคุณ';
+const UPLOAD_PRESET = 'hs_unsigned';  // จากข้อ (1)
+
+const widget = cloudinary.createUploadWidget({
+  cloudName: CLOUD_NAME,
+  uploadPreset: UPLOAD_PRESET,
+  multiple: false,
+  folder: 'products',
+  sources: ['local','url','camera'],
+  clientAllowedFormats: ['jpg','jpeg','png','webp'],
+  maxFileSize: 10 * 1024 * 1024 // 10MB
+}, (err, res) => {
+  if (!err && res && res.event === "success") {
+    // ใส่ทรานส์ฟอร์มให้พอดีการ์ด
+    const raw = res.info.secure_url;
+    const nice = raw.replace('/upload/', '/upload/f_auto,q_auto,c_fill,w_800,h_600/');
+    document.getElementById('uploadedUrl').value = nice;
+    navigator.clipboard?.writeText(nice);
+    alert('อัปโหลดสำเร็จ และคัดลอก URL แล้ว!');
+  }
+});
+
+document.getElementById('uploadBtn').onclick = () => widget.open();
+</script>
+
 
 <script>
 const APP_URL = "https://script.google.com/macros/s/AKfycbzis9Isw6XXUsi7k8MQmI4rJI8gnFnPS0VIDpuvsgw88dC8SwQ4VOHKK5TfeQMDKgLotA/exec";
