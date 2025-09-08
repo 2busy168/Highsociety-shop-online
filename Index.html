@@ -1,191 +1,101 @@
-<!-- วางไฟล์ทั้งก้อนนี้เป็น index.html -->
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
-<meta name="format-detection" content="telephone=no, email=no, address=no, date=no">
-<style>
-  /* กัน iOS ขยายฟอนต์อัตโนมัติใน WebView */
-  html{ -webkit-text-size-adjust:100%; text-size-adjust:100%; }
-  /* ป้องกัน default link style ใน LIFF */
-  a{ color:inherit; text-decoration:none; }
-  a:focus, a:hover{ text-decoration:none; }
-  /* รูป/SVG ไม่ล้น และคงสัดส่วน */
-  img, svg{ max-width:100%; height:auto; display:block; }
-  /* header เคารพ safe area (Dynamic Island) */
-  :root{ --safe-top: env(safe-area-inset-top); }
-  header{ padding-top: var(--safe-top); }
-  /* กันเมนูบนมือถือขึ้นบรรทัดมาก ๆ แล้วล้น */
-  header nav{ display:flex; flex-wrap:wrap; gap:.5rem; }
-  /* Fallback (กันตอน Tailwind ยังไม่โหลด) */
-  .fallback-card-img{ width:100%; height:12rem; object-fit:cover; border-radius:.5rem; display:block; }
-</style>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+  <meta name="format-detection" content="telephone=no, email=no, address=no, date=no" />
   <title>H!GH$OC!€T¥ - Cannabis E-commerce</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
-  <style id="ios-fit-fix">
-  /* 1) ห้ามมีแนวนอนล้นจอ */
-  html,body{width:100%!important;max-width:100%!important;overflow-x:hidden!important;
-            -webkit-text-size-adjust:100%;text-size-adjust:100%}
-  /* 2) อะไรที่ชอบกว้างเกิน viewport ให้บังคับ 100% */
-  header,#hero-section,main,footer,.container{width:100%!important;max-width:100%!important}
-  /* 3) กัน class w-screen/max-w-screen ที่ชอบกว้างเกินบน iOS WebView */
-  [class*="w-screen"],[class*="max-w-screen"],[class*="min-w-screen"]{width:100%!important;max-width:100%!important}
-  /* 4) รูป/วิดีโอไม่ยืด */
-  img,svg,video{max-width:100%;height:auto;display:block}
-  /* 5) safe area (Dynamic Island) */
-  :root{--safe-t:env(safe-area-inset-top);--safe-r:env(safe-area-inset-right);
-        --safe-b:env(safe-area-inset-bottom);--safe-l:env(safe-area-inset-left)}
-  header{padding-top:var(--safe-t)}
-  header,.gradient-bg,main,footer{padding-left:max(1rem,var(--safe-l));padding-right:max(1rem,var(--safe-r))}
-  /* 6) กันการ์ดรูปบวมตอน CSS โหลดช้าใน WebView */
-  .fallback-card-img{width:100%;height:12rem;object-fit:cover;border-radius:.5rem;display:block}
-</style>
-  <style>
-  /* รูปสินค้า/โปรโมชันให้คงสัดส่วน 4:3 เสมอ ไม่ยืดบนมือถือ */
-  .card-img{
-    aspect-ratio: 4 / 3;     /* ใช้ได้บน iOS/Safari แล้ว */
-    width: 100%;
-    height: auto;
-    object-fit: cover;
-    display: block;
-    border-radius: .5rem;
-  }
-  /* กันหน้าล้นแนวนอนบนมือถือ */
-  html, body { max-width: 100%; overflow-x: hidden; }
-</style>
-  <style>
-  /* ซ่อนลิ้นชักจริง ๆ เมื่อปิด ไม่ให้บังคลิก */
-  #mobile-drawer.hidden { display: none; }
-  /* ตัวหนังสือเมนูให้เป็นสีเข้มเสมอ */
-  #mobile-drawer-panel { color:#111; }
-  #mobile-drawer-panel .drawer-link { color:#111 !important; font-size:16px; }
-  /* ให้ทุก modal อยู่เหนือ header/drawer */
-  #cart-modal-container,
-  #admin-login-modal-container,
-  #admin-panel-modal-container,
-  #modal-container { z-index:10000; }
-</style>
-<script>
-  // FIX: ใช้ความกว้างจริงของ viewport แทน 100vw (ซึ่งกว้างเกินใน LINE WebView)
-  (function() {
-    function setVW() {
-      document.documentElement.style.setProperty('--vwpx', window.innerWidth + 'px');
-    }
-    setVW(); window.addEventListener('resize', setVW);
-  })();
-</script>
-<script>
-  /* ==== ฟังก์ชัน Drawer (อยู่นอก DOMContentLoaded) ==== */
-  function el(id){ return document.getElementById(id); }
-  function openDrawer(){
-    const drawer = el('mobile-drawer'), panel = el('mobile-drawer-panel');
-    if(!drawer || !panel) return;
-    drawer.classList.remove('hidden');
-    document.body.classList.add('overflow-hidden');
-    requestAnimationFrame(()=> panel.classList.remove('translate-x-full'));
-  }
-  function closeDrawer(){
-    const drawer = el('mobile-drawer'), panel = el('mobile-drawer-panel');
-    if(!drawer || !panel) return;
-    panel.classList.add('translate-x-full');
-    setTimeout(()=>{
-      drawer.classList.add('hidden');
-      document.body.classList.remove('overflow-hidden');
-    }, 200);
-  }
 
-  /* ==== INITIALIZATION ==== */
-  document.addEventListener('DOMContentLoaded', async () => {
-    // --- bind mobile drawer ---
-    const menuBtn    = el('mobile-menu-btn');
-    const backdrop   = el('mobile-drawer-backdrop');
-    const closeBtn   = el('mobile-drawer-close');
-    const drawerRoot = el('mobile-drawer');
-
-    menuBtn?.addEventListener('click', openDrawer);
-    backdrop?.addEventListener('click', closeDrawer);
-    closeBtn?.addEventListener('click', closeDrawer);
-    document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeDrawer(); });
-
-    drawerRoot?.addEventListener('click', (e)=>{
-      const btn = e.target.closest('.drawer-link'); if(!btn) return;
-      const action = btn.dataset.action;
-      if(action==='go'){ toggleView(btn.dataset.target); }          // 'equipments'
-      else if(action==='order-history'){ try{ location.href='profile.html'; }catch{ showModal('modal-container','เร็วๆ นี้','ประวัติคำสั่งซื้อจะพร้อมใช้งานเร็วๆ นี้'); } }
-      else if(action==='admin'){ isAdminLoggedIn ? showAdminPanel('products') : showModal('admin-login-modal-container'); }
-      closeDrawer();
-    });
-
-    // --- ปุ่ม LINE login ที่หัวเว็บ ---
-    el('line-login-btn')?.addEventListener('click', handleLineLogin);
-
-    // --- ตะกร้า ---
-    el('cart-icon-container')?.addEventListener('click', ()=> showModal('cart-modal-container'));
-    el('cart-close-btn')?.addEventListener('click', ()=> hideModal('cart-modal-container'));
-
-    // --- แสดงหน้าแรกเป็น “สายพันธุ์” เสมอ ---
-    createFeelingButtons();
-    await initializeData();
-    currentView = 'strains'; activeFeeling = null;
-    toggleView('strains');
-  });
-
-</script>
-  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Tailwind -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" />
+  <!-- Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <!-- LIFF -->
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+
   <style>
+    /* กัน iOS ขยายฟอนต์อัตโนมัติใน WebView */
+    html{ -webkit-text-size-adjust:100%; text-size-adjust:100%; }
+    /* ป้องกัน default link style ใน LIFF */
+    a{ color:inherit; text-decoration:none; }
+    a:focus, a:hover{ text-decoration:none; }
+    /* รูป/SVG ไม่ล้น และคงสัดส่วน */
+    img, svg{ max-width:100%; height:auto; display:block; }
+
+    /* header เคารพ safe area (Dynamic Island) */
+    :root{ --safe-top: env(safe-area-inset-top); }
+    header{ padding-top: var(--safe-top); }
+    header nav{ display:flex; flex-wrap:wrap; gap:.5rem; }
+
+    /* Gradient + Transitions */
     body { font-family: 'Kanit', sans-serif; }
     .gradient-bg { background: linear-gradient(135deg, #065f46 0%, #10b981 100%); }
     .card-hover { transition: all 0.3s ease; }
     .card-hover:hover { transform: translateY(-5px); box-shadow: 0 20px 25px -5px rgba(0,0,0,.1); }
+
     .feeling-btn { transition: all 0.2s ease; }
     .feeling-btn:hover { background-color: #d1fae5; transform: scale(1.05); }
     .feeling-btn.active { background-color: #047857; color: white; transform: scale(1.1);
       box-shadow: 0 10px 15px -3px rgba(0,0,0,.1), 0 4px 6px -2px rgba(0,0,0,.05); }
+
     .tag { padding: .25rem .75rem; border-radius: 9999px; font-size: .75rem; font-weight: 500; white-space: nowrap; }
+
+    /* รูปสินค้า/โปรโมชันให้คงสัดส่วน 4:3 เสมอ */
+    .card-img{ aspect-ratio: 4/3; width:100%; height:auto; object-fit:cover; display:block; border-radius:.5rem; }
+
+    /* กันหน้าล้นแนวนอนบนมือถือ */
+    html, body { width:100%!important; max-width:100%!important; overflow-x:hidden!important; }
+
+    /* Safe area padding ซ้าย/ขวา */
+    :root{--safe-t:env(safe-area-inset-top);--safe-r:env(safe-area-inset-right);--safe-b:env(safe-area-inset-bottom);--safe-l:env(safe-area-inset-left)}
+    header,.gradient-bg,main,footer{padding-left:max(1rem,var(--safe-l));padding-right:max(1rem,var(--safe-r))}
+
+    /* Loading overlay hidden by default */
     #loading-spinner { display: none; }
+
+    /* ===== Mobile Drawer ===== */
+    #mobile-drawer.hidden{ display:none; }            /* ปิดจริง ไม่บังคลิก */
+    #mobile-drawer-panel{ color:#111; }               /* เมนูอ่านออกแน่ */
+    #mobile-drawer-panel .drawer-link{ color:#111!important; font-size:16px; }
+
+    /* ให้ทุก modal อยู่เหนือ header/drawer */
+    #cart-modal-container, #modal-container { z-index:10000; }
   </style>
-  <style>
-  #mobile-drawer.hidden{ display:none; }               /* ปิดจริง ไม่บังคลิก */
-  #mobile-drawer-panel{ color:#111; }                  /* เมนูอ่านออกแน่ */
-  #mobile-drawer-panel .drawer-link{ color:#111!important; font-size:16px; }
-  #cart-modal-container,#admin-login-modal-container,
-  #admin-panel-modal-container,#modal-container{ z-index:10000; } /* โมดัลอยู่บนสุด */
-</style>
+
+  <script>
+    // FIX: ใช้ความกว้างจริงของ viewport แทน 100vw (ซึ่งกว้างเกินใน LINE WebView)
+    (function() {
+      function setVW() { document.documentElement.style.setProperty('--vwpx', window.innerWidth + 'px'); }
+      setVW(); window.addEventListener('resize', setVW);
+    })();
+  </script>
 </head>
 <body class="bg-gray-50 text-gray-800">
 
   <!-- Header -->
   <header class="gradient-bg text-white shadow-lg p-4 sticky top-0 z-50">
-    <!-- Mobile Drawer -->
-<div id="mobile-drawer" class="fixed inset-0 z-60 hidden">
-  <div id="mobile-drawer-backdrop" class="absolute inset-0 bg-black bg-opacity-50"></div>
-  <aside id="mobile-drawer-panel"
-         class="absolute inset-y-0 right-0 w-5/6 max-w-xs bg-white shadow-2xl transform translate-x-full
-                transition-transform duration-200 ease-out">
-    <div class="p-4 flex items-center justify-between border-b">
-      <span class="text-lg font-bold">เมนู</span>
-      <button id="mobile-drawer-close" class="p-2 rounded hover:bg-gray-100" aria-label="ปิดเมนู">✕</button>
+
+    <!-- ===== Mobile Drawer (สามขีด) ===== -->
+    <div id="mobile-drawer" class="fixed inset-0 z-60 hidden">
+      <div id="mobile-drawer-backdrop" class="absolute inset-0 bg-black bg-opacity-50"></div>
+      <aside id="mobile-drawer-panel"
+             class="absolute inset-y-0 right-0 w-5/6 max-w-xs bg-white shadow-2xl transform translate-x-full
+                    transition-transform duration-200 ease-out">
+        <div class="p-4 flex items-center justify-between border-b">
+          <span class="text-lg font-bold">เมนู</span>
+          <button id="mobile-drawer-close" class="p-2 rounded hover:bg-gray-100" aria-label="ปิดเมนู">✕</button>
+        </div>
+        <nav class="divide-y divide-gray-100">
+          <button class="drawer-link w-full text-left px-4 py-3" data-action="go" data-target="strains">สายพันธุ์</button>
+          <button class="drawer-link w-full text-left px-4 py-3" data-action="go" data-target="equipments">อุปกรณ์</button>
+          <button class="drawer-link w-full text-left px-4 py-3" data-action="go" data-target="promotions">โปรโมชั่น</button>
+          <button class="drawer-link w-full text-left px-4 py-3" data-action="order-history">ประวัติคำสั่งซื้อของฉัน</button>
+          <button class="drawer-link w-full text-left px-4 py-3" data-action="line-login">เข้าสู่ระบบด้วย LINE</button>
+          <a class="drawer-link w-full text-left px-4 py-3 block" data-action="admin" href="admin.html">Admin</a>
+        </nav>
+      </aside>
     </div>
 
-    <nav class="divide-y divide-gray-100">
-      <button class="drawer-link w-full text-left px-4 py-3" data-action="go" data-target="strains">สายพันธุ์</button>
-      <button class="drawer-link w-full text-left px-4 py-3" data-action="go" data-target="equipments">อุปกรณ์</button>
-      <button class="drawer-link w-full text-left px-4 py-3" data-action="go" data-target="promotions">โปรโมชั่น</button>
-
-      <button class="drawer-link w-full text-left px-4 py-3" data-action="order-history">ประวัติคำสั่งซื้อของฉัน</button>
-      <button class="drawer-link w-full text-left px-4 py-3" data-action="line-login">เข้าสู่ระบบด้วย LINE</button>
-
-      <button class="drawer-link w-full text-left px-4 py-3" data-action="admin">แอดมิน</button>
-      <!-- ถ้าอยากเพิ่มเมนูลัดของแอดมิน:
-      <button class="drawer-link w-full text-left px-4 py-3" data-action="admin-products">จัดการสินค้า</button>
-      <button class="drawer-link w-full text-left px-4 py-3" data-action="admin-sales">ดูยอดขาย</button>
-      -->
-    </nav>
-  </aside>
-</div>
     <div class="container mx-auto flex justify-between items-center px-4">
       <div class="text-2xl font-bold flex items-center cursor-pointer" onclick="window.location.reload();">
         <span class="mr-2">🌱</span>H!GH$OC!€T¥
@@ -200,15 +110,14 @@
         <button id="line-login-btn" class="bg-white text-green-600 font-semibold py-2 px-4 rounded-full text-sm hover:bg-gray-100 transition-colors">
           เข้าสู่ระบบด้วย LINE
         </button>
-        <button id="admin-login-btn" class="text-white ... hidden md:inline-flex">Admin
-        </button>
+        <a id="admin-login-btn" class="text-white hover:text-green-200 transition-colors text-sm" href="admin.html">Admin</a>
         <span class="relative cursor-pointer" id="cart-icon-container">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
           </svg>
           <span id="cart-count" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-4 w-4 flex items-center justify-center">0</span>
         </span>
-        <button id="mobile-menu-btn" class="md:hidden ml-4">
+        <button id="mobile-menu-btn" class="md:hidden ml-4" aria-label="เปิดเมนู">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
           </svg>
@@ -216,6 +125,7 @@
       </div>
     </div>
   </header>
+
   <!-- Loading -->
   <div id="loading-spinner" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50">
     <div class="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-green-500"></div>
@@ -292,6 +202,7 @@
       </div>
     </div>
   </div>
+
   <script>
   /* ===== CONFIG ===== */
   const APP_URL = "https://script.google.com/macros/s/AKfycbzis9Isw6XXUsi7k8MQmI4rJI8gnFnPS0VIDpuvsgw88dC8SwQ4VOHKK5TfeQMDKgLotA/exec";
@@ -311,74 +222,54 @@
     "Hybrid": { "icon":"🌿", "tagColor":"bg-green-100 text-green-800" }
   };
   const equipmentDescription = { icon:"⚙️", tagColor:"bg-gray-100 text-gray-800" };
+
   let strains=[], equipments=[], promotions=[], cart=[], currentView="strains", activeFeeling=null;
 
-  const loadingSpinner = document.getElementById('loading-spinner');
-  const mainContentList = document.getElementById('main-content-list');
-  const mainContentTitle = document.getElementById('main-content-title');
-  const feelingsSection = document.getElementById('feelings-section');
-  const heroTitle = document.getElementById('hero-title');
-  const heroSubtitle = document.getElementById('hero-subtitle');
-  const lineLoginBtn = document.getElementById('line-login-btn');
-  const myOrdersLink = document.getElementById('my-orders-link');
+  // ====== Helpers ======
+  const el = (id)=> document.getElementById(id);
+  const mainContentList = el('main-content-list');
+  const mainContentTitle = el('main-content-title');
+  const feelingsSection = el('feelings-section');
+  const heroTitle = el('hero-title');
+  const heroSubtitle = el('hero-subtitle');
+  const lineLoginBtn = el('line-login-btn');
+  const myOrdersLink = el('my-orders-link');
+  const loadingSpinner = el('loading-spinner');
 
   function showLoading(){ loadingSpinner.style.display='flex'; }
   function hideLoading(){ loadingSpinner.style.display='none'; }
   function showModal(id,title='',message=''){
-    const m=document.getElementById(id);
+    const m=el(id);
     if(id==='modal-container'){
-      document.getElementById('modal-title').textContent=title;
-      document.getElementById('modal-message').textContent=message;
+      el('modal-title').textContent=title;
+      el('modal-message').textContent=message;
     }
     m.classList.remove('hidden');
   }
-  function hideModal(id){ document.getElementById(id).classList.add('hidden'); }
+  function hideModal(id){ el(id).classList.add('hidden'); }
   function isStrainProduct(p){ return ['Indica','Sativa','Hybrid'].includes(String(p.type||'').trim()); }
 
   async function apiGet(params){
     const url=APP_URL+'?'+new URLSearchParams(params).toString();
     const res=await fetch(url,{cache:'no-store'}); return res.json();
   }
- async function apiPost(payload){
-  const res = await fetch(APP_URL, {
-    method: 'POST',
-    // ใช้ text/plain เพื่อตัด preflight ใน iOS/LIFF
-    headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
-    body: JSON.stringify(payload)
-  });
-  if (!res.ok) throw new Error('HTTP ' + res.status);
-  return res.json();
-}
-// ---- fetchData wrapper (วางใต้ apiGet/apiPost) ----
-async function fetchData(action, data = {}) {
-  switch (action) {
-    // อ่านข้อมูล
-    case 'getProducts':
-      return apiGet({ action: 'getProducts' });          // คืน { strains, equipments }
-    case 'getPromotions':
-      return apiGet({ action: 'getPromotions' });        // คืน array โปรโมชัน
-    case 'getSales':
-      return apiGet({ action: 'getSales' });             // ตารางยอดขาย (Sales)
-
-    // เขียน/อัปเดต (หน้าแอดมินจะเรียก)
-    case 'updateStock':
-      return apiPost({ action: 'updateStock', ...data });               // { id, value }
-    case 'updateProductImageUrl':
-      return apiPost({ action: 'updateProductImageUrl', ...data });     // { id, value:imageUrl }
-    case 'addPromotion':
-      return apiPost({ action: 'addPromotion', ...data });              // { title, ... }
-    case 'updatePromotion':
-      return apiPost({ action: 'updatePromotion', ...data });           // { id, ... }
-
-    default:
-      throw new Error('Unknown fetchData action: ' + action);
+  async function apiPost(payload){
+    const res = await fetch(APP_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=UTF-8' }, // ลด preflight บน iOS/LIFF
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    return res.json();
   }
-}
+
   function updateHeroSection(title,subtitle){ heroTitle.textContent=title; heroSubtitle.textContent=subtitle; }
+
   function toggleView(view){
     currentView=view;
     document.querySelectorAll('nav button').forEach(b=>b.classList.remove('text-green-200'));
-    const btn=document.getElementById(view+'-btn'); if(btn) btn.classList.add('text-green-200');
+    const btn=el(view+'-btn'); if(btn) btn.classList.add('text-green-200');
+
     if(view==='strains'){
       mainContentTitle.textContent='สายพันธุ์ทั้งหมด';
       feelingsSection.style.display='block';
@@ -398,7 +289,7 @@ async function fetchData(action, data = {}) {
   }
 
   function createFeelingButtons(){
-    const wrap=document.getElementById('feelings-container'); wrap.innerHTML='';
+    const wrap=el('feelings-container'); wrap.innerHTML='';
     Object.keys(feelingToStrain).forEach(feeling=>{
       const st=feelingToStrain[feeling]; const info=strainDescriptions[st];
       const b=document.createElement('button');
@@ -485,11 +376,11 @@ async function fetchData(action, data = {}) {
   }
   function updateCartUI(){
     const c=cart.reduce((t,i)=>t+i.quantity,0);
-    document.getElementById('cart-count').textContent=c;
+    el('cart-count').textContent=c;
     renderCartItems();
   }
   function renderCartItems(){
-    const list=document.getElementById('cart-items-list'); const btn=document.getElementById('checkout-button');
+    const list=el('cart-items-list'); const btn=el('checkout-button');
     list.innerHTML=''; let total=0;
     if(!cart.length){
       list.innerHTML='<p class="text-center text-gray-500">ไม่มีสินค้าในตะกร้า</p>';
@@ -513,42 +404,84 @@ async function fetchData(action, data = {}) {
       });
       btn.disabled=false; btn.classList.remove('bg-gray-400','cursor-not-allowed'); btn.classList.add('bg-green-600','hover:bg-green-700');
     }
-    document.getElementById('cart-total-price').textContent='฿'+total;
+    el('cart-total-price').textContent='฿'+total;
   }
   function changeQty(key,delta){ const it=cart.find(i=>i.key===key); if(!it) return; it.quantity=Math.max(1,it.quantity+delta); updateCartUI(); }
   function removeItem(key){ cart=cart.filter(i=>i.key!==key); updateCartUI(); }
-    function el(id){ return document.getElementById(id); }
 
-    // ===== LIFF helpers =====
-  async function ensureLiffReady(){
-    if(!LIFF_ID) return false;
-    if(!window.__liffInited){ await liff.init({ liffId: LIFF_ID }); window.__liffInited = true; }
-    if(!liff.isLoggedIn()){ liff.login({ redirectUri: location.href }); return false; }
-    return true;
+  // ===== LIFF helpers =====
+  function getLineUser(){ try{ return JSON.parse(localStorage.getItem('lineUser')||'{}'); }catch{ return {}; } }
+  function paintUser(u){
+    if(u && u.userId){
+      lineLoginBtn.textContent='สวัสดี, '+(u.displayName||'เพื่อน');
+      myOrdersLink.href='profile.html?userId='+encodeURIComponent(u.userId);
+      myOrdersLink.classList.remove('hidden');
+    }
   }
-  function buildOrderText({ orderId, items, total, user }){
-    const lines = (items||[]).map(it => '• '+it.name+' x'+it.qty+' = ฿'+(it.price*it.qty)).join('\\n');
-    const by = (user && user.displayName) ? ('จาก: '+user.displayName) : 'จากลูกค้า';
-    return ['🛍️ คำสั่งซื้อใหม่', by, 'Order: '+orderId, 'ยอดรวม: ฿'+total, '', 'รายการ:', lines].join('\\n');
-  }
-  async function sendOrderToOA({ orderId, items, total }){
-    const user = JSON.parse(localStorage.getItem('lineUser') || '{}');
-    const text = buildOrderText({ orderId, items, total, user });
+  async function initLiff(){
     try{
-      const ready = await ensureLiffReady();
-      if(ready && liff.isInClient()){ await liff.sendMessages([{ type:'text', text }]); alert('ส่งสรุปคำสั่งซื้อเข้าแชตร้านแล้ว'); }
-      else if(ready && liff.isApiAvailable('shareTargetPicker')){ await liff.shareTargetPicker([{ type:'text', text }]); alert('แชร์สรุปคำสั่งซื้อแล้ว'); }
-      else { await navigator.clipboard?.writeText(text); window.location.href='https://line.me/R/ti/p/@'+oaIdNoAt(); }
-    } catch(e){ console.warn('sendOrderToOA error', e); await navigator.clipboard?.writeText(text); window.location.href='https://line.me/R/ti/p/@'+oaIdNoAt(); }
+      await liff.init({ liffId: LIFF_ID }); window.__liffInited = true;
+      if(!liff.isLoggedIn()) return;
+      const profile=await liff.getProfile();
+      const u={ userId: profile.userId, displayName: profile.displayName, pictureUrl: profile.pictureUrl };
+      localStorage.setItem('lineUser', JSON.stringify(u));
+      paintUser(u);
+    }catch(err){ console.warn('LIFF init error', err); }
+  }
+  function maybeInitLiff(){ if(!LIFF_ID) return; initLiff(); }
+
+  // ฟังก์ชันล็อกอิน LINE (ตัวเดียว ใช้ซ้ำ)
+  async function handleLineLogin(){
+    try{
+      if (!LIFF_ID) { location.href = 'https://line.me/R/ti/p/@' + oaIdNoAt(); return; }
+      if (!window.__liffInited) { await liff.init({ liffId: LIFF_ID }); window.__liffInited = true; }
+      if (!liff.isLoggedIn()) { liff.login({ redirectUri: location.href }); return; }
+      const p = await liff.getProfile();
+      const user = { userId: p.userId, displayName: p.displayName, pictureUrl: p.pictureUrl };
+      localStorage.setItem('lineUser', JSON.stringify(user));
+      paintUser(user);
+      alert('ล็อกอินสำเร็จ');
+    }catch(e){ console.error('LINE login error', e); alert('ล็อกอิน LINE ไม่สำเร็จ: ' + (e.message || e)); }
+  }
+
+  // ส่งสรุปออร์เดอร์เข้า LINE OA (เวอร์ชันเดียว รับ text)
+  async function sendOrderToOA(text){
+    if (!window.__liffInited) { await liff.init({ liffId: LIFF_ID }); window.__liffInited = true; }
+    const inClient = liff.isInClient?.();
+    const ctx = liff.getContext?.() || { type:'none' };
+
+    // เปิดจากห้องแชตร้าน → ส่งได้เลย
+    if (inClient && (ctx.type==='utou' || ctx.type==='room' || ctx.type==='group')) {
+      await liff.sendMessages([{ type:'text', text }]);
+      return true;
+    }
+    // ไม่ใช่แชต → ให้เลือกห้อง
+    if (inClient && liff.shareTargetPicker) {
+      const res = await liff.shareTargetPicker([{ type:'text', text }]);
+      if (res) return true;
+    }
+    // สำรองสุดท้าย: เปิดห้อง OA ให้ลูกค้าวาง-ส่งเอง
+    try { await navigator.clipboard.writeText(text); } catch(_) {}
+    location.href = `https://line.me/R/ti/p/@${oaIdNoAt()}`;
+    return false;
+  }
+
+  function buildOrderSummary(items, total, name, email){
+    const lines = ['🛒 คำสั่งซื้อใหม่'];
+    items.forEach(it => lines.push(`• ${it.name} x ${it.quantity} = ฿${it.price * it.quantity}`));
+    lines.push(`ยอดรวม: ฿${total}`);
+    if (name)  lines.push(`ชื่อผู้สั่ง: ${name}`);
+    if (email) lines.push(`ที่อยู่: ${email}`);
+    return lines.join('\n');
   }
 
   async function handleCheckout(){
-    const customerName = document.getElementById('customerName').value.trim();
-    const customerEmail = document.getElementById('customerEmail').value.trim();
-    const statusMessage = document.getElementById('checkout-status-message');
-    const loadingIndicator = document.getElementById('checkout-loading-indicator');
-    const checkoutButton = document.getElementById('checkout-button');
-    const closeBtn = document.getElementById('cart-close-btn');
+    const customerName = el('customerName').value.trim();
+    const customerEmail = el('customerEmail').value.trim();
+    const statusMessage = el('checkout-status-message');
+    const loadingIndicator = el('checkout-loading-indicator');
+    const checkoutButton = el('checkout-button');
+    const closeBtn = el('cart-close-btn');
 
     try{ showLoading(); const latest = await apiGet({action:'getProducts'}); strains=latest.products||[]; equipments=latest.equipments||[]; }
     finally{ hideLoading(); }
@@ -562,21 +495,18 @@ async function fetchData(action, data = {}) {
     statusMessage.textContent = 'กำลังยืนยันคำสั่งซื้อ...'; statusMessage.className = 'text-center mt-4 text-sm text-blue-600';
 
     const totalAmount = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
-    const items = cart.map(i => ({ id:i.id, type:i.type, name:i.name, price:i.price, qty:i.quantity }));
+    const itemsForAPI = cart.map(i => ({ id:i.id, type:i.type, name:i.name, price:i.price, qty:i.quantity }));
     const u = getLineUser();
-    const orderData = { action:'placeOrder', customerName, customerEmail, user_id:u.userId||'', email: customerEmail, items, total: totalAmount };
+    const orderData = { action:'placeOrder', customerName, customerEmail, user_id:u.userId||'', email: customerEmail, items: itemsForAPI, total: totalAmount };
 
     try{
       const result = await apiPost(orderData);
       if (result.ok || result.status === 'success') {
-      const summary = buildOrderSummary(cart, totalAmount, customerName, customerEmail);
-  await sendOrderToOA(summary);
-        const orderId = result.order_id || '';
-        const itemsForMsg = cart.map(i => ({ name:i.name, price:i.price, qty:i.quantity }));
+        const summary = buildOrderSummary(cart, totalAmount, customerName, customerEmail);
         cart = []; updateCartUI();
         statusMessage.textContent = 'สั่งซื้อสำเร็จ! กำลังส่งสรุปไปที่แชตร้าน...';
         hideModal('cart-modal-container');
-        await sendOrderToOA({ orderId, items: itemsForMsg, total: totalAmount });
+        await sendOrderToOA(summary);
       } else {
         statusMessage.textContent = 'เกิดข้อผิดพลาด: ' + (result.error || result.message || 'ไม่สามารถทำรายการได้');
         statusMessage.className = 'text-center mt-4 text-sm text-red-500';
@@ -589,155 +519,83 @@ async function fetchData(action, data = {}) {
     }
   }
 
-  async function initLiff(){
+  async function initializeData(){
+    showLoading();
     try{
-      await liff.init({ liffId: LIFF_ID }); window.__liffInited = true;
-      if(!liff.isLoggedIn()) return;
-      const profile=await liff.getProfile();
-      const u={ userId: profile.userId, displayName: profile.displayName, pictureUrl: profile.pictureUrl };
-      localStorage.setItem('lineUser', JSON.stringify(u)); paintUser(u);
-    }catch(err){ console.warn('LIFF init error', err); }
-  }
-  function maybeInitLiff(){ if(!LIFF_ID) return; initLiff(); }
-  function getLineUser(){
-    try{ return JSON.parse(localStorage.getItem('lineUser')||'{}'); }catch{ return {}; }
-  }
-  function paintUser(u){
-    if(u && u.userId){
-      lineLoginBtn.textContent='สวัสดี, '+(u.displayName||'เพื่อน');
-      myOrdersLink.href='profile.html?userId='+encodeURIComponent(u.userId);
-      myOrdersLink.classList.remove('hidden');
-    }
-  }
-    // ===== ฟังก์ชันล็อกอิน LINE (ตัวเดียว ใช้ซ้ำ) =====
-async function handleLineLogin(){
-  try{
-    if (!LIFF_ID) {
-      location.href = 'https://line.me/R/ti/p/@' + (LINE_OA_ID||'').replace(/^@/,'');
-      return;
-    }
-    if (!window.__liffInited) { await liff.init({ liffId: LIFF_ID }); window.__liffInited = true; }
-    if (!liff.isLoggedIn()) { liff.login({ redirectUri: location.href }); return; }
-
-    const p = await liff.getProfile();
-    const user = { userId: p.userId, displayName: p.displayName, pictureUrl: p.pictureUrl };
-    localStorage.setItem('lineUser', JSON.stringify(user));
-    paintUser(user);
-    alert('ล็อกอินสำเร็จ');
-  }catch(e){
-    console.error('LINE login error', e);
-    alert('ล็อกอิน LINE ไม่สำเร็จ: ' + (e.message || e));
-  }
-}
-
-    async function initializeData() {
-  showLoading();
-  try {
-    const productsData = await fetchData('getProducts');
-    strains    = (productsData?.strains)    || [];
-    equipments = (productsData?.equipments) || [];
-    promotions = await fetchData('getPromotions') || [];
-  } catch (err) {
-    console.error('initializeData error:', err);
-    mainContentTitle.textContent = 'โหลดสินค้าไม่สำเร็จ';
-    mainContentList.innerHTML =
-      `<p class="col-span-full text-center text-red-500">เกิดข้อผิดพลาดในการโหลดสินค้า</p>`;
-  } finally {
-    hideLoading();
-  }
-}
-
-// === ส่งสรุปออร์เดอร์เข้า LINE OA ===
-function buildOrderSummary(items, total, name, email){
-  const lines = ['🛒 คำสั่งซื้อใหม่'];
-  items.forEach(it => lines.push(`• ${it.name} x ${it.quantity} = ฿${it.price * it.quantity}`));
-  lines.push(`ยอดรวม: ฿${total}`);
-  if (name)  lines.push(`ชื่อผู้สั่ง: ${name}`);
-  if (email) lines.push(`ที่อยู่: ${email}`);
-  return lines.join('\n');
-}
-
-async function sendOrderToOA(text){
-  // init LIFF (เรียกครั้งเดียว)
-  if (!window.__liffInited) { await liff.init({ liffId: LIFF_ID }); window.__liffInited = true; }
-
-  const inClient = liff.isInClient?.();
-  const ctx = liff.getContext?.() || { type:'none' };
-
-  // เปิดจากห้องแชตร้าน → ส่งได้เลย
-  if (inClient && (ctx.type==='utou' || ctx.type==='room' || ctx.type==='group')) {
-    await liff.sendMessages([{ type:'text', text }]);
-    return true;
+      const r1=await apiGet({action:'getProducts'}); // แบ็กเอนด์เดิมคืน { products, equipments }
+      strains=r1.products||[];
+      equipments=r1.equipments||[];
+      const r2=await apiGet({action:'getPromotions'});
+      promotions=r2.promotions||[];
+      toggleView(currentView);
+    } finally { hideLoading(); }
   }
 
-  // ไม่ใช่แชต → ให้เลือกห้อง (ต้องเปิด scope chat_message.write ใน LIFF)
-  if (inClient && liff.shareTargetPicker) {
-    const res = await liff.shareTargetPicker([{ type:'text', text }]);
-    if (res) return true;
+  // ===== Drawer Controls =====
+  function openDrawer(){
+    const drawer = el('mobile-drawer'), panel = el('mobile-drawer-panel');
+    if(!drawer || !panel) return;
+    drawer.classList.remove('hidden');
+    document.body.classList.add('overflow-hidden');
+    requestAnimationFrame(()=> panel.classList.remove('translate-x-full'));
+  }
+  function closeDrawer(){
+    const drawer = el('mobile-drawer'), panel = el('mobile-drawer-panel');
+    if(!drawer || !panel) return;
+    panel.classList.add('translate-x-full');
+    setTimeout(()=>{
+      drawer.classList.add('hidden');
+      document.body.classList.remove('overflow-hidden');
+    }, 200);
   }
 
-  // สำรองสุดท้าย: เปิดห้อง OA ให้ลูกค้าวาง-ส่งเอง
-  try { await navigator.clipboard.writeText(text); } catch(_) {}
-  location.href = `https://line.me/R/ti/p/@${LINE_OA_ID.replace(/^@?/, '')}`;
-  return false;
-}
-}
+  // ===== Boot =====
   document.addEventListener('DOMContentLoaded', ()=>{
+    // Initial UI build
     createFeelingButtons(); initializeData(); maybeInitLiff();
-    document.getElementById('cart-icon-container').addEventListener('click', ()=> showModal('cart-modal-container'));
-    document.getElementById('cart-close-btn').addEventListener('click', ()=> hideModal('cart-modal-container'));
-    document.getElementById('checkout-button').addEventListener('click', handleCheckout);
-    document.getElementById('modal-ok-btn').addEventListener('click', ()=> hideModal('modal-container'));
-    document.getElementById('line-login-btn').addEventListener('click', handleLineLogin));
 
-    // === bind mobile drawer ===
-el('line-login-btn')?.addEventListener('click', handleLineLogin);
-el('mobile-menu-btn') && el('mobile-menu-btn').addEventListener('click', openDrawer);
-el('mobile-drawer-backdrop') && el('mobile-drawer-backdrop').addEventListener('click', closeDrawer);
-el('mobile-drawer-close') && el('mobile-drawer-close').addEventListener('click', closeDrawer);
-document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeDrawer(); });
+    // Cart modal
+    el('cart-icon-container').addEventListener('click', ()=> showModal('cart-modal-container'));
+    el('cart-close-btn').addEventListener('click', ()=> hideModal('cart-modal-container'));
+    el('checkout-button').addEventListener('click', handleCheckout);
+    el('modal-ok-btn').addEventListener('click', ()=> hideModal('modal-container'));
 
-const drawerRoot = el('mobile-drawer');
-drawerRoot && drawerRoot.addEventListener('click', (e)=>{
-  const btn = e.target.closest('.drawer-link'); if(!btn) return;
-  const action = btn.dataset.action;
+    // Login button
+    el('line-login-btn').addEventListener('click', handleLineLogin);
 
-  if(action === 'go'){
-    toggleView(btn.dataset.target);
-  } else if(action === 'line-login'){
-    handleLineLogin();
-  } else if(action === 'order-history'){
-    try { window.location.href = 'profile.html'; }
-    catch { showModal('modal-container','เร็วๆ นี้','ประวัติคำสั่งซื้อจะพร้อมใช้งานเร็วๆ นี้'); }
-  } else if(action === 'admin'){
-    if(isAdminLoggedIn) showAdminPanel('products'); else showModal('admin-login-modal-container');
-  }
-  closeDrawer();
-  
-  // ถ้าคุณเพิ่มปุ่มย่อยของแอดมิน:
-  else if(action === 'admin-products'){
-    if(isAdminLoggedIn) showAdminPanel('products'); else showModal('admin-login-modal-container');
-    closeDrawer();
-  }
-  else if(action === 'admin-sales'){
-    if(isAdminLoggedIn) showAdminPanel('sales'); else showModal('admin-login-modal-container');
-    closeDrawer();
-  }
-  createFeelingButtons();
-await initializeData();           // โหลดข้อมูลจาก Apps Script
-
-currentView = 'strains';          // บังคับหน้าแรกเป็น “สายพันธุ์”
-activeFeeling = null;
-toggleView('strains');            // เรนเดอร์การ์ดสินค้าเริ่มต้น
-
-});
-
+    // Event delegation for cart buttons
     document.body.addEventListener('click', (e)=>{
       const t=e.target;
       if (t.classList.contains('add-to-cart-btn')) addToCart(t.dataset.id, t.dataset.type);
       if (t.hasAttribute('data-qty')) changeQty(t.getAttribute('data-key'), t.getAttribute('data-qty')==='+1'?1:-1);
       if (t.hasAttribute('data-remove')) removeItem(t.getAttribute('data-key'));
     });
+
+    // ====== Bind mobile drawer ======
+    el('mobile-menu-btn')?.addEventListener('click', openDrawer);
+    el('mobile-drawer-backdrop')?.addEventListener('click', closeDrawer);
+    el('mobile-drawer-close')?.addEventListener('click', closeDrawer);
+    document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeDrawer(); });
+
+    const drawerRoot = el('mobile-drawer');
+    if (drawerRoot) {
+      drawerRoot.addEventListener('click', (e)=>{
+        const btn = e.target.closest('.drawer-link'); if(!btn) return;
+        const action = btn.dataset.action;
+        if(action === 'go'){
+          toggleView(btn.dataset.target);
+        } else if(action === 'line-login'){
+          handleLineLogin();
+        } else if(action === 'order-history'){
+          try {
+            const u = getLineUser();
+            const url = u.userId ? ('profile.html?userId='+encodeURIComponent(u.userId)) : 'profile.html';
+            window.location.href = url;
+          } catch { showModal('modal-container','เร็วๆ นี้','ประวัติคำสั่งซื้อจะพร้อมใช้งานเร็วๆ นี้'); }
+        }
+        closeDrawer();
+      });
+    }
   });
   </script>
 </body>
