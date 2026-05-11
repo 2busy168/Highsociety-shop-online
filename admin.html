@@ -1,4 +1,4 @@
-<<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="th">
 <head>
 <meta charset="UTF-8">
@@ -9,234 +9,181 @@
 <script src="https://widget.cloudinary.com/v2.0/global/all.js" type="text/javascript"></script>
 <style>
   :root {
-    --bg: #0a0a0a;
-    --surface: #111111;
-    --surface2: #1a1a1a;
-    --border: #2a2a2a;
-    --green: #00ff88;
-    --green-dim: #00cc6a;
-    --green-bg: rgba(0,255,136,0.06);
-    --red: #ff4455;
-    --yellow: #ffcc00;
-    --text: #f0f0f0;
-    --muted: #666;
-    --font-mono: 'IBM Plex Mono', monospace;
-    --font-th: 'Kanit', sans-serif;
+    --bg: #0a0a0a; --surface: #111111; --surface2: #1a1a1a; --border: #2a2a2a;
+    --green: #00ff88; --green-dim: #00cc6a; --green-bg: rgba(0,255,136,0.06);
+    --red: #ff4455; --yellow: #ffcc00; --text: #f0f0f0; --muted: #666;
+    --font-mono: 'IBM Plex Mono', monospace; --font-th: 'Kanit', sans-serif;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body { height: 100%; background: var(--bg); color: var(--text); font-family: var(--font-th); }
 
-  /* ── Layout ── */
   #app { display: flex; min-height: 100vh; }
   #sidebar {
     width: 220px; min-height: 100vh; background: var(--surface);
     border-right: 1px solid var(--border); display: flex; flex-direction: column;
-    position: sticky; top: 0; flex-shrink: 0;
+    position: sticky; top: 0; height: 100vh; flex-shrink: 0;
   }
   #main { flex: 1; overflow-x: hidden; }
 
-  /* ── Sidebar ── */
-  .logo {
-    padding: 24px 20px 20px;
-    font-family: var(--font-mono); font-weight: 700; font-size: 13px;
-    color: var(--green); letter-spacing: 1px; border-bottom: 1px solid var(--border);
-  }
+  .logo { padding: 24px 20px 20px; font-family: var(--font-mono); font-weight: 700; font-size: 13px; color: var(--green); letter-spacing: 1px; border-bottom: 1px solid var(--border); }
   .logo span { color: var(--muted); font-size: 10px; display: block; margin-top: 4px; font-weight: 400; }
   nav { padding: 12px 0; flex: 1; }
-  .nav-item {
-    display: flex; align-items: center; gap: 10px;
-    padding: 11px 20px; cursor: pointer; font-size: 14px; color: var(--muted);
-    border-left: 3px solid transparent; transition: all .15s;
-  }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 11px 20px; cursor: pointer; font-size: 14px; color: var(--muted); border-left: 3px solid transparent; transition: all .15s; }
   .nav-item:hover { color: var(--text); background: var(--surface2); }
   .nav-item.active { color: var(--green); border-left-color: var(--green); background: var(--green-bg); }
   .nav-icon { font-size: 16px; width: 20px; text-align: center; }
-  .nav-badge {
-    margin-left: auto; background: var(--red); color: #fff;
-    font-size: 10px; padding: 2px 6px; border-radius: 20px; font-family: var(--font-mono);
-  }
+  .nav-badge { margin-left: auto; background: var(--red); color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 20px; font-family: var(--font-mono); }
   .sidebar-footer { padding: 16px 20px; border-top: 1px solid var(--border); }
-  .logout-btn {
-    width: 100%; background: none; border: 1px solid var(--border); color: var(--muted);
-    padding: 8px; border-radius: 6px; cursor: pointer; font-family: var(--font-th); font-size: 13px;
-    transition: all .15s;
-  }
+  .logout-btn { width: 100%; background: none; border: 1px solid var(--border); color: var(--muted); padding: 8px; border-radius: 6px; cursor: pointer; font-family: var(--font-th); font-size: 13px; transition: all .15s; }
   .logout-btn:hover { border-color: var(--red); color: var(--red); }
 
-  /* ── Topbar ── */
-  .topbar {
-    padding: 16px 28px; border-bottom: 1px solid var(--border);
-    display: flex; align-items: center; justify-content: space-between;
-    background: var(--surface); position: sticky; top: 0; z-index: 10;
-  }
+  .topbar { padding: 16px 28px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; background: var(--surface); position: sticky; top: 0; z-index: 10; }
   .topbar-title { font-size: 18px; font-weight: 600; }
-  .topbar-right { display: flex; gap: 10px; align-items: center; }
-  .badge-live {
-    background: var(--green-bg); border: 1px solid var(--green);
-    color: var(--green); font-family: var(--font-mono); font-size: 11px;
-    padding: 4px 10px; border-radius: 20px; display: flex; align-items: center; gap: 6px;
-  }
+  .badge-live { background: var(--green-bg); border: 1px solid var(--green); color: var(--green); font-family: var(--font-mono); font-size: 11px; padding: 4px 10px; border-radius: 20px; display: flex; align-items: center; gap: 6px; }
   .dot-live { width: 6px; height: 6px; background: var(--green); border-radius: 50%; animation: pulse 1.5s infinite; }
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
 
-  /* ── Login ── */
-  #login-screen {
-    display: flex; align-items: center; justify-content: center;
-    min-height: 100vh; background: var(--bg);
-  }
-  .login-box {
-    background: var(--surface); border: 1px solid var(--border);
-    padding: 40px; border-radius: 12px; width: 360px; text-align: center;
-  }
+  /* Login */
+  #login-screen { display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+  .login-box { background: var(--surface); border: 1px solid var(--border); padding: 40px; border-radius: 12px; width: 360px; text-align: center; }
   .login-logo { font-family: var(--font-mono); font-size: 20px; font-weight: 700; color: var(--green); margin-bottom: 8px; }
   .login-sub { color: var(--muted); font-size: 13px; margin-bottom: 28px; }
 
-  /* ── Forms ── */
-  input, select, textarea {
-    background: var(--surface2); border: 1px solid var(--border); color: var(--text);
-    padding: 10px 14px; border-radius: 8px; font-family: var(--font-th); font-size: 14px;
-    width: 100%; transition: border-color .15s; outline: none;
-  }
+  /* Forms */
+  input, select, textarea { background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 10px 14px; border-radius: 8px; font-family: var(--font-th); font-size: 14px; width: 100%; transition: border-color .15s; outline: none; }
   input:focus, select:focus, textarea:focus { border-color: var(--green); }
   label { font-size: 12px; color: var(--muted); display: block; margin-bottom: 6px; font-family: var(--font-mono); }
   .field { margin-bottom: 16px; }
-  .btn {
-    padding: 10px 20px; border-radius: 8px; cursor: pointer; font-family: var(--font-th);
-    font-size: 14px; font-weight: 600; border: none; transition: all .15s;
-  }
+
+  .btn { padding: 10px 20px; border-radius: 8px; cursor: pointer; font-family: var(--font-th); font-size: 14px; font-weight: 600; border: none; transition: all .15s; display: inline-flex; align-items: center; gap: 6px; }
   .btn-primary { background: var(--green); color: #000; }
   .btn-primary:hover { background: var(--green-dim); }
   .btn-secondary { background: var(--surface2); border: 1px solid var(--border); color: var(--text); }
   .btn-secondary:hover { border-color: var(--green); color: var(--green); }
   .btn-danger { background: transparent; border: 1px solid var(--red); color: var(--red); }
   .btn-danger:hover { background: var(--red); color: #fff; }
+  .btn-success { background: transparent; border: 1px solid var(--green); color: var(--green); }
+  .btn-success:hover { background: var(--green); color: #000; }
   .btn-sm { padding: 6px 12px; font-size: 12px; }
-  .btn-full { width: 100%; }
+  .btn-full { width: 100%; justify-content: center; }
+  .btn:disabled { opacity: .5; cursor: not-allowed; }
 
-  /* ── Pages ── */
   .page { display: none; padding: 28px; }
   .page.active { display: block; }
 
-  /* ── Stat Cards ── */
+  /* Stats */
   .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 28px; }
-  .stat-card {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: 10px; padding: 20px;
-  }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 20px; }
   .stat-label { font-size: 11px; color: var(--muted); font-family: var(--font-mono); margin-bottom: 8px; }
   .stat-value { font-size: 28px; font-weight: 700; font-family: var(--font-mono); color: var(--green); }
   .stat-sub { font-size: 12px; color: var(--muted); margin-top: 4px; }
 
-  /* ── Chart ── */
-  .chart-box {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: 10px; padding: 24px; margin-bottom: 28px;
-  }
-  .chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+  .chart-box { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 24px; margin-bottom: 28px; }
+  .chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
   .chart-title { font-size: 15px; font-weight: 600; }
-  input[type="month"] { width: auto; padding: 6px 10px; font-size: 13px; }
 
-  /* ── Table ── */
-  .table-box {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: 10px; overflow: hidden;
-  }
-  .table-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
-  .table-header-title { font-size: 15px; font-weight: 600; }
+  /* Table */
+  .table-box { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .table-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
   table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  th { background: var(--surface2); padding: 10px 14px; text-align: left; font-family: var(--font-mono); font-size: 11px; color: var(--muted); font-weight: 500; }
+  th { background: var(--surface2); padding: 10px 14px; text-align: left; font-family: var(--font-mono); font-size: 11px; color: var(--muted); font-weight: 500; white-space: nowrap; }
   td { padding: 12px 14px; border-bottom: 1px solid var(--border); vertical-align: middle; }
   tr:last-child td { border-bottom: none; }
-  tr:hover td { background: var(--surface2); }
+  tr:hover td { background: rgba(255,255,255,.02); }
 
-  /* ── Status badges ── */
-  .badge { padding: 3px 10px; border-radius: 20px; font-size: 11px; font-family: var(--font-mono); font-weight: 500; }
+  .badge { padding: 3px 10px; border-radius: 20px; font-size: 11px; font-family: var(--font-mono); font-weight: 500; white-space: nowrap; }
   .badge-pending { background: rgba(255,204,0,.15); color: var(--yellow); border: 1px solid rgba(255,204,0,.3); }
   .badge-paid { background: rgba(0,255,136,.12); color: var(--green); border: 1px solid rgba(0,255,136,.25); }
   .badge-cancelled { background: rgba(255,68,85,.12); color: var(--red); border: 1px solid rgba(255,68,85,.25); }
 
-  /* ── Products ── */
-  .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
-  .product-card {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: 10px; overflow: hidden; transition: border-color .2s;
-  }
-  .product-card:hover { border-color: var(--green); }
-  .product-img { width: 100%; height: 160px; object-fit: cover; display: block; background: var(--surface2); }
-  .product-body { padding: 14px; }
-  .product-name { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
-  .product-type { font-size: 11px; font-family: var(--font-mono); color: var(--muted); margin-bottom: 10px; }
-  .product-stock { font-size: 13px; }
-  .stock-low { color: var(--red); }
-  .stock-ok { color: var(--green); }
-  .product-actions { display: flex; gap: 8px; margin-top: 12px; }
+  /* ── PRODUCT GRID (ปรับใหม่) ── */
+  .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+  .product-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; transition: border-color .2s, transform .15s; }
+  .product-card:hover { border-color: var(--green); transform: translateY(-2px); }
 
-  /* ── Upload Zone ── */
-  .upload-zone {
-    border: 2px dashed var(--border); border-radius: 10px;
-    padding: 40px; text-align: center; cursor: pointer;
-    transition: all .2s; background: var(--surface2);
-  }
-  .upload-zone:hover, .upload-zone.drag-over { border-color: var(--green); background: var(--green-bg); }
-  .upload-icon { font-size: 36px; margin-bottom: 12px; }
-  .upload-text { color: var(--muted); font-size: 14px; }
-  .upload-text strong { color: var(--green); }
+  /* รูปสินค้า: square 1:1 พอดีไม่ครอบ */
+  .product-img-wrap { width: 100%; aspect-ratio: 1/1; overflow: hidden; background: var(--surface2); position: relative; }
+  .product-img-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .3s; }
+  .product-card:hover .product-img-wrap img { transform: scale(1.04); }
 
-  /* ── Modal ── */
-  .modal-backdrop {
-    position: fixed; inset: 0; background: rgba(0,0,0,.8);
+  .product-body { padding: 12px 14px 14px; }
+  .product-name { font-size: 14px; font-weight: 700; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .product-meta { font-size: 11px; font-family: var(--font-mono); color: var(--muted); margin-bottom: 8px; display: flex; gap: 8px; flex-wrap: wrap; }
+  .product-stock-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .stock-pill { font-size: 12px; font-family: var(--font-mono); padding: 3px 10px; border-radius: 20px; }
+  .stock-ok { background: rgba(0,255,136,.1); color: var(--green); border: 1px solid rgba(0,255,136,.2); }
+  .stock-low { background: rgba(255,204,0,.1); color: var(--yellow); border: 1px solid rgba(255,204,0,.2); }
+  .stock-zero { background: rgba(255,68,85,.1); color: var(--red); border: 1px solid rgba(255,68,85,.2); }
+  .product-price { font-size: 12px; color: var(--muted); font-family: var(--font-mono); }
+  .product-actions { display: flex; gap: 6px; }
+  .product-actions .btn { flex: 1; justify-content: center; padding: 7px 8px; font-size: 12px; }
+
+  /* ── INLINE IMAGE UPLOAD in product modal ── */
+  .img-upload-area {
+    width: 100%; aspect-ratio: 16/9; border-radius: 10px; overflow: hidden;
+    border: 2px dashed var(--border); background: var(--surface2);
     display: flex; align-items: center; justify-content: center;
-    z-index: 100; opacity: 0; pointer-events: none; transition: opacity .2s;
+    cursor: pointer; position: relative; transition: border-color .2s;
+    margin-bottom: 12px;
   }
+  .img-upload-area:hover { border-color: var(--green); }
+  .img-upload-area img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .img-upload-area .img-placeholder { text-align: center; pointer-events: none; }
+  .img-upload-area .img-placeholder .icon { font-size: 32px; margin-bottom: 8px; }
+  .img-upload-area .img-placeholder p { font-size: 13px; color: var(--muted); }
+  .img-upload-area .img-placeholder strong { color: var(--green); }
+  .img-upload-overlay { position: absolute; inset: 0; background: rgba(0,0,0,.6); display: none; align-items: center; justify-content: center; gap: 10px; }
+  .img-upload-area:hover .img-upload-overlay { display: flex; }
+  .img-upload-area.has-img { border-style: solid; border-color: var(--border); }
+
+  /* ── ORDER ROWS (ยืนยันได้เลย inline) ── */
+  .order-row-pending { background: rgba(255,204,0,.03) !important; }
+  .order-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+
+  /* ── ORDER EXPAND PANEL ── */
+  .order-detail-panel { display: none; background: var(--surface2); }
+  .order-detail-panel.open { display: table-row; }
+  .order-detail-inner { padding: 16px 20px; border-top: 1px solid var(--border); }
+  .order-items-list { margin: 10px 0; }
+  .order-item-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .order-item-row:last-child { border-bottom: none; }
+  .order-total { text-align: right; font-family: var(--font-mono); color: var(--green); font-size: 15px; margin-top: 8px; }
+  .order-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; font-size: 13px; }
+  .order-info-label { font-size: 11px; color: var(--muted); font-family: var(--font-mono); margin-bottom: 2px; }
+
+  /* Modal */
+  .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.85); display: flex; align-items: center; justify-content: center; z-index: 100; opacity: 0; pointer-events: none; transition: opacity .2s; }
   .modal-backdrop.open { opacity: 1; pointer-events: all; }
-  .modal {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: 12px; padding: 28px; width: 520px; max-width: 95vw;
-    max-height: 90vh; overflow-y: auto;
-    transform: translateY(20px); transition: transform .2s;
-  }
+  .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 28px; width: 560px; max-width: 96vw; max-height: 92vh; overflow-y: auto; transform: translateY(20px); transition: transform .2s; }
   .modal-backdrop.open .modal { transform: translateY(0); }
   .modal-title { font-size: 17px; font-weight: 700; margin-bottom: 20px; }
   .modal-footer { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
 
-  /* ── Toast ── */
-  #toast {
-    position: fixed; bottom: 28px; right: 28px;
-    background: var(--surface); border: 1px solid var(--border);
-    padding: 14px 20px; border-radius: 8px; font-size: 14px;
-    z-index: 200; transform: translateY(80px); opacity: 0;
-    transition: all .3s; max-width: 320px;
-  }
+  #toast { position: fixed; bottom: 28px; right: 28px; background: var(--surface); border: 1px solid var(--border); padding: 14px 20px; border-radius: 8px; font-size: 14px; z-index: 200; transform: translateY(80px); opacity: 0; transition: all .3s; max-width: 320px; }
   #toast.show { transform: translateY(0); opacity: 1; }
   #toast.success { border-color: var(--green); color: var(--green); }
   #toast.error { border-color: var(--red); color: var(--red); }
 
-  /* ── Image Preview ── */
-  .img-preview { width: 100%; height: 180px; object-fit: cover; border-radius: 8px; margin-bottom: 12px; border: 1px solid var(--border); }
-
-  /* ── Section Header ── */
-  .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+  .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
   .section-title { font-size: 16px; font-weight: 700; }
 
-  /* ── Divider ── */
-  .divider { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
-
-  /* ── Mobile sidebar toggle ── */
-  #menu-toggle { display: none; }
+  #menu-toggle { display: none; background: none; border: none; color: var(--text); font-size: 22px; cursor: pointer; }
   @media (max-width: 768px) {
-    #sidebar { position: fixed; left: -220px; top: 0; z-index: 50; transition: left .25s; }
+    #sidebar { position: fixed; left: -220px; top: 0; z-index: 50; transition: left .25s; height: 100vh; }
     #sidebar.open { left: 0; }
     #main { width: 100%; }
-    #menu-toggle { display: block; background: none; border: none; color: var(--text); font-size: 22px; cursor: pointer; }
+    #menu-toggle { display: block; }
     .page { padding: 16px; }
+    .product-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
+    .order-info-grid { grid-template-columns: 1fr; }
+    table { font-size: 12px; }
+    th, td { padding: 8px 10px; }
   }
 
-  /* ── Loading ── */
   .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid var(--border); border-top-color: var(--green); border-radius: 50%; animation: spin .6s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
   .loading-row td { text-align: center; color: var(--muted); padding: 32px; }
   .empty-state { text-align: center; padding: 48px; color: var(--muted); }
-  .empty-icon { font-size: 40px; margin-bottom: 12px; }
 </style>
 </head>
 <body>
@@ -246,206 +193,133 @@
   <div class="login-box">
     <div class="login-logo">H!GH$OC!€T¥</div>
     <div class="login-sub">ADMIN CONTROL CENTER</div>
-    <div class="field">
-      <label>USERNAME</label>
-      <input id="u" placeholder="ชื่อผู้ใช้">
-    </div>
-    <div class="field">
-      <label>PASSWORD</label>
-      <input id="p" type="password" placeholder="รหัสผ่าน">
-    </div>
+    <div class="field"><label>USERNAME</label><input id="u" placeholder="ชื่อผู้ใช้" autocomplete="username"></div>
+    <div class="field"><label>PASSWORD</label><input id="p" type="password" placeholder="รหัสผ่าน" autocomplete="current-password"></div>
     <button class="btn btn-primary btn-full" id="loginBtn">เข้าสู่ระบบ</button>
-    <p id="loginMsg" style="color:var(--red);font-size:13px;margin-top:12px;"></p>
+    <p id="loginMsg" style="color:var(--red);font-size:13px;margin-top:12px;min-height:20px;"></p>
   </div>
 </div>
 
 <!-- APP -->
 <div id="app" style="display:none;">
-  <!-- Sidebar -->
   <aside id="sidebar">
-    <div class="logo">
-      H!GH$OC!€T¥
-      <span>ADMIN PANEL v2</span>
-    </div>
+    <div class="logo">H!GH$OC!€T¥<span>ADMIN PANEL v3</span></div>
     <nav>
       <div class="nav-item active" data-page="dashboard"><span class="nav-icon">📊</span> Dashboard</div>
       <div class="nav-item" data-page="orders"><span class="nav-icon">🛒</span> คำสั่งซื้อ <span class="nav-badge" id="pending-count">0</span></div>
       <div class="nav-item" data-page="products"><span class="nav-icon">🌿</span> สินค้า</div>
-      <div class="nav-item" data-page="upload"><span class="nav-icon">📸</span> อัปโหลดรูป</div>
     </nav>
     <div class="sidebar-footer">
       <button class="logout-btn" id="logoutBtn">ออกจากระบบ</button>
     </div>
   </aside>
 
-  <!-- Main -->
   <div id="main">
-    <!-- Topbar -->
     <div class="topbar">
       <div style="display:flex;align-items:center;gap:14px;">
         <button id="menu-toggle">☰</button>
         <span class="topbar-title" id="page-title">Dashboard</span>
       </div>
-      <div class="topbar-right">
+      <div style="display:flex;gap:10px;align-items:center;">
         <div class="badge-live"><div class="dot-live"></div> LIVE</div>
         <button class="btn btn-secondary btn-sm" id="refresh-btn">↺ รีเฟรช</button>
       </div>
     </div>
 
-    <!-- ═══ DASHBOARD ═══ -->
+    <!-- DASHBOARD -->
     <div class="page active" id="page-dashboard">
-      <div class="stat-grid" id="stat-grid">
-        <div class="stat-card">
-          <div class="stat-label">TOTAL SALES (เดือนนี้)</div>
-          <div class="stat-value" id="stat-month-sales">฿—</div>
-          <div class="stat-sub" id="stat-month-orders">— ออร์เดอร์</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">ยอดทั้งหมด (all time)</div>
-          <div class="stat-value" id="stat-total-sales">฿—</div>
-          <div class="stat-sub" id="stat-total-orders">— ออร์เดอร์</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">รอยืนยัน</div>
-          <div class="stat-value" style="color:var(--yellow)" id="stat-pending">—</div>
-          <div class="stat-sub">pending orders</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">สินค้าสต็อคต่ำ</div>
-          <div class="stat-value" style="color:var(--red)" id="stat-low-stock">—</div>
-          <div class="stat-sub">รายการ (&lt;5 ชิ้น)</div>
-        </div>
+      <div class="stat-grid">
+        <div class="stat-card"><div class="stat-label">SALES เดือนนี้</div><div class="stat-value" id="stat-month-sales">฿—</div><div class="stat-sub" id="stat-month-orders">— ออร์เดอร์</div></div>
+        <div class="stat-card"><div class="stat-label">SALES ทั้งหมด</div><div class="stat-value" id="stat-total-sales">฿—</div><div class="stat-sub" id="stat-total-orders">— ออร์เดอร์</div></div>
+        <div class="stat-card"><div class="stat-label">รอยืนยัน</div><div class="stat-value" style="color:var(--yellow)" id="stat-pending">—</div><div class="stat-sub">pending</div></div>
+        <div class="stat-card"><div class="stat-label">สต็อกต่ำ</div><div class="stat-value" style="color:var(--red)" id="stat-low-stock">—</div><div class="stat-sub">รายการ &lt;5 ชิ้น</div></div>
       </div>
-
       <div class="chart-box">
         <div class="chart-header">
           <div class="chart-title">ยอดขายรายวัน</div>
-          <div style="display:flex;gap:10px;align-items:center;">
-            <input type="month" id="chart-month">
+          <div style="display:flex;gap:8px;align-items:center;">
+            <input type="month" id="chart-month" style="width:auto;padding:7px 10px;font-size:13px;">
             <button class="btn btn-secondary btn-sm" id="chart-load">โหลด</button>
           </div>
         </div>
-        <canvas id="sales-chart" height="280"></canvas>
+        <canvas id="sales-chart" height="260"></canvas>
       </div>
-
-      <!-- Top products -->
       <div class="table-box">
-        <div class="table-header">
-          <div class="table-header-title">🏆 สินค้าขายดี (เดือนนี้)</div>
-        </div>
-        <table>
-          <thead><tr><th>#</th><th>สินค้า</th><th>จำนวนที่ขาย</th><th>ยอดรวม</th></tr></thead>
-          <tbody id="top-products-body">
-            <tr class="loading-row"><td colspan="4"><span class="spinner"></span></td></tr>
-          </tbody>
-        </table>
+        <div class="table-header"><div class="chart-title">🏆 สินค้าขายดีเดือนนี้</div></div>
+        <table><thead><tr><th>#</th><th>สินค้า</th><th>จำนวน</th><th>ยอดรวม</th></tr></thead>
+        <tbody id="top-products-body"><tr class="loading-row"><td colspan="4"><span class="spinner"></span></td></tr></tbody></table>
       </div>
     </div>
 
-    <!-- ═══ ORDERS ═══ -->
+    <!-- ORDERS -->
     <div class="page" id="page-orders">
       <div class="section-header">
-        <div class="section-title">คำสั่งซื้อทั้งหมด</div>
-        <div style="display:flex;gap:8px;">
+        <div class="section-title">คำสั่งซื้อ</div>
+        <div style="display:flex;gap:8px;align-items:center;">
           <select id="order-filter" style="width:auto;padding:8px 12px;font-size:13px;">
             <option value="">ทุกสถานะ</option>
-            <option value="pending">รอยืนยัน</option>
-            <option value="paid">ชำระแล้ว</option>
-            <option value="cancelled">ยกเลิก</option>
+            <option value="pending">⏳ รอยืนยัน</option>
+            <option value="paid">✅ ชำระแล้ว</option>
+            <option value="cancelled">❌ ยกเลิก</option>
           </select>
+          <button class="btn btn-secondary btn-sm" onclick="loadOrders()">↺</button>
         </div>
       </div>
       <div class="table-box">
         <table>
           <thead><tr>
-            <th>เวลา</th><th>Order ID</th><th>ลูกค้า</th>
-            <th>รายการ</th><th>ยอดรวม</th><th>สถานะ</th><th>จัดการ</th>
+            <th></th><th>เวลา</th><th>Order</th><th>ลูกค้า</th>
+            <th>ยอด</th><th>สถานะ</th><th>จัดการ</th>
           </tr></thead>
-          <tbody id="orders-body">
-            <tr class="loading-row"><td colspan="7"><span class="spinner"></span></td></tr>
-          </tbody>
+          <tbody id="orders-body"><tr class="loading-row"><td colspan="7"><span class="spinner"></span></td></tr></tbody>
         </table>
       </div>
     </div>
 
-    <!-- ═══ PRODUCTS ═══ -->
+    <!-- PRODUCTS -->
     <div class="page" id="page-products">
       <div class="section-header">
         <div class="section-title">จัดการสินค้า</div>
-        <button class="btn btn-primary btn-sm" id="add-product-btn">+ เพิ่มสินค้า</button>
+        <div style="display:flex;gap:8px;">
+          <input id="product-search" placeholder="🔍 ค้นหาสินค้า..." style="width:180px;padding:8px 12px;font-size:13px;">
+          <button class="btn btn-primary btn-sm" id="add-product-btn">+ เพิ่มสินค้า</button>
+        </div>
       </div>
       <div id="products-grid" class="product-grid">
-        <div class="empty-state"><div class="spinner"></div></div>
-      </div>
-    </div>
-
-    <!-- ═══ UPLOAD ═══ -->
-    <div class="page" id="page-upload">
-      <div class="section-header">
-        <div class="section-title">อัปโหลดรูปสินค้า</div>
-      </div>
-
-      <!-- Cloudinary Widget -->
-      <div class="chart-box" style="margin-bottom:20px;">
-        <div style="margin-bottom:16px;font-size:14px;color:var(--muted);">วิธีที่ 1: อัปโหลดผ่าน Cloudinary (แนะนำ)</div>
-        <div class="upload-zone" id="cloud-upload-zone">
-          <div class="upload-icon">☁️</div>
-          <div class="upload-text"><strong>คลิกหรือลากรูปมาวาง</strong> เพื่ออัปโหลด</div>
-          <div style="font-size:12px;color:var(--muted);margin-top:8px;">JPG, PNG, WEBP · สูงสุด 10MB</div>
-          <button class="btn btn-primary" style="margin-top:16px;" id="cld-btn">เลือกรูปภาพ</button>
-        </div>
-        <div id="upload-result" style="display:none;margin-top:16px;">
-          <img id="upload-preview" class="img-preview" src="" alt="">
-          <div class="field">
-            <label>URL (คัดลอกแล้ว ✓)</label>
-            <input id="upload-url" readonly onclick="this.select()">
-          </div>
-          <div style="font-size:12px;color:var(--muted);">
-            📋 นำ URL นี้ไปวางในฟอร์มเพิ่ม/แก้ไขสินค้า หรือคอลัมน์ <code>imageUrl</code> ใน Google Sheets
-          </div>
-        </div>
-      </div>
-
-      <!-- Recent uploaded gallery -->
-      <div class="chart-box">
-        <div class="chart-title" style="margin-bottom:16px;">รูปที่อัปโหลดล่าสุด (session นี้)</div>
-        <div id="upload-gallery" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;">
-          <div style="color:var(--muted);font-size:13px;grid-column:1/-1;">ยังไม่มีรูปที่อัปโหลดในเซสชันนี้</div>
-        </div>
-      </div>
-
-      <!-- Config note -->
-      <div class="chart-box" style="background:rgba(255,204,0,.04);border-color:rgba(255,204,0,.2);">
-        <div style="color:var(--yellow);font-size:13px;font-family:var(--font-mono);margin-bottom:10px;">⚠️ ตั้งค่าก่อนใช้งาน</div>
-        <div style="font-size:13px;color:var(--muted);line-height:1.8;">
-          1. ไปที่ <strong>cloudinary.com</strong> → Settings → Upload → Add upload preset<br>
-          2. ตั้งชื่อ preset: <code>hs_unsigned</code> และเปิด Unsigned<br>
-          3. แก้ไข <code>CLOUD_NAME</code> ในโค้ดให้ตรงกับ cloud name ของคุณ
-        </div>
-        <div class="field" style="margin-top:14px;margin-bottom:0;">
-          <label>CLOUD_NAME (แก้ตรงนี้)</label>
-          <input id="cloud-name-input" placeholder="เช่น dkabcxyz" style="font-family:var(--font-mono);">
-          <div style="font-size:11px;color:var(--muted);margin-top:6px;">กรอกแล้วกด Enter จะบันทึกลง localStorage</div>
-        </div>
+        <div class="empty-state"><span class="spinner"></span></div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ═══ EDIT PRODUCT MODAL ═══ -->
+<!-- PRODUCT MODAL -->
 <div class="modal-backdrop" id="product-modal">
   <div class="modal">
     <div class="modal-title" id="product-modal-title">เพิ่มสินค้าใหม่</div>
 
-    <img id="pm-preview" class="img-preview" src="https://placehold.co/520x180/1a1a1a/666?text=รูปสินค้า" alt="">
+    <!-- Inline image upload -->
+    <label>รูปสินค้า</label>
+    <div class="img-upload-area" id="img-upload-area">
+      <img id="pm-preview-img" src="" alt="" style="display:none;">
+      <div class="img-placeholder" id="img-placeholder">
+        <div class="icon">📸</div>
+        <p><strong>คลิกเพื่ออัปโหลด</strong> หรือวาง URL ด้านล่าง</p>
+        <p style="margin-top:4px;font-size:11px;">JPG, PNG, WEBP · สูงสุด 10MB</p>
+      </div>
+      <div class="img-upload-overlay">
+        <button class="btn btn-primary btn-sm" onclick="openCloudinary(event)">📸 เปลี่ยนรูป</button>
+        <button class="btn btn-danger btn-sm" onclick="clearImg(event)">✕ ลบรูป</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>URL รูปภาพ (หรือใช้ปุ่มอัปโหลดด้านบน)</label>
+      <input id="pm-img" placeholder="https://res.cloudinary.com/..." oninput="onImgUrlChange()">
+    </div>
 
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-      <div class="field" style="grid-column:1/-1;">
-        <label>ชื่อสินค้า *</label>
-        <input id="pm-name" placeholder="เช่น OG Kush">
-      </div>
-      <div class="field">
-        <label>ประเภท</label>
+      <div class="field" style="grid-column:1/-1;"><label>ชื่อสินค้า *</label><input id="pm-name" placeholder="เช่น OG Kush"></div>
+      <div class="field"><label>ประเภท</label>
         <select id="pm-type">
           <option value="Indica">Indica 😴</option>
           <option value="Sativa">Sativa ⚡</option>
@@ -453,45 +327,26 @@
           <option value="Equipment">Equipment ⚙️</option>
         </select>
       </div>
-      <div class="field">
-        <label>สต็อค (ชิ้น)</label>
-        <input id="pm-stock" type="number" min="0" placeholder="0">
-      </div>
-      <div class="field">
-        <label>Indica %</label>
-        <input id="pm-indica" type="number" min="0" max="100" placeholder="50">
-      </div>
-      <div class="field">
-        <label>Sativa %</label>
-        <input id="pm-sativa" type="number" min="0" max="100" placeholder="50">
-      </div>
-      <div class="field">
-        <label>THC %</label>
-        <input id="pm-thc" type="number" step="0.1" placeholder="20.5">
-      </div>
-      <div class="field">
-        <label>กลิ่น/รส</label>
-        <input id="pm-aroma" placeholder="เช่น ดิน, ไม้, ผลไม้">
-      </div>
+      <div class="field"><label>สต็อก (ชิ้น)</label><input id="pm-stock" type="number" min="0" placeholder="0"></div>
+      <div class="field"><label>Indica %</label><input id="pm-indica" type="number" min="0" max="100" placeholder="50"></div>
+      <div class="field"><label>Sativa %</label><input id="pm-sativa" type="number" min="0" max="100" placeholder="50"></div>
+      <div class="field"><label>THC %</label><input id="pm-thc" type="number" step="0.1" placeholder="20.5"></div>
+      <div class="field"><label>กลิ่น/รส</label><input id="pm-aroma" placeholder="เช่น ดิน, ไม้, ผลไม้"></div>
     </div>
-
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;">
-      <div class="field"><label>ราคา 1g</label><input id="pm-p1" type="number" placeholder="฿"></div>
-      <div class="field"><label>ราคา 3.5g</label><input id="pm-p35" type="number" placeholder="฿"></div>
-      <div class="field"><label>ราคา 5g</label><input id="pm-p5" type="number" placeholder="฿"></div>
-      <div class="field"><label>ราคา 10g</label><input id="pm-p10" type="number" placeholder="฿"></div>
+      <div class="field"><label>1g ฿</label><input id="pm-p1" type="number" placeholder="—"></div>
+      <div class="field"><label>3.5g ฿</label><input id="pm-p35" type="number" placeholder="—"></div>
+      <div class="field"><label>5g ฿</label><input id="pm-p5" type="number" placeholder="—"></div>
+      <div class="field"><label>10g ฿</label><input id="pm-p10" type="number" placeholder="—"></div>
     </div>
-
-    <div class="field">
-      <label>URL รูปสินค้า</label>
-      <input id="pm-img" placeholder="https://res.cloudinary.com/..." oninput="updatePreview()">
-    </div>
-    <div class="field">
-      <label>คำอธิบาย</label>
-      <textarea id="pm-desc" rows="3" placeholder="รายละเอียดสินค้า..."></textarea>
-    </div>
-
+    <div class="field"><label>คำอธิบาย</label><textarea id="pm-desc" rows="3" placeholder="รายละเอียดสินค้า..."></textarea></div>
     <input type="hidden" id="pm-id">
+
+    <div style="background:rgba(255,204,0,.05);border:1px solid rgba(255,204,0,.15);border-radius:8px;padding:12px;margin-bottom:4px;font-size:12px;color:var(--muted);">
+      ⚠️ ต้องตั้งค่า Cloudinary ก่อนใช้งานอัปโหลดรูป — กรอก Cloud Name:
+      <input id="cloud-name-mini" placeholder="cloud name" style="margin-top:6px;font-family:var(--font-mono);font-size:12px;" oninput="saveCloudName()">
+    </div>
+
     <div class="modal-footer">
       <button class="btn btn-secondary" id="pm-cancel">ยกเลิก</button>
       <button class="btn btn-primary" id="pm-save">💾 บันทึก</button>
@@ -499,72 +354,39 @@
   </div>
 </div>
 
-<!-- ═══ ORDER DETAIL MODAL ═══ -->
-<div class="modal-backdrop" id="order-modal">
-  <div class="modal">
-    <div class="modal-title">รายละเอียดออร์เดอร์</div>
-    <div id="order-detail-content"></div>
-    <div class="modal-footer">
-      <button class="btn btn-secondary" id="order-modal-close">ปิด</button>
-      <button class="btn btn-primary" id="order-confirm-btn" style="display:none;">✅ ยืนยันชำระเงิน</button>
-    </div>
-  </div>
-</div>
-
-<!-- Toast -->
 <div id="toast"></div>
 
 <script>
-// ═══════════════════════════════════════════
-//  CONFIG — แก้ตรงนี้
-// ═══════════════════════════════════════════
+// ─── CONFIG ───
 const APP_URL = "https://script.google.com/macros/s/AKfycbzis9Isw6XXUsi7k8MQmI4rJI8gnFnPS0VIDpuvsgw88dC8SwQ4VOHKK5TfeQMDKgLotA/exec";
-let CLOUD_NAME = localStorage.getItem('hs_cloud_name') || '';
 const UPLOAD_PRESET = 'hs_unsigned';
-
-// ═══════════════════════════════════════════
-//  STATE
-// ═══════════════════════════════════════════
+let CLOUD_NAME = localStorage.getItem('hs_cloud_name') || '';
 let ADMIN_TOKEN = localStorage.getItem('ADMIN_TOKEN') || '';
 let allOrders = [], allProducts = [], allEquipments = [];
-let uploadedUrls = [];
-let currentOrderId = null;
 let chartInstance = null;
 let cldWidget = null;
+let expandedOrderId = null;
 
-// ═══════════════════════════════════════════
-//  API
-// ═══════════════════════════════════════════
+// ─── API ───
 async function apiGet(params) {
-  const url = APP_URL + '?' + new URLSearchParams(params).toString();
-  const res = await fetch(url, { cache: 'no-store' });
+  const res = await fetch(APP_URL + '?' + new URLSearchParams(params), { cache: 'no-store' });
   return res.json();
 }
 async function apiPost(body) {
-  const res = await fetch(APP_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
-    body: JSON.stringify(body)
-  });
+  const res = await fetch(APP_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=UTF-8' }, body: JSON.stringify(body) });
   if (!res.ok) throw new Error('HTTP ' + res.status);
   return res.json();
 }
 
-// ═══════════════════════════════════════════
-//  TOAST
-// ═══════════════════════════════════════════
+// ─── TOAST ───
 let toastTimer;
 function toast(msg, type = 'success') {
   const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = 'show ' + type;
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t.className = '', 3000);
+  t.textContent = msg; t.className = 'show ' + type;
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.className = '', 3500);
 }
 
-// ═══════════════════════════════════════════
-//  AUTH
-// ═══════════════════════════════════════════
+// ─── AUTH ───
 document.getElementById('loginBtn').onclick = async () => {
   const u = document.getElementById('u').value.trim();
   const pw = document.getElementById('p').value.trim();
@@ -576,354 +398,353 @@ document.getElementById('loginBtn').onclick = async () => {
     ADMIN_TOKEN = r.token || 'ok';
     localStorage.setItem('ADMIN_TOKEN', ADMIN_TOKEN);
     showApp();
-  } catch(e) {
-    msg.textContent = '❌ เชื่อมต่อไม่ได้: ' + e.message;
-  }
+  } catch(e) { msg.textContent = '❌ เชื่อมต่อไม่ได้: ' + e.message; }
 };
-document.getElementById('p').addEventListener('keydown', e => { if(e.key==='Enter') document.getElementById('loginBtn').click(); });
-
+document.getElementById('p').onkeydown = e => { if (e.key === 'Enter') document.getElementById('loginBtn').click(); };
 document.getElementById('logoutBtn').onclick = () => {
-  localStorage.removeItem('ADMIN_TOKEN');
-  ADMIN_TOKEN = '';
+  localStorage.removeItem('ADMIN_TOKEN'); ADMIN_TOKEN = '';
   document.getElementById('app').style.display = 'none';
   document.getElementById('login-screen').style.display = 'flex';
 };
-
 function showApp() {
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('app').style.display = 'flex';
   loadAll();
 }
 
-// ═══════════════════════════════════════════
-//  NAVIGATION
-// ═══════════════════════════════════════════
-const pageTitles = { dashboard: 'Dashboard', orders: 'คำสั่งซื้อ', products: 'สินค้า', upload: 'อัปโหลดรูป' };
-
+// ─── NAV ───
+const pageTitles = { dashboard: 'Dashboard', orders: 'คำสั่งซื้อ', products: 'สินค้า' };
 document.querySelectorAll('.nav-item').forEach(item => {
-  item.addEventListener('click', () => {
-    const page = item.dataset.page;
+  item.onclick = () => {
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     item.classList.add('active');
-    document.getElementById('page-' + page).classList.add('active');
-    document.getElementById('page-title').textContent = pageTitles[page];
-    closeSidebar();
-  });
+    document.getElementById('page-' + item.dataset.page).classList.add('active');
+    document.getElementById('page-title').textContent = pageTitles[item.dataset.page];
+    document.getElementById('sidebar').classList.remove('open');
+  };
 });
-
+document.getElementById('menu-toggle').onclick = () => document.getElementById('sidebar').classList.toggle('open');
 document.getElementById('refresh-btn').onclick = loadAll;
 
-// Mobile menu
-document.getElementById('menu-toggle').onclick = () => {
-  document.getElementById('sidebar').classList.toggle('open');
-};
-function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); }
-
-// ═══════════════════════════════════════════
-//  LOAD ALL DATA
-// ═══════════════════════════════════════════
+// ─── LOAD ALL ───
 async function loadAll() {
   await Promise.all([loadProducts(), loadOrders(), loadChart()]);
   updateStats();
 }
-
-// ─── Products ───
 async function loadProducts() {
   try {
     const r = await apiGet({ action: 'getProducts' });
-    allProducts = r.products || [];
-    allEquipments = r.equipments || [];
-    renderProducts();
-    updateLowStock();
+    allProducts = r.products || []; allEquipments = r.equipments || [];
+    renderProducts(); updateLowStock();
+  } catch(e) { console.warn(e); }
+}
+async function loadOrders() {
+  try {
+    const r = await apiGet({ action: 'adminListOrders', limit: 200 });
+    allOrders = r.orders || [];
+    renderOrders(); updateOrderStats();
   } catch(e) {
-    console.warn('loadProducts error', e);
+    document.getElementById('orders-body').innerHTML = '<tr class="loading-row"><td colspan="7" style="color:var(--red)">เชื่อมต่อไม่ได้ — ลอง deploy Apps Script ใหม่</td></tr>';
   }
 }
 
-function renderProducts() {
+// ─── PRODUCTS ───
+function renderProducts(filter = '') {
   const grid = document.getElementById('products-grid');
-  const all = [...allProducts, ...allEquipments];
-  if (!all.length) { grid.innerHTML = '<div class="empty-state"><div class="empty-icon">📦</div><div>ไม่มีสินค้า</div></div>'; return; }
+  let all = [...allProducts, ...allEquipments];
+  if (filter) all = all.filter(p => (p.name||'').toLowerCase().includes(filter.toLowerCase()));
+  if (!all.length) { grid.innerHTML = '<div class="empty-state">ไม่พบสินค้า</div>'; return; }
+
   grid.innerHTML = all.map(p => {
     const stock = Number(p.stock || 0);
-    const stockClass = stock < 5 ? 'stock-low' : 'stock-ok';
-    const stockText = stock <= 0 ? '❌ หมดสต็อก' : (stock < 5 ? `⚠️ เหลือ ${stock}` : `✅ ${stock} ชิ้น`);
+    const stockClass = stock <= 0 ? 'stock-zero' : stock < 5 ? 'stock-low' : 'stock-ok';
+    const stockText = stock <= 0 ? 'หมด' : `${stock} ชิ้น`;
+    const prices = [p.price_1g||p.price1g, p.price_3_5g||p.price3_5g].filter(Boolean).map(v => '฿'+v).join(' / ');
+    const img = p.imageUrl || 'https://placehold.co/400x400/1a1a1a/444?text=No+Image';
     return `
     <div class="product-card">
-      <img class="product-img" src="${p.imageUrl||'https://placehold.co/260x160/1a1a1a/444?text=No+Image'}"
-           onerror="this.src='https://placehold.co/260x160/1a1a1a/444?text=Error'" alt="${p.name||''}">
+      <div class="product-img-wrap">
+        <img src="${img}" onerror="this.src='https://placehold.co/400x400/1a1a1a/444?text=Error'" alt="${p.name||''}">
+      </div>
       <div class="product-body">
-        <div class="product-name">${p.name||'-'}</div>
-        <div class="product-type">${p.type||''}</div>
-        <div class="product-stock ${stockClass}">${stockText}</div>
+        <div class="product-name" title="${p.name||''}">${p.name||'-'}</div>
+        <div class="product-meta">
+          <span>${p.type||''}</span>
+          ${p.thc_percent||p.thc ? `<span>THC ~${p.thc_percent||p.thc}%</span>` : ''}
+        </div>
+        <div class="product-stock-row">
+          <span class="stock-pill ${stockClass}">${stockText}</span>
+          <span class="product-price">${prices}</span>
+        </div>
         <div class="product-actions">
-          <button class="btn btn-secondary btn-sm" style="flex:1" onclick="editProduct('${p.id}','${p.id in allProducts.reduce((a,x)=>{a[x.id]=1;return a},{}) ? 'strains':'equipments'}')">✏️ แก้ไข</button>
-          <button class="btn btn-secondary btn-sm" onclick="quickStockEdit('${p.id}','${p.id in allProducts.reduce((a,x)=>{a[x.id]=1;return a},{}) ? 'strains':'equipments'}',${stock})">📦 สต็อก</button>
+          <button class="btn btn-secondary" onclick="openProductModal('${p.id}')">✏️ แก้ไข</button>
+          <button class="btn btn-secondary" onclick="quickStock('${p.id}', ${stock})">📦 สต็อก</button>
         </div>
       </div>
     </div>`;
   }).join('');
 }
 
+document.getElementById('product-search').oninput = function() { renderProducts(this.value); };
+
 function updateLowStock() {
-  const all = [...allProducts, ...allEquipments];
-  const low = all.filter(p => Number(p.stock||0) < 5).length;
+  const low = [...allProducts, ...allEquipments].filter(p => Number(p.stock||0) < 5).length;
   document.getElementById('stat-low-stock').textContent = low;
 }
 
-// ─── Orders ───
-async function loadOrders() {
-  try {
-    const r = await apiGet({ action: 'adminListOrders', limit: 200 });
-    allOrders = r.orders || [];
-    renderOrders();
-    updateOrderStats();
-  } catch(e) {
-    console.warn('loadOrders error', e);
-    document.getElementById('orders-body').innerHTML = '<tr class="loading-row"><td colspan="7">เชื่อมต่อไม่ได้</td></tr>';
-  }
-}
-
+// ─── ORDERS (inline expand + confirm) ───
 function renderOrders(filter = '') {
   const tbody = document.getElementById('orders-body');
-  let list = allOrders;
-  if (filter) list = list.filter(o => o.status === filter);
-  if (!list.length) { tbody.innerHTML = '<tr class="loading-row"><td colspan="7" style="color:var(--muted)">ไม่มีออร์เดอร์</td></tr>'; return; }
+  let list = filter ? allOrders.filter(o => o.status === filter) : allOrders;
+  if (!list.length) { tbody.innerHTML = '<tr class="loading-row"><td colspan="7">ไม่มีออร์เดอร์</td></tr>'; return; }
 
   tbody.innerHTML = list.map(o => {
+    const isPending = o.status === 'pending';
+    const rowClass = isPending ? 'order-row-pending' : '';
     const statusMap = { pending: 'badge-pending', paid: 'badge-paid', cancelled: 'badge-cancelled' };
     const badge = statusMap[o.status] || '';
     const items = Array.isArray(o.items) ? o.items : [];
-    const itemSummary = items.slice(0,2).map(i => `${i.name} x${i.qty||i.quantity||1}`).join(', ') + (items.length > 2 ? ` +${items.length-2}` : '');
-    const actionBtn = o.status === 'pending'
-      ? `<button class="btn btn-primary btn-sm" onclick="openOrderModal('${o.order_id}')">ยืนยัน</button>`
-      : `<button class="btn btn-secondary btn-sm" onclick="openOrderModal('${o.order_id}')">ดู</button>`;
-    return `<tr>
-      <td style="font-size:12px;color:var(--muted)">${(o.createdAt||'').replace('T',' ').slice(0,16)}</td>
-      <td style="font-family:var(--font-mono);font-size:12px">${o.order_id||'-'}</td>
+    const itemCount = items.length;
+    const time = (o.createdAt||'').replace('T',' ').slice(0,16);
+
+    // expand + confirm ใน row เดียว
+    const confirmBtn = isPending
+      ? `<button class="btn btn-success btn-sm" onclick="confirmOrder(event,'${o.order_id}')">✅ ยืนยัน</button>`
+      : '';
+    const cancelBtn = isPending
+      ? `<button class="btn btn-danger btn-sm" onclick="cancelOrder(event,'${o.order_id}')">✕</button>`
+      : '';
+
+    return `
+    <tr class="${rowClass}" id="row-${o.order_id}" onclick="toggleExpand('${o.order_id}')" style="cursor:pointer;">
+      <td><span id="arrow-${o.order_id}" style="color:var(--muted);font-size:10px;">▶</span></td>
+      <td style="font-size:12px;color:var(--muted);white-space:nowrap;">${time}</td>
+      <td style="font-family:var(--font-mono);font-size:12px;">#${(o.order_id||'').slice(-6)}</td>
       <td>${o.customerName||o.user_id||'-'}</td>
-      <td style="font-size:12px;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${itemSummary||'-'}</td>
-      <td style="font-family:var(--font-mono)">฿${Number(o.total||0).toLocaleString()}</td>
+      <td style="font-family:var(--font-mono);white-space:nowrap;">฿${Number(o.total||0).toLocaleString()}</td>
       <td><span class="badge ${badge}">${o.status}</span></td>
-      <td>${actionBtn}</td>
+      <td><div class="order-actions" onclick="event.stopPropagation();">${confirmBtn}${cancelBtn}</div></td>
+    </tr>
+    <tr class="order-detail-panel" id="panel-${o.order_id}">
+      <td colspan="7">
+        <div class="order-detail-inner">
+          <div class="order-info-grid">
+            <div><div class="order-info-label">ORDER ID</div>${o.order_id||'-'}</div>
+            <div><div class="order-info-label">ที่อยู่ / LINE</div>${o.customerEmail||o.email||'-'}</div>
+          </div>
+          <div class="order-items-list">
+            ${items.map(i => `
+              <div class="order-item-row">
+                <span>${i.name} <span style="color:var(--muted)">× ${i.qty||i.quantity||1}</span></span>
+                <span style="font-family:var(--font-mono)">฿${(Number(i.price||0)*Number(i.qty||i.quantity||1)).toLocaleString()}</span>
+              </div>`).join('')}
+          </div>
+          <div class="order-total">ยอดรวม ฿${Number(o.total||0).toLocaleString()}</div>
+        </div>
+      </td>
     </tr>`;
   }).join('');
 }
 
+function toggleExpand(orderId) {
+  const panel = document.getElementById('panel-' + orderId);
+  const arrow = document.getElementById('arrow-' + orderId);
+  const isOpen = panel.classList.contains('open');
+  // close others
+  document.querySelectorAll('.order-detail-panel.open').forEach(p => p.classList.remove('open'));
+  document.querySelectorAll('[id^="arrow-"]').forEach(a => a.textContent = '▶');
+  if (!isOpen) {
+    panel.classList.add('open');
+    arrow.textContent = '▼';
+    arrow.style.color = 'var(--green)';
+  } else {
+    arrow.style.color = 'var(--muted)';
+  }
+}
+
+async function confirmOrder(e, orderId) {
+  e.stopPropagation();
+  if (!confirm('ยืนยันการชำระเงินออร์เดอร์ #' + orderId.slice(-6) + '?')) return;
+  const btn = e.target;
+  btn.textContent = '...'; btn.disabled = true;
+  try {
+    const r = await apiPost({ action: 'confirmPayment', order_id: orderId, adminToken: ADMIN_TOKEN });
+    if (r.ok || r.status === 'success') {
+      toast('✅ ยืนยันสำเร็จ!');
+      await loadOrders(); updateStats();
+    } else toast('❌ ' + (r.error||r.message||'ผิดพลาด'), 'error');
+  } catch(e) { toast('❌ ' + e.message, 'error'); }
+  btn.textContent = '✅ ยืนยัน'; btn.disabled = false;
+}
+
+async function cancelOrder(e, orderId) {
+  e.stopPropagation();
+  if (!confirm('ยกเลิกออร์เดอร์ #' + orderId.slice(-6) + '?')) return;
+  try {
+    const r = await apiPost({ action: 'cancelOrder', order_id: orderId, adminToken: ADMIN_TOKEN });
+    if (r.ok || r.status === 'success') { toast('ยกเลิกแล้ว', 'error'); await loadOrders(); updateStats(); }
+    else toast('❌ ' + (r.error||'ผิดพลาด'), 'error');
+  } catch(e) { toast('❌ ' + e.message, 'error'); }
+}
+
+document.getElementById('order-filter').onchange = function() { renderOrders(this.value); };
+
+// ─── STATS ───
 function updateOrderStats() {
   const pending = allOrders.filter(o => o.status === 'pending');
   const paid = allOrders.filter(o => o.status === 'paid');
   document.getElementById('stat-pending').textContent = pending.length;
   document.getElementById('pending-count').textContent = pending.length;
-  document.getElementById('stat-total-sales').textContent = '฿' + paid.reduce((s,o) => s + Number(o.total||0), 0).toLocaleString();
+  document.getElementById('stat-total-sales').textContent = '฿' + paid.reduce((s,o) => s+Number(o.total||0),0).toLocaleString();
   document.getElementById('stat-total-orders').textContent = paid.length + ' ออร์เดอร์';
 }
-
 function updateStats() {
   const now = new Date();
-  const ym = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
-  const thisMonth = allOrders.filter(o => o.status === 'paid' && (o.createdAt||'').startsWith(ym));
-  document.getElementById('stat-month-sales').textContent = '฿' + thisMonth.reduce((s,o) => s+Number(o.total||0),0).toLocaleString();
-  document.getElementById('stat-month-orders').textContent = thisMonth.length + ' ออร์เดอร์';
+  const ym = now.toISOString().slice(0,7);
+  const m = allOrders.filter(o => o.status==='paid' && (o.createdAt||'').startsWith(ym));
+  document.getElementById('stat-month-sales').textContent = '฿' + m.reduce((s,o)=>s+Number(o.total||0),0).toLocaleString();
+  document.getElementById('stat-month-orders').textContent = m.length + ' ออร์เดอร์';
 
-  // Top products
   const soldMap = {};
-  allOrders.filter(o => o.status==='paid').forEach(o => {
-    const items = Array.isArray(o.items) ? o.items : [];
-    items.forEach(i => {
-      const k = i.name;
-      if (!soldMap[k]) soldMap[k] = { qty: 0, total: 0 };
-      soldMap[k].qty += Number(i.qty||i.quantity||1);
-      soldMap[k].total += Number(i.price||0) * Number(i.qty||i.quantity||1);
+  allOrders.filter(o=>o.status==='paid').forEach(o=>{
+    (Array.isArray(o.items)?o.items:[]).forEach(i=>{
+      if(!soldMap[i.name]) soldMap[i.name]={qty:0,total:0};
+      soldMap[i.name].qty+=Number(i.qty||i.quantity||1);
+      soldMap[i.name].total+=Number(i.price||0)*Number(i.qty||i.quantity||1);
     });
   });
-  const top = Object.entries(soldMap).sort((a,b) => b[1].qty - a[1].qty).slice(0,5);
+  const top = Object.entries(soldMap).sort((a,b)=>b[1].qty-a[1].qty).slice(0,5);
   const tbody = document.getElementById('top-products-body');
-  if (!top.length) { tbody.innerHTML = '<tr class="loading-row"><td colspan="4" style="color:var(--muted)">ยังไม่มีข้อมูล</td></tr>'; return; }
-  tbody.innerHTML = top.map(([name, d], i) => `<tr>
-    <td style="font-family:var(--font-mono);color:var(--muted)">${i+1}</td>
+  tbody.innerHTML = top.length ? top.map(([name,d],i)=>`<tr>
+    <td style="color:var(--muted);font-family:var(--font-mono)">${i+1}</td>
     <td>${name}</td>
     <td style="font-family:var(--font-mono)">${d.qty}</td>
     <td style="font-family:var(--font-mono)">฿${d.total.toLocaleString()}</td>
-  </tr>`).join('');
+  </tr>`).join('') : '<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:24px">ยังไม่มีข้อมูล</td></tr>';
 }
 
-// ─── Chart ───
+// ─── CHART ───
 async function loadChart() {
   const m = document.getElementById('chart-month').value || new Date().toISOString().slice(0,7);
   try {
     const r = await apiGet({ action: 'getSalesChartData', month: m });
-    renderChart(r.labels || [], r.values || []);
-  } catch(e) {
-    // fallback: compute from local orders
-    const [yr, mo] = m.split('-');
-    const days = new Date(Number(yr), Number(mo), 0).getDate();
-    const labels = Array.from({length: days}, (_, i) => String(i+1).padStart(2,'0'));
+    renderChart(r.labels||[], r.values||[]);
+  } catch {
+    const [yr,mo] = m.split('-');
+    const days = new Date(+yr,+mo,0).getDate();
+    const labels = Array.from({length:days},(_,i)=>String(i+1).padStart(2,'0'));
     const values = Array(days).fill(0);
-    allOrders.filter(o => o.status==='paid' && (o.createdAt||'').startsWith(m)).forEach(o => {
-      const day = parseInt((o.createdAt||'').slice(8,10)) - 1;
-      if (day >= 0 && day < days) values[day] += Number(o.total||0);
+    allOrders.filter(o=>o.status==='paid'&&(o.createdAt||'').startsWith(m)).forEach(o=>{
+      const d=parseInt((o.createdAt||'').slice(8,10))-1;
+      if(d>=0&&d<days) values[d]+=Number(o.total||0);
     });
-    renderChart(labels, values);
+    renderChart(labels,values);
   }
 }
-
 function renderChart(labels, values) {
   const ctx = document.getElementById('sales-chart');
   if (chartInstance) chartInstance.destroy();
   chartInstance = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels,
-      datasets: [{
-        label: 'ยอดขาย (บาท)',
-        data: values,
-        backgroundColor: 'rgba(0,255,136,0.25)',
-        borderColor: '#00ff88',
-        borderWidth: 2,
-        borderRadius: 4,
-        hoverBackgroundColor: 'rgba(0,255,136,0.5)',
-      }]
-    },
-    options: {
-      responsive: true,
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          backgroundColor: '#1a1a1a',
-          borderColor: '#2a2a2a',
-          borderWidth: 1,
-          titleColor: '#666',
-          bodyColor: '#00ff88',
-          callbacks: { label: ctx => '฿' + ctx.raw.toLocaleString() }
-        }
-      },
-      scales: {
-        x: { ticks: { color: '#555', font: { family: 'IBM Plex Mono', size: 10 } }, grid: { color: '#1e1e1e' } },
-        y: { ticks: { color: '#555', font: { family: 'IBM Plex Mono', size: 10 }, callback: v => '฿'+v.toLocaleString() }, grid: { color: '#1e1e1e' }, beginAtZero: true }
-      }
-    }
+    type: 'bar', data: { labels, datasets: [{ label:'ยอดขาย', data:values, backgroundColor:'rgba(0,255,136,.2)', borderColor:'#00ff88', borderWidth:2, borderRadius:4, hoverBackgroundColor:'rgba(0,255,136,.45)' }] },
+    options: { responsive:true, plugins:{ legend:{display:false}, tooltip:{ backgroundColor:'#1a1a1a', borderColor:'#2a2a2a', borderWidth:1, titleColor:'#555', bodyColor:'#00ff88', callbacks:{label:c=>'฿'+c.raw.toLocaleString()} } }, scales:{ x:{ticks:{color:'#555',font:{family:'IBM Plex Mono',size:10}},grid:{color:'#1c1c1c'}}, y:{ticks:{color:'#555',font:{family:'IBM Plex Mono',size:10},callback:v=>'฿'+v.toLocaleString()},grid:{color:'#1c1c1c'},beginAtZero:true} } }
   });
 }
-
 document.getElementById('chart-load').onclick = loadChart;
 
-// ─── Order filter ───
-document.getElementById('order-filter').onchange = function() { renderOrders(this.value); };
-
-// ═══════════════════════════════════════════
-//  ORDER MODAL
-// ═══════════════════════════════════════════
-function openOrderModal(orderId) {
-  const o = allOrders.find(x => String(x.order_id) === String(orderId));
-  if (!o) return;
-  currentOrderId = orderId;
-  const items = Array.isArray(o.items) ? o.items : [];
-  const content = document.getElementById('order-detail-content');
-  content.innerHTML = `
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
-      <div><div style="font-size:11px;color:var(--muted);font-family:var(--font-mono);">ORDER ID</div><div style="font-family:var(--font-mono)">${o.order_id}</div></div>
-      <div><div style="font-size:11px;color:var(--muted);font-family:var(--font-mono);">สถานะ</div><span class="badge badge-${o.status||'pending'}">${o.status}</span></div>
-      <div><div style="font-size:11px;color:var(--muted);font-family:var(--font-mono);">ลูกค้า</div><div>${o.customerName||o.user_id||'-'}</div></div>
-      <div><div style="font-size:11px;color:var(--muted);font-family:var(--font-mono);">ที่อยู่/LINE</div><div style="font-size:13px">${o.customerEmail||o.email||'-'}</div></div>
-    </div>
-    <div style="background:var(--surface2);border-radius:8px;padding:14px;margin-bottom:14px;">
-      <div style="font-size:12px;color:var(--muted);margin-bottom:10px;font-family:var(--font-mono);">รายการสินค้า</div>
-      ${items.map(i => `
-        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);">
-          <span>${i.name} <span style="color:var(--muted)">x${i.qty||i.quantity||1}</span></span>
-          <span style="font-family:var(--font-mono)">฿${(Number(i.price||0)*Number(i.qty||i.quantity||1)).toLocaleString()}</span>
-        </div>`).join('')}
-      <div style="text-align:right;margin-top:10px;font-family:var(--font-mono);color:var(--green);font-size:16px;">
-        ยอดรวม ฿${Number(o.total||0).toLocaleString()}
-      </div>
-    </div>
-    ${o.createdAt ? `<div style="font-size:12px;color:var(--muted)">📅 ${o.createdAt}</div>` : ''}
-  `;
-  const confirmBtn = document.getElementById('order-confirm-btn');
-  confirmBtn.style.display = o.status === 'pending' ? 'block' : 'none';
-  document.getElementById('order-modal').classList.add('open');
-}
-
-document.getElementById('order-modal-close').onclick = () => document.getElementById('order-modal').classList.remove('open');
-document.getElementById('order-confirm-btn').onclick = async () => {
-  if (!confirm('ยืนยันการชำระเงินของออร์เดอร์นี้?')) return;
-  const btn = document.getElementById('order-confirm-btn');
-  btn.textContent = '...';
-  btn.disabled = true;
-  try {
-    const r = await apiPost({ action: 'confirmPayment', order_id: currentOrderId, adminToken: ADMIN_TOKEN });
-    if (r.ok || r.status === 'success') {
-      toast('✅ ยืนยันสำเร็จ!');
-      document.getElementById('order-modal').classList.remove('open');
-      await loadOrders();
-      updateStats();
-    } else { toast('❌ ' + (r.error||r.message||'ผิดพลาด'), 'error'); }
-  } catch(e) { toast('❌ ' + e.message, 'error'); }
-  btn.textContent = '✅ ยืนยันชำระเงิน';
-  btn.disabled = false;
-};
-
-// Close modals on backdrop click
-document.getElementById('order-modal').addEventListener('click', function(e) { if(e.target===this) this.classList.remove('open'); });
-document.getElementById('product-modal').addEventListener('click', function(e) { if(e.target===this) this.classList.remove('open'); });
-
-// ═══════════════════════════════════════════
-//  PRODUCT MODAL
-// ═══════════════════════════════════════════
-function getProductById(id) {
-  return allProducts.find(p => String(p.id) === String(id)) || allEquipments.find(p => String(p.id) === String(id));
-}
-
+// ─── PRODUCT MODAL ───
 document.getElementById('add-product-btn').onclick = () => openProductModal(null);
+document.getElementById('pm-cancel').onclick = () => document.getElementById('product-modal').classList.remove('open');
+document.getElementById('product-modal').onclick = function(e) { if(e.target===this) this.classList.remove('open'); };
+
+function getProductById(id) {
+  return allProducts.find(p=>String(p.id)===String(id)) || allEquipments.find(p=>String(p.id)===String(id));
+}
 
 function openProductModal(id) {
-  const modal = document.getElementById('product-modal');
   const p = id ? getProductById(id) : null;
   document.getElementById('product-modal-title').textContent = p ? 'แก้ไขสินค้า' : 'เพิ่มสินค้าใหม่';
-
-  ['pm-id','pm-name','pm-stock','pm-indica','pm-sativa','pm-thc','pm-aroma','pm-p1','pm-p35','pm-p5','pm-p10','pm-img','pm-desc'].forEach(fid => {
-    const el = document.getElementById(fid);
-    if (!el) return;
-    if (fid === 'pm-id') el.value = p ? (p.id||'') : '';
-    else if (fid === 'pm-name') el.value = p ? (p.name||'') : '';
-    else if (fid === 'pm-stock') el.value = p ? (p.stock||0) : 0;
-    else if (fid === 'pm-indica') el.value = p ? (p.indica_percent||'') : '';
-    else if (fid === 'pm-sativa') el.value = p ? (p.sativa_percent||'') : '';
-    else if (fid === 'pm-thc') el.value = p ? (p.thc_percent||p.thc||'') : '';
-    else if (fid === 'pm-aroma') el.value = p ? (p.aroma||'') : '';
-    else if (fid === 'pm-p1') el.value = p ? (p.price_1g||p.price1g||'') : '';
-    else if (fid === 'pm-p35') el.value = p ? (p.price_3_5g||p.price3_5g||'') : '';
-    else if (fid === 'pm-p5') el.value = p ? (p.price_5g||p.price5g||'') : '';
-    else if (fid === 'pm-p10') el.value = p ? (p.price_10g||p.price10g||'') : '';
-    else if (fid === 'pm-img') el.value = p ? (p.imageUrl||'') : '';
-    else if (fid === 'pm-desc') el.value = p ? (p.description||'') : '';
-  });
-  document.getElementById('pm-type').value = p ? (p.type||'Hybrid') : 'Hybrid';
-  updatePreview();
-  modal.classList.add('open');
+  document.getElementById('pm-id').value = p?.id || '';
+  document.getElementById('pm-name').value = p?.name || '';
+  document.getElementById('pm-type').value = p?.type || 'Hybrid';
+  document.getElementById('pm-stock').value = p?.stock ?? '';
+  document.getElementById('pm-indica').value = p?.indica_percent || '';
+  document.getElementById('pm-sativa').value = p?.sativa_percent || '';
+  document.getElementById('pm-thc').value = p?.thc_percent || p?.thc || '';
+  document.getElementById('pm-aroma').value = p?.aroma || '';
+  document.getElementById('pm-p1').value = p?.price_1g || p?.price1g || '';
+  document.getElementById('pm-p35').value = p?.price_3_5g || p?.price3_5g || '';
+  document.getElementById('pm-p5').value = p?.price_5g || p?.price5g || '';
+  document.getElementById('pm-p10').value = p?.price_10g || p?.price10g || '';
+  document.getElementById('pm-desc').value = p?.description || '';
+  document.getElementById('pm-img').value = p?.imageUrl || '';
+  document.getElementById('cloud-name-mini').value = CLOUD_NAME;
+  setPreviewImg(p?.imageUrl || '');
+  document.getElementById('product-modal').classList.add('open');
 }
 
-function editProduct(id) { openProductModal(id); }
-
-function updatePreview() {
-  const url = document.getElementById('pm-img').value;
-  document.getElementById('pm-preview').src = url || 'https://placehold.co/520x180/1a1a1a/666?text=รูปสินค้า';
+function setPreviewImg(url) {
+  const img = document.getElementById('pm-preview-img');
+  const placeholder = document.getElementById('img-placeholder');
+  const area = document.getElementById('img-upload-area');
+  if (url) {
+    img.src = url; img.style.display = 'block';
+    placeholder.style.display = 'none'; area.classList.add('has-img');
+  } else {
+    img.src = ''; img.style.display = 'none';
+    placeholder.style.display = 'block'; area.classList.remove('has-img');
+  }
+}
+function onImgUrlChange() {
+  setPreviewImg(document.getElementById('pm-img').value.trim());
+}
+function clearImg(e) {
+  e.stopPropagation();
+  document.getElementById('pm-img').value = '';
+  setPreviewImg('');
 }
 
-document.getElementById('pm-cancel').onclick = () => document.getElementById('product-modal').classList.remove('open');
+document.getElementById('img-upload-area').onclick = function(e) {
+  if (!e.target.closest('button')) openCloudinary(e);
+};
+
+function openCloudinary(e) {
+  if(e) e.stopPropagation();
+  if (!CLOUD_NAME) { toast('❌ กรอก Cloud Name ก่อนครับ', 'error'); return; }
+  if (!cldWidget) {
+    cldWidget = cloudinary.createUploadWidget({
+      cloudName: CLOUD_NAME, uploadPreset: UPLOAD_PRESET,
+      multiple: false, folder: 'highsociety/products',
+      sources: ['local','url','camera'],
+      clientAllowedFormats: ['jpg','jpeg','png','webp'],
+      maxFileSize: 10*1024*1024,
+      styles: { palette: { window:'#111111',tabIcon:'#00ff88',menuIcons:'#00ff88',textDark:'#f0f0f0',textLight:'#f0f0f0',link:'#00ff88',action:'#00ff88',inactiveTabIcon:'#555',error:'#ff4455',inProgress:'#00ff88',complete:'#00ff88',sourceBg:'#1a1a1a' } }
+    }, (err, res) => {
+      if (!err && res?.event === 'success') {
+        const url = res.info.secure_url.replace('/upload/','/upload/f_auto,q_auto,c_fill,w_800,h_800/');
+        document.getElementById('pm-img').value = url;
+        setPreviewImg(url);
+        toast('✅ อัปโหลดสำเร็จ!');
+        cldWidget = null; // reset so cloud name can update
+      }
+    });
+  }
+  cldWidget.open();
+}
+
+function saveCloudName() {
+  CLOUD_NAME = document.getElementById('cloud-name-mini').value.trim();
+  localStorage.setItem('hs_cloud_name', CLOUD_NAME);
+  cldWidget = null;
+}
 
 document.getElementById('pm-save').onclick = async () => {
   const name = document.getElementById('pm-name').value.trim();
   if (!name) { toast('❌ กรุณากรอกชื่อสินค้า', 'error'); return; }
-
   const payload = {
-    action: 'upsertProduct',
-    adminToken: ADMIN_TOKEN,
+    action: 'upsertProduct', adminToken: ADMIN_TOKEN,
     id: document.getElementById('pm-id').value || '',
-    name,
-    type: document.getElementById('pm-type').value,
+    name, type: document.getElementById('pm-type').value,
     stock: document.getElementById('pm-stock').value,
     indica_percent: document.getElementById('pm-indica').value,
     sativa_percent: document.getElementById('pm-sativa').value,
@@ -936,7 +757,6 @@ document.getElementById('pm-save').onclick = async () => {
     imageUrl: document.getElementById('pm-img').value,
     description: document.getElementById('pm-desc').value,
   };
-
   const btn = document.getElementById('pm-save');
   btn.textContent = '...'; btn.disabled = true;
   try {
@@ -945,99 +765,29 @@ document.getElementById('pm-save').onclick = async () => {
       toast('✅ บันทึกสำเร็จ!');
       document.getElementById('product-modal').classList.remove('open');
       await loadProducts();
-    } else { toast('❌ ' + (r.error||r.message||'ผิดพลาด'), 'error'); }
+    } else toast('❌ ' + (r.error||r.message||'ผิดพลาด'), 'error');
   } catch(e) { toast('❌ ' + e.message, 'error'); }
   btn.textContent = '💾 บันทึก'; btn.disabled = false;
 };
 
-// Quick stock edit
-function quickStockEdit(id, type, current) {
-  const newStock = prompt(`แก้สต็อก "${getProductById(id)?.name||id}"\nปัจจุบัน: ${current} ชิ้น\n\nกรอกจำนวนใหม่:`, current);
-  if (newStock === null || newStock === '') return;
-  const n = parseInt(newStock);
-  if (isNaN(n) || n < 0) { toast('❌ จำนวนไม่ถูกต้อง', 'error'); return; }
-  apiPost({ action: 'updateStock', adminToken: ADMIN_TOKEN, id, type, stock: n })
+// Quick stock
+function quickStock(id, current) {
+  const p = getProductById(id);
+  const val = prompt(`📦 สต็อก "${p?.name||id}"\nปัจจุบัน: ${current} ชิ้น\n\nกรอกจำนวนใหม่:`, current);
+  if (val === null || val === '') return;
+  const n = parseInt(val);
+  if (isNaN(n) || n < 0) { toast('❌ จำนวนไม่ถูกต้อง','error'); return; }
+  apiPost({ action: 'updateStock', adminToken: ADMIN_TOKEN, id, stock: n })
     .then(r => {
-      if (r.ok || r.status === 'success') { toast('✅ อัปเดตสต็อกแล้ว'); loadProducts(); }
-      else toast('❌ ' + (r.error||r.message), 'error');
-    }).catch(e => toast('❌ ' + e.message, 'error'));
+      if (r.ok||r.status==='success') { toast('✅ อัปเดตสต็อกแล้ว'); loadProducts(); }
+      else toast('❌ '+(r.error||'ผิดพลาด'),'error');
+    }).catch(e=>toast('❌ '+e.message,'error'));
 }
 
-// ═══════════════════════════════════════════
-//  CLOUDINARY UPLOAD
-// ═══════════════════════════════════════════
-function initCloudinary() {
-  const name = document.getElementById('cloud-name-input');
-  name.value = CLOUD_NAME;
-
-  name.addEventListener('change', () => {
-    CLOUD_NAME = name.value.trim();
-    localStorage.setItem('hs_cloud_name', CLOUD_NAME);
-    cldWidget = null; // reset widget
-    toast('✅ บันทึก Cloud Name แล้ว');
-  });
-
-  document.getElementById('cld-btn').onclick = openCloudinary;
-  document.getElementById('cloud-upload-zone').addEventListener('click', e => {
-    if (e.target !== document.getElementById('cld-btn')) openCloudinary();
-  });
-}
-
-function openCloudinary() {
-  if (!CLOUD_NAME) { toast('❌ กรุณากรอก Cloud Name ก่อน', 'error'); return; }
-  if (!cldWidget) {
-    cldWidget = cloudinary.createUploadWidget({
-      cloudName: CLOUD_NAME,
-      uploadPreset: UPLOAD_PRESET,
-      multiple: true,
-      folder: 'highsociety/products',
-      sources: ['local', 'url', 'camera'],
-      clientAllowedFormats: ['jpg','jpeg','png','webp'],
-      maxFileSize: 10 * 1024 * 1024,
-      styles: { palette: { window: '#111111', tabIcon: '#00ff88', menuIcons: '#00ff88', textDark: '#f0f0f0', textLight: '#f0f0f0', link: '#00ff88', action: '#00ff88', inactiveTabIcon: '#555', error: '#ff4455', inProgress: '#00ff88', complete: '#00ff88', sourceBg: '#1a1a1a' } }
-    }, (err, res) => {
-      if (!err && res && res.event === 'success') {
-        const raw = res.info.secure_url;
-        const nice = raw.replace('/upload/', '/upload/f_auto,q_auto,c_fill,w_800,h_600/');
-        document.getElementById('upload-url').value = nice;
-        document.getElementById('upload-preview').src = nice;
-        document.getElementById('upload-result').style.display = 'block';
-        navigator.clipboard?.writeText(nice);
-        toast('✅ อัปโหลดสำเร็จ! คัดลอก URL แล้ว');
-        // Gallery
-        uploadedUrls.unshift(nice);
-        renderGallery();
-      }
-    });
-  }
-  cldWidget.open();
-}
-
-function renderGallery() {
-  const g = document.getElementById('upload-gallery');
-  if (!uploadedUrls.length) { g.innerHTML = '<div style="color:var(--muted);font-size:13px;grid-column:1/-1;">ยังไม่มีรูปที่อัปโหลดในเซสชันนี้</div>'; return; }
-  g.innerHTML = uploadedUrls.map(url => `
-    <div style="position:relative;cursor:pointer;" onclick="copyUrl('${url}')">
-      <img src="${url}" style="width:100%;height:80px;object-fit:cover;border-radius:6px;border:1px solid var(--border);">
-      <div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.6);font-size:10px;color:var(--green);padding:2px;text-align:center;border-radius:0 0 5px 5px;">คลิกคัดลอก</div>
-    </div>`).join('');
-}
-
-function copyUrl(url) {
-  navigator.clipboard?.writeText(url);
-  toast('✅ คัดลอก URL แล้ว!');
-}
-
-// ═══════════════════════════════════════════
-//  BOOT
-// ═══════════════════════════════════════════
-(function init() {
+// ─── BOOT ───
+(function() {
   document.getElementById('chart-month').value = new Date().toISOString().slice(0,7);
-  initCloudinary();
-
-  if (ADMIN_TOKEN) {
-    showApp();
-  }
+  if (ADMIN_TOKEN) showApp();
 })();
 </script>
 </body>
