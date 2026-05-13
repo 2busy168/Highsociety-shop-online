@@ -6,184 +6,179 @@
 <title>H!GH$OC!€T¥ — Admin</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=Kanit:wght@300;400;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://widget.cloudinary.com/v2.0/global/all.js" type="text/javascript"></script>
 <style>
-  :root {
-    --bg: #0a0a0a; --surface: #111111; --surface2: #1a1a1a; --border: #2a2a2a;
-    --green: #00ff88; --green-dim: #00cc6a; --green-bg: rgba(0,255,136,0.06);
-    --red: #ff4455; --yellow: #ffcc00; --text: #f0f0f0; --muted: #666;
-    --font-mono: 'IBM Plex Mono', monospace; --font-th: 'Kanit', sans-serif;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  html, body { height: 100%; background: var(--bg); color: var(--text); font-family: var(--font-th); }
+:root {
+  --bg:#0a0a0a; --surface:#111; --surface2:#1a1a1a; --border:#2a2a2a;
+  --green:#00ff88; --green-dim:#00cc6a; --green-bg:rgba(0,255,136,.06);
+  --red:#ff4455; --yellow:#ffcc00; --text:#f0f0f0; --muted:#666;
+  --mono:'IBM Plex Mono',monospace; --th:'Kanit',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--th)}
+#app{display:flex;min-height:100vh}
+#sidebar{width:220px;min-height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;flex-shrink:0}
+#main{flex:1;overflow-x:hidden}
+.logo{padding:24px 20px 20px;font-family:var(--mono);font-weight:700;font-size:13px;color:var(--green);letter-spacing:1px;border-bottom:1px solid var(--border)}
+.logo span{color:var(--muted);font-size:10px;display:block;margin-top:4px;font-weight:400}
+nav{padding:12px 0;flex:1}
+.nav-item{display:flex;align-items:center;gap:10px;padding:11px 20px;cursor:pointer;font-size:14px;color:var(--muted);border-left:3px solid transparent;transition:all .15s}
+.nav-item:hover{color:var(--text);background:var(--surface2)}
+.nav-item.active{color:var(--green);border-left-color:var(--green);background:var(--green-bg)}
+.nav-icon{font-size:16px;width:20px;text-align:center}
+.nav-badge{margin-left:auto;background:var(--red);color:#fff;font-size:10px;padding:2px 6px;border-radius:20px;font-family:var(--mono)}
+.sidebar-footer{padding:16px 20px;border-top:1px solid var(--border)}
+.logout-btn{width:100%;background:none;border:1px solid var(--border);color:var(--muted);padding:8px;border-radius:6px;cursor:pointer;font-family:var(--th);font-size:13px;transition:all .15s}
+.logout-btn:hover{border-color:var(--red);color:var(--red)}
+.topbar{padding:16px 28px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--surface);position:sticky;top:0;z-index:10}
+.topbar-title{font-size:18px;font-weight:600}
+.badge-live{background:var(--green-bg);border:1px solid var(--green);color:var(--green);font-family:var(--mono);font-size:11px;padding:4px 10px;border-radius:20px;display:flex;align-items:center;gap:6px}
+.dot-live{width:6px;height:6px;background:var(--green);border-radius:50%;animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
 
-  #app { display: flex; min-height: 100vh; }
-  #sidebar {
-    width: 220px; min-height: 100vh; background: var(--surface);
-    border-right: 1px solid var(--border); display: flex; flex-direction: column;
-    position: sticky; top: 0; height: 100vh; flex-shrink: 0;
-  }
-  #main { flex: 1; overflow-x: hidden; }
+/* Login */
+#login-screen{display:flex;align-items:center;justify-content:center;min-height:100vh}
+.login-box{background:var(--surface);border:1px solid var(--border);padding:40px;border-radius:12px;width:360px;text-align:center}
+.login-logo{font-family:var(--mono);font-size:20px;font-weight:700;color:var(--green);margin-bottom:8px}
+.login-sub{color:var(--muted);font-size:13px;margin-bottom:28px}
 
-  .logo { padding: 24px 20px 20px; font-family: var(--font-mono); font-weight: 700; font-size: 13px; color: var(--green); letter-spacing: 1px; border-bottom: 1px solid var(--border); }
-  .logo span { color: var(--muted); font-size: 10px; display: block; margin-top: 4px; font-weight: 400; }
-  nav { padding: 12px 0; flex: 1; }
-  .nav-item { display: flex; align-items: center; gap: 10px; padding: 11px 20px; cursor: pointer; font-size: 14px; color: var(--muted); border-left: 3px solid transparent; transition: all .15s; }
-  .nav-item:hover { color: var(--text); background: var(--surface2); }
-  .nav-item.active { color: var(--green); border-left-color: var(--green); background: var(--green-bg); }
-  .nav-icon { font-size: 16px; width: 20px; text-align: center; }
-  .nav-badge { margin-left: auto; background: var(--red); color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 20px; font-family: var(--font-mono); }
-  .sidebar-footer { padding: 16px 20px; border-top: 1px solid var(--border); }
-  .logout-btn { width: 100%; background: none; border: 1px solid var(--border); color: var(--muted); padding: 8px; border-radius: 6px; cursor: pointer; font-family: var(--font-th); font-size: 13px; transition: all .15s; }
-  .logout-btn:hover { border-color: var(--red); color: var(--red); }
+/* Forms */
+input,select,textarea{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;font-family:var(--th);font-size:14px;width:100%;transition:border-color .15s;outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--green)}
+label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px;font-family:var(--mono)}
+.field{margin-bottom:16px}
+input[type="file"]{padding:8px;cursor:pointer}
 
-  .topbar { padding: 16px 28px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; background: var(--surface); position: sticky; top: 0; z-index: 10; }
-  .topbar-title { font-size: 18px; font-weight: 600; }
-  .badge-live { background: var(--green-bg); border: 1px solid var(--green); color: var(--green); font-family: var(--font-mono); font-size: 11px; padding: 4px 10px; border-radius: 20px; display: flex; align-items: center; gap: 6px; }
-  .dot-live { width: 6px; height: 6px; background: var(--green); border-radius: 50%; animation: pulse 1.5s infinite; }
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+.btn{padding:10px 20px;border-radius:8px;cursor:pointer;font-family:var(--th);font-size:14px;font-weight:600;border:none;transition:all .15s;display:inline-flex;align-items:center;gap:6px}
+.btn-primary{background:var(--green);color:#000}
+.btn-primary:hover{background:var(--green-dim)}
+.btn-secondary{background:var(--surface2);border:1px solid var(--border);color:var(--text)}
+.btn-secondary:hover{border-color:var(--green);color:var(--green)}
+.btn-danger{background:transparent;border:1px solid var(--red);color:var(--red)}
+.btn-danger:hover{background:var(--red);color:#fff}
+.btn-success{background:transparent;border:1px solid var(--green);color:var(--green)}
+.btn-success:hover{background:var(--green);color:#000}
+.btn-warn{background:transparent;border:1px solid var(--yellow);color:var(--yellow)}
+.btn-warn:hover{background:var(--yellow);color:#000}
+.btn-sm{padding:6px 12px;font-size:12px}
+.btn-full{width:100%;justify-content:center}
+.btn:disabled{opacity:.5;cursor:not-allowed}
 
-  /* Login */
-  #login-screen { display: flex; align-items: center; justify-content: center; min-height: 100vh; }
-  .login-box { background: var(--surface); border: 1px solid var(--border); padding: 40px; border-radius: 12px; width: 360px; text-align: center; }
-  .login-logo { font-family: var(--font-mono); font-size: 20px; font-weight: 700; color: var(--green); margin-bottom: 8px; }
-  .login-sub { color: var(--muted); font-size: 13px; margin-bottom: 28px; }
+.page{display:none;padding:28px}
+.page.active{display:block}
 
-  /* Forms */
-  input, select, textarea { background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 10px 14px; border-radius: 8px; font-family: var(--font-th); font-size: 14px; width: 100%; transition: border-color .15s; outline: none; }
-  input:focus, select:focus, textarea:focus { border-color: var(--green); }
-  label { font-size: 12px; color: var(--muted); display: block; margin-bottom: 6px; font-family: var(--font-mono); }
-  .field { margin-bottom: 16px; }
+/* Stats */
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:28px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px}
+.stat-label{font-size:11px;color:var(--muted);font-family:var(--mono);margin-bottom:8px}
+.stat-value{font-size:28px;font-weight:700;font-family:var(--mono);color:var(--green)}
+.stat-sub{font-size:12px;color:var(--muted);margin-top:4px}
+.chart-box{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:24px;margin-bottom:28px}
+.chart-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px}
+.chart-title{font-size:15px;font-weight:600}
 
-  .btn { padding: 10px 20px; border-radius: 8px; cursor: pointer; font-family: var(--font-th); font-size: 14px; font-weight: 600; border: none; transition: all .15s; display: inline-flex; align-items: center; gap: 6px; }
-  .btn-primary { background: var(--green); color: #000; }
-  .btn-primary:hover { background: var(--green-dim); }
-  .btn-secondary { background: var(--surface2); border: 1px solid var(--border); color: var(--text); }
-  .btn-secondary:hover { border-color: var(--green); color: var(--green); }
-  .btn-danger { background: transparent; border: 1px solid var(--red); color: var(--red); }
-  .btn-danger:hover { background: var(--red); color: #fff; }
-  .btn-success { background: transparent; border: 1px solid var(--green); color: var(--green); }
-  .btn-success:hover { background: var(--green); color: #000; }
-  .btn-sm { padding: 6px 12px; font-size: 12px; }
-  .btn-full { width: 100%; justify-content: center; }
-  .btn:disabled { opacity: .5; cursor: not-allowed; }
+/* Table */
+.table-box{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.table-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{background:var(--surface2);padding:10px 14px;text-align:left;font-family:var(--mono);font-size:11px;color:var(--muted);font-weight:500;white-space:nowrap}
+td{padding:12px 14px;border-bottom:1px solid var(--border);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(255,255,255,.02)}
+.badge{padding:3px 10px;border-radius:20px;font-size:11px;font-family:var(--mono);font-weight:500;white-space:nowrap}
+.badge-pending{background:rgba(255,204,0,.15);color:var(--yellow);border:1px solid rgba(255,204,0,.3)}
+.badge-paid{background:rgba(0,255,136,.12);color:var(--green);border:1px solid rgba(0,255,136,.25)}
+.badge-cancelled{background:rgba(255,68,85,.12);color:var(--red);border:1px solid rgba(255,68,85,.25)}
 
-  .page { display: none; padding: 28px; }
-  .page.active { display: block; }
+/* ── PRODUCT GRID — ขนาดมาตรฐาน ── */
+.product-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px}
+.product-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;transition:border-color .2s,transform .15s}
+.product-card:hover{border-color:var(--green);transform:translateY(-2px)}
+/* รูปสินค้า มาตรฐาน 4:3 ทุกการ์ด */
+.product-img-wrap{width:100%;aspect-ratio:4/3;overflow:hidden;background:var(--surface2);position:relative}
+.product-img-wrap img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .3s}
+.product-card:hover .product-img-wrap img{transform:scale(1.04)}
+/* ปุ่ม edit รูปทับอยู่บนรูป */
+.product-img-edit{position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,.7);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer;font-family:var(--th);display:none;transition:all .15s}
+.product-img-wrap:hover .product-img-edit{display:block}
+.product-img-edit:hover{background:var(--green);color:#000;border-color:var(--green)}
+.product-body{padding:12px 14px 14px}
+.product-name{font-size:14px;font-weight:700;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.product-meta{font-size:11px;font-family:var(--mono);color:var(--muted);margin-bottom:8px;display:flex;gap:8px;flex-wrap:wrap}
+.product-stock-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.stock-pill{font-size:12px;font-family:var(--mono);padding:3px 10px;border-radius:20px}
+.stock-ok{background:rgba(0,255,136,.1);color:var(--green);border:1px solid rgba(0,255,136,.2)}
+.stock-low{background:rgba(255,204,0,.1);color:var(--yellow);border:1px solid rgba(255,204,0,.2)}
+.stock-zero{background:rgba(255,68,85,.1);color:var(--red);border:1px solid rgba(255,68,85,.2)}
+.product-price{font-size:12px;color:var(--muted);font-family:var(--mono)}
+.product-actions{display:flex;gap:6px}
+.product-actions .btn{flex:1;justify-content:center;padding:7px 8px;font-size:12px}
 
-  /* Stats */
-  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 28px; }
-  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 20px; }
-  .stat-label { font-size: 11px; color: var(--muted); font-family: var(--font-mono); margin-bottom: 8px; }
-  .stat-value { font-size: 28px; font-weight: 700; font-family: var(--font-mono); color: var(--green); }
-  .stat-sub { font-size: 12px; color: var(--muted); margin-top: 4px; }
+/* ── IMAGE UPLOAD AREA (direct file) ── */
+.img-drop-zone{width:100%;aspect-ratio:4/3;border-radius:10px;overflow:hidden;border:2px dashed var(--border);background:var(--surface2);display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;transition:border-color .2s;margin-bottom:10px}
+.img-drop-zone:hover,.img-drop-zone.drag{border-color:var(--green);background:var(--green-bg)}
+.img-drop-zone img{width:100%;height:100%;object-fit:cover;display:block}
+.img-drop-placeholder{text-align:center;pointer-events:none}
+.img-drop-placeholder .icon{font-size:32px;margin-bottom:8px}
+.img-drop-placeholder p{font-size:13px;color:var(--muted)}
+.img-drop-placeholder strong{color:var(--green)}
+.img-overlay{position:absolute;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;gap:10px}
+.img-drop-zone:hover .img-overlay{display:flex}
+.img-upload-input{display:none}
 
-  .chart-box { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 24px; margin-bottom: 28px; }
-  .chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
-  .chart-title { font-size: 15px; font-weight: 600; }
+/* ── ORDER EXPAND ── */
+.order-row-pending{background:rgba(255,204,0,.03)!important}
+.order-actions{display:flex;gap:6px;flex-wrap:wrap}
+.order-detail-panel{display:none;background:var(--surface2)}
+.order-detail-panel.open{display:table-row}
+.order-detail-inner{padding:16px 20px;border-top:1px solid var(--border)}
+.order-items-list{margin:10px 0}
+.order-item-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px}
+.order-item-row:last-child{border-bottom:none}
+.order-total{text-align:right;font-family:var(--mono);color:var(--green);font-size:15px;margin-top:8px}
+.order-info-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;font-size:13px}
+.order-info-label{font-size:11px;color:var(--muted);font-family:var(--mono);margin-bottom:2px}
 
-  /* Table */
-  .table-box { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
-  .table-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
-  table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  th { background: var(--surface2); padding: 10px 14px; text-align: left; font-family: var(--font-mono); font-size: 11px; color: var(--muted); font-weight: 500; white-space: nowrap; }
-  td { padding: 12px 14px; border-bottom: 1px solid var(--border); vertical-align: middle; }
-  tr:last-child td { border-bottom: none; }
-  tr:hover td { background: rgba(255,255,255,.02); }
+/* ── SLIP VERIFY SECTION ── */
+.slip-section{margin-top:14px;padding-top:14px;border-top:1px solid var(--border)}
+.slip-drop{width:100%;min-height:100px;border:2px dashed var(--border);border-radius:8px;background:var(--surface);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:border-color .2s;padding:16px;text-align:center;font-size:13px;color:var(--muted);position:relative}
+.slip-drop:hover,.slip-drop.drag{border-color:var(--green);background:var(--green-bg)}
+.slip-drop img{max-width:100%;max-height:200px;border-radius:6px;display:block;margin:0 auto}
+.slip-drop input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer}
+.slip-status{margin-top:10px;padding:10px 14px;border-radius:8px;font-size:13px;display:none}
+.slip-status.ok{background:rgba(0,255,136,.1);border:1px solid rgba(0,255,136,.2);color:var(--green)}
+.slip-status.err{background:rgba(255,68,85,.1);border:1px solid rgba(255,68,85,.2);color:var(--red)}
+.slip-status.info{background:rgba(255,204,0,.1);border:1px solid rgba(255,204,0,.2);color:var(--yellow)}
 
-  .badge { padding: 3px 10px; border-radius: 20px; font-size: 11px; font-family: var(--font-mono); font-weight: 500; white-space: nowrap; }
-  .badge-pending { background: rgba(255,204,0,.15); color: var(--yellow); border: 1px solid rgba(255,204,0,.3); }
-  .badge-paid { background: rgba(0,255,136,.12); color: var(--green); border: 1px solid rgba(0,255,136,.25); }
-  .badge-cancelled { background: rgba(255,68,85,.12); color: var(--red); border: 1px solid rgba(255,68,85,.25); }
+/* Modal */
+.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;z-index:100;opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-backdrop.open{opacity:1;pointer-events:all}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:28px;width:560px;max-width:96vw;max-height:92vh;overflow-y:auto;transform:translateY(20px);transition:transform .2s}
+.modal-backdrop.open .modal{transform:translateY(0)}
+.modal-title{font-size:17px;font-weight:700;margin-bottom:20px}
+.modal-footer{display:flex;gap:10px;justify-content:flex-end;margin-top:20px}
 
-  /* ── PRODUCT GRID (ปรับใหม่) ── */
-  .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
-  .product-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; transition: border-color .2s, transform .15s; }
-  .product-card:hover { border-color: var(--green); transform: translateY(-2px); }
-
-  /* รูปสินค้า: square 1:1 พอดีไม่ครอบ */
-  .product-img-wrap { width: 100%; aspect-ratio: 1/1; overflow: hidden; background: var(--surface2); position: relative; }
-  .product-img-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .3s; }
-  .product-card:hover .product-img-wrap img { transform: scale(1.04); }
-
-  .product-body { padding: 12px 14px 14px; }
-  .product-name { font-size: 14px; font-weight: 700; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .product-meta { font-size: 11px; font-family: var(--font-mono); color: var(--muted); margin-bottom: 8px; display: flex; gap: 8px; flex-wrap: wrap; }
-  .product-stock-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
-  .stock-pill { font-size: 12px; font-family: var(--font-mono); padding: 3px 10px; border-radius: 20px; }
-  .stock-ok { background: rgba(0,255,136,.1); color: var(--green); border: 1px solid rgba(0,255,136,.2); }
-  .stock-low { background: rgba(255,204,0,.1); color: var(--yellow); border: 1px solid rgba(255,204,0,.2); }
-  .stock-zero { background: rgba(255,68,85,.1); color: var(--red); border: 1px solid rgba(255,68,85,.2); }
-  .product-price { font-size: 12px; color: var(--muted); font-family: var(--font-mono); }
-  .product-actions { display: flex; gap: 6px; }
-  .product-actions .btn { flex: 1; justify-content: center; padding: 7px 8px; font-size: 12px; }
-
-  /* ── INLINE IMAGE UPLOAD in product modal ── */
-  .img-upload-area {
-    width: 100%; aspect-ratio: 16/9; border-radius: 10px; overflow: hidden;
-    border: 2px dashed var(--border); background: var(--surface2);
-    display: flex; align-items: center; justify-content: center;
-    cursor: pointer; position: relative; transition: border-color .2s;
-    margin-bottom: 12px;
-  }
-  .img-upload-area:hover { border-color: var(--green); }
-  .img-upload-area img { width: 100%; height: 100%; object-fit: cover; display: block; }
-  .img-upload-area .img-placeholder { text-align: center; pointer-events: none; }
-  .img-upload-area .img-placeholder .icon { font-size: 32px; margin-bottom: 8px; }
-  .img-upload-area .img-placeholder p { font-size: 13px; color: var(--muted); }
-  .img-upload-area .img-placeholder strong { color: var(--green); }
-  .img-upload-overlay { position: absolute; inset: 0; background: rgba(0,0,0,.6); display: none; align-items: center; justify-content: center; gap: 10px; }
-  .img-upload-area:hover .img-upload-overlay { display: flex; }
-  .img-upload-area.has-img { border-style: solid; border-color: var(--border); }
-
-  /* ── ORDER ROWS (ยืนยันได้เลย inline) ── */
-  .order-row-pending { background: rgba(255,204,0,.03) !important; }
-  .order-actions { display: flex; gap: 6px; flex-wrap: wrap; }
-
-  /* ── ORDER EXPAND PANEL ── */
-  .order-detail-panel { display: none; background: var(--surface2); }
-  .order-detail-panel.open { display: table-row; }
-  .order-detail-inner { padding: 16px 20px; border-top: 1px solid var(--border); }
-  .order-items-list { margin: 10px 0; }
-  .order-item-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
-  .order-item-row:last-child { border-bottom: none; }
-  .order-total { text-align: right; font-family: var(--font-mono); color: var(--green); font-size: 15px; margin-top: 8px; }
-  .order-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; font-size: 13px; }
-  .order-info-label { font-size: 11px; color: var(--muted); font-family: var(--font-mono); margin-bottom: 2px; }
-
-  /* Modal */
-  .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.85); display: flex; align-items: center; justify-content: center; z-index: 100; opacity: 0; pointer-events: none; transition: opacity .2s; }
-  .modal-backdrop.open { opacity: 1; pointer-events: all; }
-  .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 28px; width: 560px; max-width: 96vw; max-height: 92vh; overflow-y: auto; transform: translateY(20px); transition: transform .2s; }
-  .modal-backdrop.open .modal { transform: translateY(0); }
-  .modal-title { font-size: 17px; font-weight: 700; margin-bottom: 20px; }
-  .modal-footer { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
-
-  #toast { position: fixed; bottom: 28px; right: 28px; background: var(--surface); border: 1px solid var(--border); padding: 14px 20px; border-radius: 8px; font-size: 14px; z-index: 200; transform: translateY(80px); opacity: 0; transition: all .3s; max-width: 320px; }
-  #toast.show { transform: translateY(0); opacity: 1; }
-  #toast.success { border-color: var(--green); color: var(--green); }
-  #toast.error { border-color: var(--red); color: var(--red); }
-
-  .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
-  .section-title { font-size: 16px; font-weight: 700; }
-
-  #menu-toggle { display: none; background: none; border: none; color: var(--text); font-size: 22px; cursor: pointer; }
-  @media (max-width: 768px) {
-    #sidebar { position: fixed; left: -220px; top: 0; z-index: 50; transition: left .25s; height: 100vh; }
-    #sidebar.open { left: 0; }
-    #main { width: 100%; }
-    #menu-toggle { display: block; }
-    .page { padding: 16px; }
-    .product-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
-    .order-info-grid { grid-template-columns: 1fr; }
-    table { font-size: 12px; }
-    th, td { padding: 8px 10px; }
-  }
-
-  .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid var(--border); border-top-color: var(--green); border-radius: 50%; animation: spin .6s linear infinite; }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .loading-row td { text-align: center; color: var(--muted); padding: 32px; }
-  .empty-state { text-align: center; padding: 48px; color: var(--muted); }
+#toast{position:fixed;bottom:28px;right:28px;background:var(--surface);border:1px solid var(--border);padding:14px 20px;border-radius:8px;font-size:14px;z-index:200;transform:translateY(80px);opacity:0;transition:all .3s;max-width:320px}
+#toast.show{transform:translateY(0);opacity:1}
+#toast.success{border-color:var(--green);color:var(--green)}
+#toast.error{border-color:var(--red);color:var(--red)}
+.section-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px}
+.section-title{font-size:16px;font-weight:700}
+#menu-toggle{display:none;background:none;border:none;color:var(--text);font-size:22px;cursor:pointer}
+@media(max-width:768px){
+  #sidebar{position:fixed;left:-220px;top:0;z-index:50;transition:left .25s;height:100vh}
+  #sidebar.open{left:0}
+  #main{width:100%}
+  #menu-toggle{display:block}
+  .page{padding:16px}
+  .product-grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+  .order-info-grid{grid-template-columns:1fr}
+  table{font-size:12px}
+  th,td{padding:8px 10px}
+}
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid var(--border);border-top-color:var(--green);border-radius:50%;animation:spin .6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-row td{text-align:center;color:var(--muted);padding:32px}
+.empty-state{text-align:center;padding:48px;color:var(--muted)}
 </style>
 </head>
 <body>
@@ -193,35 +188,33 @@
   <div class="login-box">
     <div class="login-logo">H!GH$OC!€T¥</div>
     <div class="login-sub">ADMIN CONTROL CENTER</div>
-    <div class="field"><label>USERNAME</label><input id="u" placeholder="ชื่อผู้ใช้" autocomplete="username"></div>
-    <div class="field"><label>PASSWORD</label><input id="p" type="password" placeholder="รหัสผ่าน" autocomplete="current-password"></div>
+    <div class="field"><label>USERNAME</label><input id="u" autocomplete="username" placeholder="ชื่อผู้ใช้"></div>
+    <div class="field"><label>PASSWORD</label><input id="p" type="password" autocomplete="current-password" placeholder="รหัสผ่าน"></div>
     <button class="btn btn-primary btn-full" id="loginBtn">เข้าสู่ระบบ</button>
-    <p id="loginMsg" style="color:var(--red);font-size:13px;margin-top:12px;min-height:20px;"></p>
+    <p id="loginMsg" style="color:var(--red);font-size:13px;margin-top:12px;min-height:20px"></p>
   </div>
 </div>
 
 <!-- APP -->
-<div id="app" style="display:none;">
+<div id="app" style="display:none">
   <aside id="sidebar">
-    <div class="logo">H!GH$OC!€T¥<span>ADMIN PANEL v3</span></div>
+    <div class="logo">H!GH$OC!€T¥<span>ADMIN v4</span></div>
     <nav>
-      <div class="nav-item active" data-page="dashboard"><span class="nav-icon">📊</span> Dashboard</div>
-      <div class="nav-item" data-page="orders"><span class="nav-icon">🛒</span> คำสั่งซื้อ <span class="nav-badge" id="pending-count">0</span></div>
-      <div class="nav-item" data-page="products"><span class="nav-icon">🌿</span> สินค้า</div>
+      <div class="nav-item active" data-page="dashboard"><span class="nav-icon">📊</span>Dashboard</div>
+      <div class="nav-item" data-page="orders"><span class="nav-icon">🛒</span>คำสั่งซื้อ<span class="nav-badge" id="pending-count">0</span></div>
+      <div class="nav-item" data-page="products"><span class="nav-icon">🌿</span>สินค้า</div>
     </nav>
-    <div class="sidebar-footer">
-      <button class="logout-btn" id="logoutBtn">ออกจากระบบ</button>
-    </div>
+    <div class="sidebar-footer"><button class="logout-btn" id="logoutBtn">ออกจากระบบ</button></div>
   </aside>
 
   <div id="main">
     <div class="topbar">
-      <div style="display:flex;align-items:center;gap:14px;">
+      <div style="display:flex;align-items:center;gap:14px">
         <button id="menu-toggle">☰</button>
         <span class="topbar-title" id="page-title">Dashboard</span>
       </div>
-      <div style="display:flex;gap:10px;align-items:center;">
-        <div class="badge-live"><div class="dot-live"></div> LIVE</div>
+      <div style="display:flex;gap:10px;align-items:center">
+        <div class="badge-live"><div class="dot-live"></div>LIVE</div>
         <button class="btn btn-secondary btn-sm" id="refresh-btn">↺ รีเฟรช</button>
       </div>
     </div>
@@ -229,16 +222,16 @@
     <!-- DASHBOARD -->
     <div class="page active" id="page-dashboard">
       <div class="stat-grid">
-        <div class="stat-card"><div class="stat-label">SALES เดือนนี้</div><div class="stat-value" id="stat-month-sales">฿—</div><div class="stat-sub" id="stat-month-orders">— ออร์เดอร์</div></div>
-        <div class="stat-card"><div class="stat-label">SALES ทั้งหมด</div><div class="stat-value" id="stat-total-sales">฿—</div><div class="stat-sub" id="stat-total-orders">— ออร์เดอร์</div></div>
+        <div class="stat-card"><div class="stat-label">SALES เดือนนี้</div><div class="stat-value" id="stat-month-sales">฿—</div><div class="stat-sub" id="stat-month-orders">—</div></div>
+        <div class="stat-card"><div class="stat-label">SALES ทั้งหมด</div><div class="stat-value" id="stat-total-sales">฿—</div><div class="stat-sub" id="stat-total-orders">—</div></div>
         <div class="stat-card"><div class="stat-label">รอยืนยัน</div><div class="stat-value" style="color:var(--yellow)" id="stat-pending">—</div><div class="stat-sub">pending</div></div>
-        <div class="stat-card"><div class="stat-label">สต็อกต่ำ</div><div class="stat-value" style="color:var(--red)" id="stat-low-stock">—</div><div class="stat-sub">รายการ &lt;5 ชิ้น</div></div>
+        <div class="stat-card"><div class="stat-label">สต็อกต่ำ</div><div class="stat-value" style="color:var(--red)" id="stat-low-stock">—</div><div class="stat-sub">รายการ &lt;5</div></div>
       </div>
       <div class="chart-box">
         <div class="chart-header">
           <div class="chart-title">ยอดขายรายวัน</div>
-          <div style="display:flex;gap:8px;align-items:center;">
-            <input type="month" id="chart-month" style="width:auto;padding:7px 10px;font-size:13px;">
+          <div style="display:flex;gap:8px;align-items:center">
+            <input type="month" id="chart-month" style="width:auto;padding:7px 10px;font-size:13px">
             <button class="btn btn-secondary btn-sm" id="chart-load">โหลด</button>
           </div>
         </div>
@@ -255,8 +248,8 @@
     <div class="page" id="page-orders">
       <div class="section-header">
         <div class="section-title">คำสั่งซื้อ</div>
-        <div style="display:flex;gap:8px;align-items:center;">
-          <select id="order-filter" style="width:auto;padding:8px 12px;font-size:13px;">
+        <div style="display:flex;gap:8px;align-items:center">
+          <select id="order-filter" style="width:auto;padding:8px 12px;font-size:13px">
             <option value="">ทุกสถานะ</option>
             <option value="pending">⏳ รอยืนยัน</option>
             <option value="paid">✅ ชำระแล้ว</option>
@@ -267,10 +260,7 @@
       </div>
       <div class="table-box">
         <table>
-          <thead><tr>
-            <th></th><th>เวลา</th><th>Order</th><th>ลูกค้า</th>
-            <th>ยอด</th><th>สถานะ</th><th>จัดการ</th>
-          </tr></thead>
+          <thead><tr><th></th><th>เวลา</th><th>Order</th><th>ลูกค้า</th><th>ยอด</th><th>สถานะ</th><th>จัดการ</th></tr></thead>
           <tbody id="orders-body"><tr class="loading-row"><td colspan="7"><span class="spinner"></span></td></tr></tbody>
         </table>
       </div>
@@ -280,45 +270,42 @@
     <div class="page" id="page-products">
       <div class="section-header">
         <div class="section-title">จัดการสินค้า</div>
-        <div style="display:flex;gap:8px;">
-          <input id="product-search" placeholder="🔍 ค้นหาสินค้า..." style="width:180px;padding:8px 12px;font-size:13px;">
+        <div style="display:flex;gap:8px">
+          <input id="product-search" placeholder="🔍 ค้นหา..." style="width:160px;padding:8px 12px;font-size:13px">
           <button class="btn btn-primary btn-sm" id="add-product-btn">+ เพิ่มสินค้า</button>
         </div>
       </div>
-      <div id="products-grid" class="product-grid">
-        <div class="empty-state"><span class="spinner"></span></div>
-      </div>
+      <div id="products-grid" class="product-grid"><div class="empty-state"><span class="spinner"></span></div></div>
     </div>
   </div>
 </div>
 
-<!-- PRODUCT MODAL -->
+<!-- ══ PRODUCT MODAL ══ -->
 <div class="modal-backdrop" id="product-modal">
   <div class="modal">
-    <div class="modal-title" id="product-modal-title">เพิ่มสินค้าใหม่</div>
+    <div class="modal-title" id="pm-title">เพิ่มสินค้าใหม่</div>
 
-    <!-- Inline image upload -->
-    <label>รูปสินค้า</label>
-    <div class="img-upload-area" id="img-upload-area">
-      <img id="pm-preview-img" src="" alt="" style="display:none;">
-      <div class="img-placeholder" id="img-placeholder">
+    <!-- Direct image upload — ไม่ต้องผ่าน Cloudinary -->
+    <label>รูปสินค้า <span style="color:var(--muted);font-weight:400">(คลิกหรือลากมาวาง · JPG PNG WEBP)</span></label>
+    <div class="img-drop-zone" id="img-drop-zone">
+      <img id="pm-img-preview" src="" alt="" style="display:none">
+      <div class="img-drop-placeholder" id="img-drop-placeholder">
         <div class="icon">📸</div>
-        <p><strong>คลิกเพื่ออัปโหลด</strong> หรือวาง URL ด้านล่าง</p>
-        <p style="margin-top:4px;font-size:11px;">JPG, PNG, WEBP · สูงสุด 10MB</p>
+        <p><strong>คลิกเพื่อเลือกรูป</strong> หรือลากมาวาง</p>
       </div>
-      <div class="img-upload-overlay">
-        <button class="btn btn-primary btn-sm" onclick="openCloudinary(event)">📸 เปลี่ยนรูป</button>
-        <button class="btn btn-danger btn-sm" onclick="clearImg(event)">✕ ลบรูป</button>
+      <div class="img-overlay" id="img-overlay">
+        <button class="btn btn-primary btn-sm" onclick="document.getElementById('pm-file-input').click();event.stopPropagation()">📸 เปลี่ยนรูป</button>
+        <button class="btn btn-danger btn-sm" onclick="clearProductImg(event)">✕</button>
       </div>
+      <input type="file" id="pm-file-input" class="img-upload-input" accept="image/*">
     </div>
-
     <div class="field">
-      <label>URL รูปภาพ (หรือใช้ปุ่มอัปโหลดด้านบน)</label>
-      <input id="pm-img" placeholder="https://res.cloudinary.com/..." oninput="onImgUrlChange()">
+      <label>หรือวาง URL รูปภาพ</label>
+      <input id="pm-img-url" placeholder="https://..." oninput="onPmUrlChange()">
     </div>
 
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-      <div class="field" style="grid-column:1/-1;"><label>ชื่อสินค้า *</label><input id="pm-name" placeholder="เช่น OG Kush"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="field" style="grid-column:1/-1"><label>ชื่อสินค้า *</label><input id="pm-name" placeholder="เช่น OG Kush"></div>
       <div class="field"><label>ประเภท</label>
         <select id="pm-type">
           <option value="Indica">Indica 😴</option>
@@ -327,25 +314,20 @@
           <option value="Equipment">Equipment ⚙️</option>
         </select>
       </div>
-      <div class="field"><label>สต็อก (ชิ้น)</label><input id="pm-stock" type="number" min="0" placeholder="0"></div>
-      <div class="field"><label>Indica %</label><input id="pm-indica" type="number" min="0" max="100" placeholder="50"></div>
-      <div class="field"><label>Sativa %</label><input id="pm-sativa" type="number" min="0" max="100" placeholder="50"></div>
+      <div class="field"><label>สต็อก</label><input id="pm-stock" type="number" min="0" placeholder="0"></div>
+      <div class="field"><label>Indica %</label><input id="pm-indica" type="number" placeholder="50"></div>
+      <div class="field"><label>Sativa %</label><input id="pm-sativa" type="number" placeholder="50"></div>
       <div class="field"><label>THC %</label><input id="pm-thc" type="number" step="0.1" placeholder="20.5"></div>
-      <div class="field"><label>กลิ่น/รส</label><input id="pm-aroma" placeholder="เช่น ดิน, ไม้, ผลไม้"></div>
+      <div class="field"><label>กลิ่น/รส</label><input id="pm-aroma" placeholder="ดิน, ไม้, ผลไม้"></div>
     </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;">
-      <div class="field"><label>1g ฿</label><input id="pm-p1" type="number" placeholder="—"></div>
-      <div class="field"><label>3.5g ฿</label><input id="pm-p35" type="number" placeholder="—"></div>
-      <div class="field"><label>5g ฿</label><input id="pm-p5" type="number" placeholder="—"></div>
-      <div class="field"><label>10g ฿</label><input id="pm-p10" type="number" placeholder="—"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px">
+      <div class="field"><label>1g ฿</label><input id="pm-p1" type="number"></div>
+      <div class="field"><label>3.5g ฿</label><input id="pm-p35" type="number"></div>
+      <div class="field"><label>5g ฿</label><input id="pm-p5" type="number"></div>
+      <div class="field"><label>10g ฿</label><input id="pm-p10" type="number"></div>
     </div>
-    <div class="field"><label>คำอธิบาย</label><textarea id="pm-desc" rows="3" placeholder="รายละเอียดสินค้า..."></textarea></div>
+    <div class="field"><label>คำอธิบาย</label><textarea id="pm-desc" rows="3"></textarea></div>
     <input type="hidden" id="pm-id">
-
-    <div style="background:rgba(255,204,0,.05);border:1px solid rgba(255,204,0,.15);border-radius:8px;padding:12px;margin-bottom:4px;font-size:12px;color:var(--muted);">
-      ⚠️ ต้องตั้งค่า Cloudinary ก่อนใช้งานอัปโหลดรูป — กรอก Cloud Name:
-      <input id="cloud-name-mini" placeholder="cloud name" style="margin-top:6px;font-family:var(--font-mono);font-size:12px;" oninput="saveCloudName()">
-    </div>
 
     <div class="modal-footer">
       <button class="btn btn-secondary" id="pm-cancel">ยกเลิก</button>
@@ -357,438 +339,367 @@
 <div id="toast"></div>
 
 <script>
-// ─── CONFIG ───
 const APP_URL = "https://script.google.com/macros/s/AKfycbzis9Isw6XXUsi7k8MQmI4rJI8gnFnPS0VIDpuvsgw88dC8SwQ4VOHKK5TfeQMDKgLotA/exec";
-const UPLOAD_PRESET = 'hs_unsigned';
-let CLOUD_NAME = localStorage.getItem('hs_cloud_name') || '';
 let ADMIN_TOKEN = localStorage.getItem('ADMIN_TOKEN') || '';
 let allOrders = [], allProducts = [], allEquipments = [];
 let chartInstance = null;
-let cldWidget = null;
-let expandedOrderId = null;
+let pmImgBase64 = ''; // เก็บรูปที่ upload จากเครื่อง
 
-// ─── API ───
-async function apiGet(params) {
-  const res = await fetch(APP_URL + '?' + new URLSearchParams(params), { cache: 'no-store' });
-  return res.json();
-}
-async function apiPost(body) {
-  const res = await fetch(APP_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=UTF-8' }, body: JSON.stringify(body) });
-  if (!res.ok) throw new Error('HTTP ' + res.status);
-  return res.json();
-}
+// ── API ──
+async function apiGet(p){ const r=await fetch(APP_URL+'?'+new URLSearchParams(p),{cache:'no-store'}); return r.json(); }
+async function apiPost(b){ const r=await fetch(APP_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=UTF-8'},body:JSON.stringify(b)}); if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }
 
-// ─── TOAST ───
-let toastTimer;
-function toast(msg, type = 'success') {
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.className = 'show ' + type;
-  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.className = '', 3500);
-}
+// ── TOAST ──
+let tTimer;
+function toast(msg,type='success'){ const t=document.getElementById('toast'); t.textContent=msg; t.className='show '+type; clearTimeout(tTimer); tTimer=setTimeout(()=>t.className='',3500); }
 
-// ─── AUTH ───
-document.getElementById('loginBtn').onclick = async () => {
-  const u = document.getElementById('u').value.trim();
-  const pw = document.getElementById('p').value.trim();
-  const msg = document.getElementById('loginMsg');
-  msg.textContent = 'กำลังเข้าสู่ระบบ...';
-  try {
-    const r = await apiPost({ action: 'adminLogin', username: u, password: pw });
-    if (!r.ok) { msg.textContent = '❌ ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง'; return; }
-    ADMIN_TOKEN = r.token || 'ok';
-    localStorage.setItem('ADMIN_TOKEN', ADMIN_TOKEN);
-    showApp();
-  } catch(e) { msg.textContent = '❌ เชื่อมต่อไม่ได้: ' + e.message; }
+// ── AUTH ──
+document.getElementById('loginBtn').onclick = async()=>{
+  const u=document.getElementById('u').value.trim(), pw=document.getElementById('p').value.trim();
+  const msg=document.getElementById('loginMsg'); msg.textContent='กำลังเข้าสู่ระบบ...';
+  try{
+    const r=await apiPost({action:'adminLogin',username:u,password:pw});
+    if(!r.ok){msg.textContent='❌ ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง';return;}
+    ADMIN_TOKEN=r.token||'ok'; localStorage.setItem('ADMIN_TOKEN',ADMIN_TOKEN); showApp();
+  }catch(e){msg.textContent='❌ '+e.message;}
 };
-document.getElementById('p').onkeydown = e => { if (e.key === 'Enter') document.getElementById('loginBtn').click(); };
-document.getElementById('logoutBtn').onclick = () => {
-  localStorage.removeItem('ADMIN_TOKEN'); ADMIN_TOKEN = '';
-  document.getElementById('app').style.display = 'none';
-  document.getElementById('login-screen').style.display = 'flex';
-};
-function showApp() {
-  document.getElementById('login-screen').style.display = 'none';
-  document.getElementById('app').style.display = 'flex';
-  loadAll();
-}
+document.getElementById('p').onkeydown=e=>{ if(e.key==='Enter') document.getElementById('loginBtn').click(); };
+document.getElementById('logoutBtn').onclick=()=>{ localStorage.removeItem('ADMIN_TOKEN'); ADMIN_TOKEN=''; document.getElementById('app').style.display='none'; document.getElementById('login-screen').style.display='flex'; };
+function showApp(){ document.getElementById('login-screen').style.display='none'; document.getElementById('app').style.display='flex'; loadAll(); }
 
-// ─── NAV ───
-const pageTitles = { dashboard: 'Dashboard', orders: 'คำสั่งซื้อ', products: 'สินค้า' };
-document.querySelectorAll('.nav-item').forEach(item => {
-  item.onclick = () => {
-    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+// ── NAV ──
+document.querySelectorAll('.nav-item').forEach(item=>{
+  item.onclick=()=>{
+    document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
     item.classList.add('active');
-    document.getElementById('page-' + item.dataset.page).classList.add('active');
-    document.getElementById('page-title').textContent = pageTitles[item.dataset.page];
+    document.getElementById('page-'+item.dataset.page).classList.add('active');
+    document.getElementById('page-title').textContent={dashboard:'Dashboard',orders:'คำสั่งซื้อ',products:'สินค้า'}[item.dataset.page];
     document.getElementById('sidebar').classList.remove('open');
   };
 });
-document.getElementById('menu-toggle').onclick = () => document.getElementById('sidebar').classList.toggle('open');
-document.getElementById('refresh-btn').onclick = loadAll;
+document.getElementById('menu-toggle').onclick=()=>document.getElementById('sidebar').classList.toggle('open');
+document.getElementById('refresh-btn').onclick=loadAll;
 
-// ─── LOAD ALL ───
-async function loadAll() {
-  await Promise.all([loadProducts(), loadOrders(), loadChart()]);
-  updateStats();
+// ── LOAD ──
+async function loadAll(){ await Promise.all([loadProducts(),loadOrders(),loadChart()]); updateStats(); }
+async function loadProducts(){
+  try{ const r=await apiGet({action:'getProducts'}); allProducts=r.products||[]; allEquipments=r.equipments||[]; renderProducts(); updateLowStock(); }catch(e){console.warn(e);}
 }
-async function loadProducts() {
-  try {
-    const r = await apiGet({ action: 'getProducts' });
-    allProducts = r.products || []; allEquipments = r.equipments || [];
-    renderProducts(); updateLowStock();
-  } catch(e) { console.warn(e); }
-}
-async function loadOrders() {
-  try {
-    const r = await apiGet({ action: 'adminListOrders', limit: 200 });
-    allOrders = r.orders || [];
-    renderOrders(); updateOrderStats();
-  } catch(e) {
-    document.getElementById('orders-body').innerHTML = '<tr class="loading-row"><td colspan="7" style="color:var(--red)">เชื่อมต่อไม่ได้ — ลอง deploy Apps Script ใหม่</td></tr>';
-  }
+async function loadOrders(){
+  try{ const r=await apiGet({action:'adminListOrders',limit:200}); allOrders=r.orders||[]; renderOrders(); updateOrderStats(); }
+  catch(e){ document.getElementById('orders-body').innerHTML='<tr class="loading-row"><td colspan="7" style="color:var(--red)">เชื่อมต่อไม่ได้</td></tr>'; }
 }
 
-// ─── PRODUCTS ───
-function renderProducts(filter = '') {
-  const grid = document.getElementById('products-grid');
-  let all = [...allProducts, ...allEquipments];
-  if (filter) all = all.filter(p => (p.name||'').toLowerCase().includes(filter.toLowerCase()));
-  if (!all.length) { grid.innerHTML = '<div class="empty-state">ไม่พบสินค้า</div>'; return; }
-
-  grid.innerHTML = all.map(p => {
-    const stock = Number(p.stock || 0);
-    const stockClass = stock <= 0 ? 'stock-zero' : stock < 5 ? 'stock-low' : 'stock-ok';
-    const stockText = stock <= 0 ? 'หมด' : `${stock} ชิ้น`;
-    const prices = [p.price_1g||p.price1g, p.price_3_5g||p.price3_5g].filter(Boolean).map(v => '฿'+v).join(' / ');
-    const img = p.imageUrl || 'https://placehold.co/400x400/1a1a1a/444?text=No+Image';
-    return `
-    <div class="product-card">
+// ── PRODUCTS ──
+function renderProducts(filter=''){
+  const grid=document.getElementById('products-grid');
+  let all=[...allProducts,...allEquipments];
+  if(filter) all=all.filter(p=>(p.name||'').toLowerCase().includes(filter.toLowerCase()));
+  if(!all.length){grid.innerHTML='<div class="empty-state">ไม่พบสินค้า</div>';return;}
+  grid.innerHTML=all.map(p=>{
+    const stock=Number(p.stock||0);
+    const sc=stock<=0?'stock-zero':stock<5?'stock-low':'stock-ok';
+    const st=stock<=0?'หมด':`${stock} ชิ้น`;
+    const prices=[p.price_1g||p.price1g,p.price_3_5g||p.price3_5g].filter(Boolean).map(v=>'฿'+v).join(' / ');
+    const img=p.imageUrl||'https://placehold.co/400x300/1a1a1a/444?text=No+Image';
+    return `<div class="product-card">
       <div class="product-img-wrap">
-        <img src="${img}" onerror="this.src='https://placehold.co/400x400/1a1a1a/444?text=Error'" alt="${p.name||''}">
+        <img src="${img}" onerror="this.src='https://placehold.co/400x300/1a1a1a/444?text=Error'" alt="">
+        <button class="product-img-edit" onclick="openProductModal('${p.id}')">✏️ แก้ไขรูป</button>
       </div>
       <div class="product-body">
         <div class="product-name" title="${p.name||''}">${p.name||'-'}</div>
-        <div class="product-meta">
-          <span>${p.type||''}</span>
-          ${p.thc_percent||p.thc ? `<span>THC ~${p.thc_percent||p.thc}%</span>` : ''}
-        </div>
-        <div class="product-stock-row">
-          <span class="stock-pill ${stockClass}">${stockText}</span>
-          <span class="product-price">${prices}</span>
-        </div>
+        <div class="product-meta"><span>${p.type||''}</span>${p.thc_percent||p.thc?`<span>THC ~${p.thc_percent||p.thc}%</span>`:''}</div>
+        <div class="product-stock-row"><span class="stock-pill ${sc}">${st}</span><span class="product-price">${prices}</span></div>
         <div class="product-actions">
           <button class="btn btn-secondary" onclick="openProductModal('${p.id}')">✏️ แก้ไข</button>
-          <button class="btn btn-secondary" onclick="quickStock('${p.id}', ${stock})">📦 สต็อก</button>
+          <button class="btn btn-secondary" onclick="quickStock('${p.id}',${stock})">📦 สต็อก</button>
         </div>
       </div>
     </div>`;
   }).join('');
 }
+document.getElementById('product-search').oninput=function(){renderProducts(this.value);};
+function updateLowStock(){ document.getElementById('stat-low-stock').textContent=[...allProducts,...allEquipments].filter(p=>Number(p.stock||0)<5).length; }
 
-document.getElementById('product-search').oninput = function() { renderProducts(this.value); };
-
-function updateLowStock() {
-  const low = [...allProducts, ...allEquipments].filter(p => Number(p.stock||0) < 5).length;
-  document.getElementById('stat-low-stock').textContent = low;
-}
-
-// ─── ORDERS (inline expand + confirm) ───
-function renderOrders(filter = '') {
-  const tbody = document.getElementById('orders-body');
-  let list = filter ? allOrders.filter(o => o.status === filter) : allOrders;
-  if (!list.length) { tbody.innerHTML = '<tr class="loading-row"><td colspan="7">ไม่มีออร์เดอร์</td></tr>'; return; }
-
-  tbody.innerHTML = list.map(o => {
-    const isPending = o.status === 'pending';
-    const rowClass = isPending ? 'order-row-pending' : '';
-    const statusMap = { pending: 'badge-pending', paid: 'badge-paid', cancelled: 'badge-cancelled' };
-    const badge = statusMap[o.status] || '';
-    const items = Array.isArray(o.items) ? o.items : [];
-    const itemCount = items.length;
-    const time = (o.createdAt||'').replace('T',' ').slice(0,16);
-
-    // expand + confirm ใน row เดียว
-    const confirmBtn = isPending
-      ? `<button class="btn btn-success btn-sm" onclick="confirmOrder(event,'${o.order_id}')">✅ ยืนยัน</button>`
-      : '';
-    const cancelBtn = isPending
-      ? `<button class="btn btn-danger btn-sm" onclick="cancelOrder(event,'${o.order_id}')">✕</button>`
-      : '';
-
+// ── ORDERS ──
+function renderOrders(filter=''){
+  const tbody=document.getElementById('orders-body');
+  let list=filter?allOrders.filter(o=>o.status===filter):allOrders;
+  if(!list.length){tbody.innerHTML='<tr class="loading-row"><td colspan="7">ไม่มีออร์เดอร์</td></tr>';return;}
+  tbody.innerHTML=list.map(o=>{
+    const isPending=o.status==='pending';
+    const sm={pending:'badge-pending',paid:'badge-paid',cancelled:'badge-cancelled'};
+    const confirmBtn=isPending?`<button class="btn btn-success btn-sm" onclick="confirmOrder(event,'${o.order_id}')">✅ ยืนยัน</button>`:'';
+    const cancelBtn=isPending?`<button class="btn btn-danger btn-sm" onclick="cancelOrder(event,'${o.order_id}')">✕</button>`:'';
     return `
-    <tr class="${rowClass}" id="row-${o.order_id}" onclick="toggleExpand('${o.order_id}')" style="cursor:pointer;">
-      <td><span id="arrow-${o.order_id}" style="color:var(--muted);font-size:10px;">▶</span></td>
-      <td style="font-size:12px;color:var(--muted);white-space:nowrap;">${time}</td>
-      <td style="font-family:var(--font-mono);font-size:12px;">#${(o.order_id||'').slice(-6)}</td>
-      <td>${o.customerName||o.user_id||'-'}</td>
-      <td style="font-family:var(--font-mono);white-space:nowrap;">฿${Number(o.total||0).toLocaleString()}</td>
-      <td><span class="badge ${badge}">${o.status}</span></td>
-      <td><div class="order-actions" onclick="event.stopPropagation();">${confirmBtn}${cancelBtn}</div></td>
+    <tr class="${isPending?'order-row-pending':''}" onclick="toggleExpand('${o.order_id}')" style="cursor:pointer">
+      <td><span id="arrow-${o.order_id}" style="color:var(--muted);font-size:10px">▶</span></td>
+      <td style="font-size:12px;color:var(--muted);white-space:nowrap">${(o.createdAt||'').replace('T',' ').slice(0,16)}</td>
+      <td style="font-family:var(--mono);font-size:12px">#${(o.order_id||'').slice(-6)}</td>
+      <td>${o.customerName||o.email||o.user_id||'-'}</td>
+      <td style="font-family:var(--mono);white-space:nowrap">฿${Number(o.total||0).toLocaleString()}</td>
+      <td><span class="badge ${sm[o.status]||''}">${o.status}</span></td>
+      <td><div class="order-actions" onclick="event.stopPropagation()">${confirmBtn}${cancelBtn}</div></td>
     </tr>
     <tr class="order-detail-panel" id="panel-${o.order_id}">
       <td colspan="7">
         <div class="order-detail-inner">
           <div class="order-info-grid">
             <div><div class="order-info-label">ORDER ID</div>${o.order_id||'-'}</div>
-            <div><div class="order-info-label">ที่อยู่ / LINE</div>${o.customerEmail||o.email||'-'}</div>
+            <div><div class="order-info-label">ลูกค้า/LINE</div>${o.email||o.user_id||'-'}</div>
           </div>
           <div class="order-items-list">
-            ${items.map(i => `
-              <div class="order-item-row">
-                <span>${i.name} <span style="color:var(--muted)">× ${i.qty||i.quantity||1}</span></span>
-                <span style="font-family:var(--font-mono)">฿${(Number(i.price||0)*Number(i.qty||i.quantity||1)).toLocaleString()}</span>
-              </div>`).join('')}
+            ${(Array.isArray(o.items)?o.items:[]).map(i=>`
+            <div class="order-item-row">
+              <span>${i.name||'-'} <span style="color:var(--muted)">×${i.qty||i.quantity||1}</span></span>
+              <span style="font-family:var(--mono)">฿${(Number(i.price||0)*Number(i.qty||i.quantity||1)).toLocaleString()}</span>
+            </div>`).join('')}
           </div>
           <div class="order-total">ยอดรวม ฿${Number(o.total||0).toLocaleString()}</div>
+
+          <!-- ── SLIP VERIFY SECTION ── -->
+          <div class="slip-section" id="slip-section-${o.order_id}">
+            <div style="font-size:13px;font-weight:600;margin-bottom:10px;display:flex;align-items:center;gap:8px">
+              📎 ยืนยันสลิป Manual
+              ${o.paymentSlipUrl?`<a href="${o.paymentSlipUrl}" target="_blank" style="font-size:11px;color:var(--green)">ดูสลิปเดิม ↗</a>`:''}
+            </div>
+            <div class="slip-drop" id="slip-drop-${o.order_id}">
+              <input type="file" accept="image/*" onchange="onSlipFileChange(event,'${o.order_id}','${o.total}')">
+              <span id="slip-drop-text-${o.order_id}">📸 คลิกหรือลากสลิปมาวางที่นี่</span>
+            </div>
+            <div class="slip-status" id="slip-status-${o.order_id}"></div>
+            ${isPending?`
+            <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+              <button class="btn btn-success btn-sm" onclick="confirmOrder(event,'${o.order_id}')">✅ ยืนยันชำระ (ไม่มีสลิป)</button>
+              <button class="btn btn-warn btn-sm" id="slip-confirm-btn-${o.order_id}" style="display:none" onclick="confirmWithSlip('${o.order_id}')">✅ ยืนยัน + บันทึกสลิป</button>
+            </div>`:''}
+          </div>
         </div>
       </td>
     </tr>`;
   }).join('');
 }
 
-function toggleExpand(orderId) {
-  const panel = document.getElementById('panel-' + orderId);
-  const arrow = document.getElementById('arrow-' + orderId);
-  const isOpen = panel.classList.contains('open');
-  // close others
-  document.querySelectorAll('.order-detail-panel.open').forEach(p => p.classList.remove('open'));
-  document.querySelectorAll('[id^="arrow-"]').forEach(a => a.textContent = '▶');
-  if (!isOpen) {
-    panel.classList.add('open');
-    arrow.textContent = '▼';
-    arrow.style.color = 'var(--green)';
-  } else {
-    arrow.style.color = 'var(--muted)';
-  }
+function toggleExpand(id){
+  const panel=document.getElementById('panel-'+id);
+  const arrow=document.getElementById('arrow-'+id);
+  const isOpen=panel.classList.contains('open');
+  document.querySelectorAll('.order-detail-panel.open').forEach(p=>p.classList.remove('open'));
+  document.querySelectorAll('[id^="arrow-"]').forEach(a=>{a.textContent='▶';a.style.color='var(--muted)';});
+  if(!isOpen){panel.classList.add('open');arrow.textContent='▼';arrow.style.color='var(--green)';}
 }
 
-async function confirmOrder(e, orderId) {
+document.getElementById('order-filter').onchange=function(){renderOrders(this.value);};
+
+// slip file per order
+const slipFiles = {};
+
+function onSlipFileChange(e, orderId, total){
+  const file=e.target.files[0]; if(!file) return;
+  slipFiles[orderId]=file;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    const drop=document.getElementById('slip-drop-'+orderId);
+    drop.innerHTML=`<input type="file" accept="image/*" onchange="onSlipFileChange(event,'${orderId}','${total}')"><img src="${ev.target.result}" style="max-width:100%;max-height:200px;border-radius:6px">`;
+    // แสดง status กำลังอ่าน
+    showSlipStatus(orderId,'info','⏳ อ่านสลิปอัตโนมัติ...');
+    // ส่งให้ backend อ่าน (ถ้ามี Claude)
+    readSlipAuto(orderId, ev.target.result.split(',')[1], total);
+    // แสดงปุ่ม confirm+slip
+    const btn=document.getElementById('slip-confirm-btn-'+orderId);
+    if(btn) btn.style.display='inline-flex';
+  };
+  reader.readAsDataURL(file);
+}
+
+async function readSlipAuto(orderId, base64, total){
+  try{
+    const r=await apiPost({action:'verifySlip',adminToken:ADMIN_TOKEN,imageBase64:base64,expectedAmount:total,order_id:orderId});
+    if(r.ok && r.slipData){
+      const s=r.slipData;
+      if(!s.isSlip){ showSlipStatus(orderId,'err','❌ รูปนี้ไม่ใช่สลิปโอนเงิน'); return; }
+      if(!s.amountMatch){ showSlipStatus(orderId,'err',`⚠️ ยอดไม่ตรง — สลิป ฿${s.amount?.toLocaleString()||'?'} / ออร์เดอร์ ฿${Number(total).toLocaleString()}`); return; }
+      showSlipStatus(orderId,'ok',`✅ สลิปถูกต้อง — ฿${s.amount?.toLocaleString()} · ${s.bank||''} · ${s.time||''}`);
+    }
+  }catch(e){ showSlipStatus(orderId,'info','ℹ️ ตรวจสอบเองแล้วกด "ยืนยัน + บันทึกสลิป"'); }
+}
+
+function showSlipStatus(orderId, type, msg){
+  const el=document.getElementById('slip-status-'+orderId);
+  if(!el) return;
+  el.textContent=msg; el.className='slip-status '+type; el.style.display='block';
+}
+
+async function confirmWithSlip(orderId){
+  const file=slipFiles[orderId];
+  const btn=document.getElementById('slip-confirm-btn-'+orderId);
+  if(btn){btn.textContent='...';btn.disabled=true;}
+  try{
+    let base64='';
+    if(file){ base64=await fileToBase64(file); }
+    const r=await apiPost({action:'confirmPaymentWithSlip',adminToken:ADMIN_TOKEN,order_id:orderId,imageBase64:base64});
+    if(r.ok||r.status==='success'){ toast('✅ ยืนยันพร้อมบันทึกสลิปแล้ว!'); await loadOrders(); updateStats(); }
+    else toast('❌ '+(r.error||'ผิดพลาด'),'error');
+  }catch(e){ toast('❌ '+e.message,'error'); }
+  if(btn){btn.textContent='✅ ยืนยัน + บันทึกสลิป';btn.disabled=false;}
+}
+
+async function confirmOrder(e,orderId){
   e.stopPropagation();
-  if (!confirm('ยืนยันการชำระเงินออร์เดอร์ #' + orderId.slice(-6) + '?')) return;
-  const btn = e.target;
-  btn.textContent = '...'; btn.disabled = true;
-  try {
-    const r = await apiPost({ action: 'confirmPayment', order_id: orderId, adminToken: ADMIN_TOKEN });
-    if (r.ok || r.status === 'success') {
-      toast('✅ ยืนยันสำเร็จ!');
-      await loadOrders(); updateStats();
-    } else toast('❌ ' + (r.error||r.message||'ผิดพลาด'), 'error');
-  } catch(e) { toast('❌ ' + e.message, 'error'); }
-  btn.textContent = '✅ ยืนยัน'; btn.disabled = false;
+  if(!confirm('ยืนยันการชำระเงินออร์เดอร์ #'+orderId.slice(-6)+'?')) return;
+  const btn=e.target; btn.textContent='...'; btn.disabled=true;
+  try{
+    const r=await apiPost({action:'confirmPayment',order_id:orderId,adminToken:ADMIN_TOKEN});
+    if(r.ok||r.status==='success'){ toast('✅ ยืนยันสำเร็จ!'); await loadOrders(); updateStats(); }
+    else toast('❌ '+(r.error||'ผิดพลาด'),'error');
+  }catch(e){ toast('❌ '+e.message,'error'); }
+  btn.textContent='✅ ยืนยัน'; btn.disabled=false;
 }
 
-async function cancelOrder(e, orderId) {
+async function cancelOrder(e,orderId){
   e.stopPropagation();
-  if (!confirm('ยกเลิกออร์เดอร์ #' + orderId.slice(-6) + '?')) return;
-  try {
-    const r = await apiPost({ action: 'cancelOrder', order_id: orderId, adminToken: ADMIN_TOKEN });
-    if (r.ok || r.status === 'success') { toast('ยกเลิกแล้ว', 'error'); await loadOrders(); updateStats(); }
-    else toast('❌ ' + (r.error||'ผิดพลาด'), 'error');
-  } catch(e) { toast('❌ ' + e.message, 'error'); }
+  if(!confirm('ยกเลิกออร์เดอร์?')) return;
+  try{
+    const r=await apiPost({action:'cancelOrder',order_id:orderId,adminToken:ADMIN_TOKEN});
+    if(r.ok||r.status==='success'){ toast('ยกเลิกแล้ว','error'); await loadOrders(); updateStats(); }
+    else toast('❌ '+(r.error||'ผิดพลาด'),'error');
+  }catch(e){ toast('❌ '+e.message,'error'); }
 }
 
-document.getElementById('order-filter').onchange = function() { renderOrders(this.value); };
+function fileToBase64(file){ return new Promise((res,rej)=>{ const r=new FileReader(); r.onload=e=>res(e.target.result.split(',')[1]); r.onerror=rej; r.readAsDataURL(file); }); }
 
-// ─── STATS ───
-function updateOrderStats() {
-  const pending = allOrders.filter(o => o.status === 'pending');
-  const paid = allOrders.filter(o => o.status === 'paid');
-  document.getElementById('stat-pending').textContent = pending.length;
-  document.getElementById('pending-count').textContent = pending.length;
-  document.getElementById('stat-total-sales').textContent = '฿' + paid.reduce((s,o) => s+Number(o.total||0),0).toLocaleString();
-  document.getElementById('stat-total-orders').textContent = paid.length + ' ออร์เดอร์';
+// ── STATS ──
+function updateOrderStats(){
+  const pending=allOrders.filter(o=>o.status==='pending');
+  const paid=allOrders.filter(o=>o.status==='paid');
+  document.getElementById('stat-pending').textContent=pending.length;
+  document.getElementById('pending-count').textContent=pending.length;
+  document.getElementById('stat-total-sales').textContent='฿'+paid.reduce((s,o)=>s+Number(o.total||0),0).toLocaleString();
+  document.getElementById('stat-total-orders').textContent=paid.length+' ออร์เดอร์';
 }
-function updateStats() {
-  const now = new Date();
-  const ym = now.toISOString().slice(0,7);
-  const m = allOrders.filter(o => o.status==='paid' && (o.createdAt||'').startsWith(ym));
-  document.getElementById('stat-month-sales').textContent = '฿' + m.reduce((s,o)=>s+Number(o.total||0),0).toLocaleString();
-  document.getElementById('stat-month-orders').textContent = m.length + ' ออร์เดอร์';
-
-  const soldMap = {};
-  allOrders.filter(o=>o.status==='paid').forEach(o=>{
-    (Array.isArray(o.items)?o.items:[]).forEach(i=>{
-      if(!soldMap[i.name]) soldMap[i.name]={qty:0,total:0};
-      soldMap[i.name].qty+=Number(i.qty||i.quantity||1);
-      soldMap[i.name].total+=Number(i.price||0)*Number(i.qty||i.quantity||1);
-    });
-  });
-  const top = Object.entries(soldMap).sort((a,b)=>b[1].qty-a[1].qty).slice(0,5);
-  const tbody = document.getElementById('top-products-body');
-  tbody.innerHTML = top.length ? top.map(([name,d],i)=>`<tr>
-    <td style="color:var(--muted);font-family:var(--font-mono)">${i+1}</td>
-    <td>${name}</td>
-    <td style="font-family:var(--font-mono)">${d.qty}</td>
-    <td style="font-family:var(--font-mono)">฿${d.total.toLocaleString()}</td>
-  </tr>`).join('') : '<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:24px">ยังไม่มีข้อมูล</td></tr>';
+function updateStats(){
+  const ym=new Date().toISOString().slice(0,7);
+  const m=allOrders.filter(o=>o.status==='paid'&&(o.createdAt||'').startsWith(ym));
+  document.getElementById('stat-month-sales').textContent='฿'+m.reduce((s,o)=>s+Number(o.total||0),0).toLocaleString();
+  document.getElementById('stat-month-orders').textContent=m.length+' ออร์เดอร์';
+  const sm={}; allOrders.filter(o=>o.status==='paid').forEach(o=>{ (Array.isArray(o.items)?o.items:[]).forEach(i=>{ if(!sm[i.name])sm[i.name]={qty:0,total:0}; sm[i.name].qty+=Number(i.qty||i.quantity||1); sm[i.name].total+=Number(i.price||0)*Number(i.qty||i.quantity||1); }); });
+  const top=Object.entries(sm).sort((a,b)=>b[1].qty-a[1].qty).slice(0,5);
+  document.getElementById('top-products-body').innerHTML=top.length?top.map(([n,d],i)=>`<tr><td style="color:var(--muted);font-family:var(--mono)">${i+1}</td><td>${n}</td><td style="font-family:var(--mono)">${d.qty}</td><td style="font-family:var(--mono)">฿${d.total.toLocaleString()}</td></tr>`).join(''):'<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:24px">ยังไม่มีข้อมูล</td></tr>';
 }
 
-// ─── CHART ───
-async function loadChart() {
-  const m = document.getElementById('chart-month').value || new Date().toISOString().slice(0,7);
-  try {
-    const r = await apiGet({ action: 'getSalesChartData', month: m });
-    renderChart(r.labels||[], r.values||[]);
-  } catch {
-    const [yr,mo] = m.split('-');
-    const days = new Date(+yr,+mo,0).getDate();
-    const labels = Array.from({length:days},(_,i)=>String(i+1).padStart(2,'0'));
-    const values = Array(days).fill(0);
-    allOrders.filter(o=>o.status==='paid'&&(o.createdAt||'').startsWith(m)).forEach(o=>{
-      const d=parseInt((o.createdAt||'').slice(8,10))-1;
-      if(d>=0&&d<days) values[d]+=Number(o.total||0);
-    });
-    renderChart(labels,values);
-  }
+// ── CHART ──
+async function loadChart(){
+  const m=document.getElementById('chart-month').value||new Date().toISOString().slice(0,7);
+  try{ const r=await apiGet({action:'getSalesChartData',month:m}); renderChart(r.labels||[],r.values||[]); }
+  catch{ const [yr,mo]=m.split('-'); const days=new Date(+yr,+mo,0).getDate(); const labels=Array.from({length:days},(_,i)=>String(i+1).padStart(2,'0')); const values=Array(days).fill(0); allOrders.filter(o=>o.status==='paid'&&(o.createdAt||'').startsWith(m)).forEach(o=>{ const d=parseInt((o.createdAt||'').slice(8,10))-1; if(d>=0&&d<days)values[d]+=Number(o.total||0); }); renderChart(labels,values); }
 }
-function renderChart(labels, values) {
-  const ctx = document.getElementById('sales-chart');
-  if (chartInstance) chartInstance.destroy();
-  chartInstance = new Chart(ctx, {
-    type: 'bar', data: { labels, datasets: [{ label:'ยอดขาย', data:values, backgroundColor:'rgba(0,255,136,.2)', borderColor:'#00ff88', borderWidth:2, borderRadius:4, hoverBackgroundColor:'rgba(0,255,136,.45)' }] },
-    options: { responsive:true, plugins:{ legend:{display:false}, tooltip:{ backgroundColor:'#1a1a1a', borderColor:'#2a2a2a', borderWidth:1, titleColor:'#555', bodyColor:'#00ff88', callbacks:{label:c=>'฿'+c.raw.toLocaleString()} } }, scales:{ x:{ticks:{color:'#555',font:{family:'IBM Plex Mono',size:10}},grid:{color:'#1c1c1c'}}, y:{ticks:{color:'#555',font:{family:'IBM Plex Mono',size:10},callback:v=>'฿'+v.toLocaleString()},grid:{color:'#1c1c1c'},beginAtZero:true} } }
-  });
+function renderChart(labels,values){
+  const ctx=document.getElementById('sales-chart'); if(chartInstance)chartInstance.destroy();
+  chartInstance=new Chart(ctx,{type:'bar',data:{labels,datasets:[{label:'ยอดขาย',data:values,backgroundColor:'rgba(0,255,136,.2)',borderColor:'#00ff88',borderWidth:2,borderRadius:4,hoverBackgroundColor:'rgba(0,255,136,.45)'}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:{backgroundColor:'#1a1a1a',borderColor:'#2a2a2a',borderWidth:1,titleColor:'#555',bodyColor:'#00ff88',callbacks:{label:c=>'฿'+c.raw.toLocaleString()}}},scales:{x:{ticks:{color:'#555',font:{family:'IBM Plex Mono',size:10}},grid:{color:'#1c1c1c'}},y:{ticks:{color:'#555',font:{family:'IBM Plex Mono',size:10},callback:v=>'฿'+v.toLocaleString()},grid:{color:'#1c1c1c'},beginAtZero:true}}}});
 }
-document.getElementById('chart-load').onclick = loadChart;
+document.getElementById('chart-load').onclick=loadChart;
 
-// ─── PRODUCT MODAL ───
-document.getElementById('add-product-btn').onclick = () => openProductModal(null);
-document.getElementById('pm-cancel').onclick = () => document.getElementById('product-modal').classList.remove('open');
-document.getElementById('product-modal').onclick = function(e) { if(e.target===this) this.classList.remove('open'); };
+// ── PRODUCT MODAL ──
+document.getElementById('add-product-btn').onclick=()=>openProductModal(null);
+document.getElementById('pm-cancel').onclick=()=>document.getElementById('product-modal').classList.remove('open');
+document.getElementById('product-modal').onclick=function(e){if(e.target===this)this.classList.remove('open');};
 
-function getProductById(id) {
-  return allProducts.find(p=>String(p.id)===String(id)) || allEquipments.find(p=>String(p.id)===String(id));
-}
+function getProductById(id){ return allProducts.find(p=>String(p.id)===String(id))||allEquipments.find(p=>String(p.id)===String(id)); }
 
-function openProductModal(id) {
-  const p = id ? getProductById(id) : null;
-  document.getElementById('product-modal-title').textContent = p ? 'แก้ไขสินค้า' : 'เพิ่มสินค้าใหม่';
-  document.getElementById('pm-id').value = p?.id || '';
-  document.getElementById('pm-name').value = p?.name || '';
-  document.getElementById('pm-type').value = p?.type || 'Hybrid';
-  document.getElementById('pm-stock').value = p?.stock ?? '';
-  document.getElementById('pm-indica').value = p?.indica_percent || '';
-  document.getElementById('pm-sativa').value = p?.sativa_percent || '';
-  document.getElementById('pm-thc').value = p?.thc_percent || p?.thc || '';
-  document.getElementById('pm-aroma').value = p?.aroma || '';
-  document.getElementById('pm-p1').value = p?.price_1g || p?.price1g || '';
-  document.getElementById('pm-p35').value = p?.price_3_5g || p?.price3_5g || '';
-  document.getElementById('pm-p5').value = p?.price_5g || p?.price5g || '';
-  document.getElementById('pm-p10').value = p?.price_10g || p?.price10g || '';
-  document.getElementById('pm-desc').value = p?.description || '';
-  document.getElementById('pm-img').value = p?.imageUrl || '';
-  document.getElementById('cloud-name-mini').value = CLOUD_NAME;
-  setPreviewImg(p?.imageUrl || '');
+function openProductModal(id){
+  const p=id?getProductById(id):null;
+  document.getElementById('pm-title').textContent=p?'แก้ไขสินค้า':'เพิ่มสินค้าใหม่';
+  document.getElementById('pm-id').value=p?.id||'';
+  document.getElementById('pm-name').value=p?.name||'';
+  document.getElementById('pm-type').value=p?.type||'Hybrid';
+  document.getElementById('pm-stock').value=p?.stock??'';
+  document.getElementById('pm-indica').value=p?.indica_percent||'';
+  document.getElementById('pm-sativa').value=p?.sativa_percent||'';
+  document.getElementById('pm-thc').value=p?.thc_percent||p?.thc||'';
+  document.getElementById('pm-aroma').value=p?.aroma||'';
+  document.getElementById('pm-p1').value=p?.price_1g||p?.price1g||'';
+  document.getElementById('pm-p35').value=p?.price_3_5g||p?.price3_5g||'';
+  document.getElementById('pm-p5').value=p?.price_5g||p?.price5g||'';
+  document.getElementById('pm-p10').value=p?.price_10g||p?.price10g||'';
+  document.getElementById('pm-desc').value=p?.description||'';
+  document.getElementById('pm-img-url').value=p?.imageUrl||'';
+  pmImgBase64='';
+  setPmPreview(p?.imageUrl||'');
   document.getElementById('product-modal').classList.add('open');
 }
 
-function setPreviewImg(url) {
-  const img = document.getElementById('pm-preview-img');
-  const placeholder = document.getElementById('img-placeholder');
-  const area = document.getElementById('img-upload-area');
-  if (url) {
-    img.src = url; img.style.display = 'block';
-    placeholder.style.display = 'none'; area.classList.add('has-img');
-  } else {
-    img.src = ''; img.style.display = 'none';
-    placeholder.style.display = 'block'; area.classList.remove('has-img');
-  }
+function setPmPreview(url){
+  const img=document.getElementById('pm-img-preview');
+  const ph=document.getElementById('img-drop-placeholder');
+  if(url){img.src=url;img.style.display='block';ph.style.display='none';}
+  else{img.src='';img.style.display='none';ph.style.display='block';}
 }
-function onImgUrlChange() {
-  setPreviewImg(document.getElementById('pm-img').value.trim());
-}
-function clearImg(e) {
-  e.stopPropagation();
-  document.getElementById('pm-img').value = '';
-  setPreviewImg('');
-}
+function onPmUrlChange(){ setPmPreview(document.getElementById('pm-img-url').value.trim()); pmImgBase64=''; }
+function clearProductImg(e){ e.stopPropagation(); document.getElementById('pm-img-url').value=''; pmImgBase64=''; setPmPreview(''); }
 
-document.getElementById('img-upload-area').onclick = function(e) {
-  if (!e.target.closest('button')) openCloudinary(e);
-};
+// Drag & drop
+const dropZone=document.getElementById('img-drop-zone');
+dropZone.addEventListener('dragover',e=>{e.preventDefault();dropZone.classList.add('drag');});
+dropZone.addEventListener('dragleave',()=>dropZone.classList.remove('drag'));
+dropZone.addEventListener('drop',e=>{ e.preventDefault(); dropZone.classList.remove('drag'); const f=e.dataTransfer.files[0]; if(f) handleProductImageFile(f); });
+dropZone.onclick=e=>{ if(!e.target.closest('button')) document.getElementById('pm-file-input').click(); };
+document.getElementById('pm-file-input').onchange=e=>{ const f=e.target.files[0]; if(f) handleProductImageFile(f); };
 
-function openCloudinary(e) {
-  if(e) e.stopPropagation();
-  if (!CLOUD_NAME) { toast('❌ กรอก Cloud Name ก่อนครับ', 'error'); return; }
-  if (!cldWidget) {
-    cldWidget = cloudinary.createUploadWidget({
-      cloudName: CLOUD_NAME, uploadPreset: UPLOAD_PRESET,
-      multiple: false, folder: 'highsociety/products',
-      sources: ['local','url','camera'],
-      clientAllowedFormats: ['jpg','jpeg','png','webp'],
-      maxFileSize: 10*1024*1024,
-      styles: { palette: { window:'#111111',tabIcon:'#00ff88',menuIcons:'#00ff88',textDark:'#f0f0f0',textLight:'#f0f0f0',link:'#00ff88',action:'#00ff88',inactiveTabIcon:'#555',error:'#ff4455',inProgress:'#00ff88',complete:'#00ff88',sourceBg:'#1a1a1a' } }
-    }, (err, res) => {
-      if (!err && res?.event === 'success') {
-        const url = res.info.secure_url.replace('/upload/','/upload/f_auto,q_auto,c_fill,w_800,h_800/');
-        document.getElementById('pm-img').value = url;
-        setPreviewImg(url);
-        toast('✅ อัปโหลดสำเร็จ!');
-        cldWidget = null; // reset so cloud name can update
-      }
-    });
-  }
-  cldWidget.open();
-}
-
-function saveCloudName() {
-  CLOUD_NAME = document.getElementById('cloud-name-mini').value.trim();
-  localStorage.setItem('hs_cloud_name', CLOUD_NAME);
-  cldWidget = null;
-}
-
-document.getElementById('pm-save').onclick = async () => {
-  const name = document.getElementById('pm-name').value.trim();
-  if (!name) { toast('❌ กรุณากรอกชื่อสินค้า', 'error'); return; }
-  const payload = {
-    action: 'upsertProduct', adminToken: ADMIN_TOKEN,
-    id: document.getElementById('pm-id').value || '',
-    name, type: document.getElementById('pm-type').value,
-    stock: document.getElementById('pm-stock').value,
-    indica_percent: document.getElementById('pm-indica').value,
-    sativa_percent: document.getElementById('pm-sativa').value,
-    thc_percent: document.getElementById('pm-thc').value,
-    aroma: document.getElementById('pm-aroma').value,
-    price_1g: document.getElementById('pm-p1').value,
-    price_3_5g: document.getElementById('pm-p35').value,
-    price_5g: document.getElementById('pm-p5').value,
-    price_10g: document.getElementById('pm-p10').value,
-    imageUrl: document.getElementById('pm-img').value,
-    description: document.getElementById('pm-desc').value,
+function handleProductImageFile(file){
+  if(!file.type.startsWith('image/')){ toast('❌ กรุณาเลือกไฟล์รูปภาพ','error'); return; }
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    pmImgBase64=ev.target.result.split(',')[1];
+    document.getElementById('pm-img-url').value=''; // clear url
+    setPmPreview(ev.target.result);
   };
-  const btn = document.getElementById('pm-save');
-  btn.textContent = '...'; btn.disabled = true;
-  try {
-    const r = await apiPost(payload);
-    if (r.ok || r.status === 'success') {
-      toast('✅ บันทึกสำเร็จ!');
-      document.getElementById('product-modal').classList.remove('open');
-      await loadProducts();
-    } else toast('❌ ' + (r.error||r.message||'ผิดพลาด'), 'error');
-  } catch(e) { toast('❌ ' + e.message, 'error'); }
-  btn.textContent = '💾 บันทึก'; btn.disabled = false;
+  reader.readAsDataURL(file);
+}
+
+document.getElementById('pm-save').onclick=async()=>{
+  const name=document.getElementById('pm-name').value.trim();
+  if(!name){toast('❌ กรุณากรอกชื่อสินค้า','error');return;}
+  const payload={
+    action:'upsertProduct', adminToken:ADMIN_TOKEN,
+    id:document.getElementById('pm-id').value||'',
+    name, type:document.getElementById('pm-type').value,
+    stock:document.getElementById('pm-stock').value,
+    indica_percent:document.getElementById('pm-indica').value,
+    sativa_percent:document.getElementById('pm-sativa').value,
+    thc_percent:document.getElementById('pm-thc').value,
+    aroma:document.getElementById('pm-aroma').value,
+    price_1g:document.getElementById('pm-p1').value,
+    price_3_5g:document.getElementById('pm-p35').value,
+    price_5g:document.getElementById('pm-p5').value,
+    price_10g:document.getElementById('pm-p10').value,
+    imageUrl:document.getElementById('pm-img-url').value,
+    description:document.getElementById('pm-desc').value,
+    imageBase64:pmImgBase64||'', // ส่งรูปที่ upload ไปด้วย
+  };
+  const btn=document.getElementById('pm-save'); btn.textContent='...'; btn.disabled=true;
+  try{
+    const r=await apiPost(payload);
+    if(r.ok||r.status==='success'){ toast('✅ บันทึกสำเร็จ!'); document.getElementById('product-modal').classList.remove('open'); await loadProducts(); }
+    else toast('❌ '+(r.error||r.message||'ผิดพลาด'),'error');
+  }catch(e){toast('❌ '+e.message,'error');}
+  btn.textContent='💾 บันทึก'; btn.disabled=false;
 };
 
 // Quick stock
-function quickStock(id, current) {
-  const p = getProductById(id);
-  const val = prompt(`📦 สต็อก "${p?.name||id}"\nปัจจุบัน: ${current} ชิ้น\n\nกรอกจำนวนใหม่:`, current);
-  if (val === null || val === '') return;
-  const n = parseInt(val);
-  if (isNaN(n) || n < 0) { toast('❌ จำนวนไม่ถูกต้อง','error'); return; }
-  apiPost({ action: 'updateStock', adminToken: ADMIN_TOKEN, id, stock: n })
-    .then(r => {
-      if (r.ok||r.status==='success') { toast('✅ อัปเดตสต็อกแล้ว'); loadProducts(); }
-      else toast('❌ '+(r.error||'ผิดพลาด'),'error');
-    }).catch(e=>toast('❌ '+e.message,'error'));
+function quickStock(id,current){
+  const p=getProductById(id);
+  const val=prompt(`📦 สต็อก "${p?.name||id}"\nปัจจุบัน: ${current}\n\nกรอกจำนวนใหม่:`,current);
+  if(val===null||val==='') return;
+  const n=parseInt(val); if(isNaN(n)||n<0){toast('❌ ไม่ถูกต้อง','error');return;}
+  apiPost({action:'updateStock',adminToken:ADMIN_TOKEN,id,stock:n})
+    .then(r=>{ if(r.ok||r.status==='success'){toast('✅ อัปเดตสต็อกแล้ว');loadProducts();}else toast('❌ '+(r.error||'ผิดพลาด'),'error'); })
+    .catch(e=>toast('❌ '+e.message,'error'));
 }
 
-// ─── BOOT ───
-(function() {
-  document.getElementById('chart-month').value = new Date().toISOString().slice(0,7);
-  if (ADMIN_TOKEN) showApp();
-})();
+// ── BOOT ──
+(function(){ document.getElementById('chart-month').value=new Date().toISOString().slice(0,7); if(ADMIN_TOKEN)showApp(); })();
 </script>
 </body>
 </html>
