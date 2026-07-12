@@ -342,6 +342,10 @@
   function renderContentCards(items,type){
     const list = el('main-content-list'); list.innerHTML='';
     if(searchQuery){ items=(items||[]).filter(it=>String(it.name||'').toLowerCase().includes(searchQuery)); }
+    if(type==='strains'||type==='equipments'){
+      // สินค้าหมดสต็อกไปอยู่ท้ายกริด แต่ไม่ยุ่งลำดับเดิมภายในกลุ่มที่เหลือ/หมด
+      items=[...(items||[])].sort((a,b)=>(Number(a.stock||0)<=0?1:0)-(Number(b.stock||0)<=0?1:0));
+    }
     if(!items||!items.length){ list.innerHTML='<p class="col-span-full text-center text-gray-500">ไม่พบข้อมูลในหมวดหมู่นี้</p>'; return; }
     items.forEach(it=>{ const card=(type==='promotions')?createPromotionCard(it):createProductCard(it); if(card) list.appendChild(card); });
   }
