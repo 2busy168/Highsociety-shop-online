@@ -118,6 +118,14 @@
   <!-- Main -->
   <main class="container mx-auto py-8 md:py-12 px-4">
     <h2 id="main-content-title" class="text-2xl md:3xl font-bold text-center mb-6">สินค้าทั้งหมด</h2>
+    <div class="max-w-md mx-auto mb-6">
+      <div class="relative">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 10a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+        <input id="product-search-input" type="text" placeholder="ค้นหาสินค้า..." class="w-full pl-10 pr-4 py-2.5 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500 text-sm" />
+      </div>
+    </div>
     <div id="main-content-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
   </main>
 
@@ -225,7 +233,7 @@
   };
   const equipmentDescription = { icon:"⚙️", tagColor:"bg-gray-100 text-gray-800" };
 
-  let strains=[], equipments=[], promotions=[], cart=[], currentView="strains", activeFeeling=null;
+  let strains=[], equipments=[], promotions=[], cart=[], currentView="strains", activeFeeling=null, searchQuery='';
 
   // ===== Helpers =====
   const el = id => document.getElementById(id);
@@ -333,8 +341,15 @@
 
   function renderContentCards(items,type){
     const list = el('main-content-list'); list.innerHTML='';
+    if(searchQuery){ items=(items||[]).filter(it=>String(it.name||'').toLowerCase().includes(searchQuery)); }
     if(!items||!items.length){ list.innerHTML='<p class="col-span-full text-center text-gray-500">ไม่พบข้อมูลในหมวดหมู่นี้</p>'; return; }
     items.forEach(it=>{ const card=(type==='promotions')?createPromotionCard(it):createProductCard(it); if(card) list.appendChild(card); });
+  }
+
+  function rerenderCurrentView(){
+    if(currentView==='strains') filterProductsByFeeling(activeFeeling);
+    else if(currentView==='equipments') renderContentCards(equipments,'equipments');
+    else if(currentView==='promotions') renderContentCards(promotions,'promotions');
   }
 
   // ===== การ์ดสินค้า (รายละเอียดเพิ่ม) =====
@@ -651,6 +666,7 @@
     el('checkout-button').addEventListener('click', handleCheckout);
     el('modal-ok-btn').addEventListener('click', ()=> hideModal('modal-container'));
     el('line-login-btn').addEventListener('click', handleLineLogin);
+    el('product-search-input').addEventListener('input', (e)=>{ searchQuery=e.target.value.trim().toLowerCase(); rerenderCurrentView(); });
 
     // เปลี่ยนให้ปุ่ม "เพิ่มลงตะกร้า" เปิดโมดัลเลือกแพ็ค/จำนวน
     document.body.addEventListener('click', (e)=>{
