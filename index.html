@@ -690,7 +690,8 @@
     statusMessage.textContent='กำลังยืนยันคำสั่งซื้อ...'; statusMessage.className='text-center mt-4 text-sm text-blue-600';
 
     const totalAmount = cart.reduce((t,i)=>t+(i.price*i.quantity),0);
-    const itemsForAPI = cart.map(i=>({ id:i.id, type:i.type, name:i.name, price:i.price, qty:i.quantity }));
+    // backend (reduceStock) เช็คคำว่า 'equipment' เอกพจน์ — แปลงก่อนส่ง ไม่งั้นสต็อกอุปกรณ์ไม่ถูกตัด
+    const itemsForAPI = cart.map(i=>({ id:i.id, type:(i.type==='equipments'?'equipment':i.type), name:i.name, price:i.price, qty:i.quantity }));
     const u = getLineUser();
     const orderData = { action:'placeOrder', customerName, customerEmail, user_id:u.userId||'', email:customerEmail, items:itemsForAPI, total:totalAmount };
 
