@@ -116,6 +116,12 @@
     <div id="feelings-container" class="flex flex-wrap justify-center gap-2 md:gap-4 px-4"></div>
   </section>
 
+  <!-- Brands (แท็บ Vape) -->
+  <section id="brands-section" class="py-6 md:py-10 bg-white shadow-lg -mt-8 md:-mt-16 mx-auto rounded-xl max-w-7xl relative z-20" style="display:none">
+    <h2 class="text-center text-xl md:text-2xl font-semibold mb-5 px-4">เลือกแบรนด์</h2>
+    <div id="brands-container" class="flex flex-wrap justify-center gap-2 md:gap-4 px-4"></div>
+  </section>
+
   <!-- Main -->
   <main class="container mx-auto py-8 md:py-12 px-4">
     <h2 id="main-content-title" class="text-2xl md:3xl font-bold text-center mb-6">สินค้าทั้งหมด</h2>
@@ -235,7 +241,7 @@
   const equipmentDescription = { icon:"⚙️", tagColor:"bg-gray-100 text-gray-800" };
   const vapeDescription = { icon:"💨", tagColor:"bg-blue-100 text-blue-800" };
 
-  let strains=[], vapes=[], equipments=[], promotions=[], cart=[], currentView="strains", activeFeeling=null, searchQuery='';
+  let strains=[], vapes=[], equipments=[], promotions=[], cart=[], currentView="strains", activeFeeling=null, activeBrand=null, searchQuery='';
 
   // แยกสินค้าจากชีต Products: type "Vape" ไปแท็บ Vape ที่เหลือเป็นสายพันธุ์
   function splitProducts(list){
@@ -310,24 +316,56 @@
     if(view==='strains'){
       el('main-content-title').textContent='สายพันธุ์ทั้งหมด';
       el('feelings-section').style.display='block';
+      el('brands-section').style.display='none';
       updateHeroSection('ค้นหาสายพันธุ์ที่เหมาะกับคุณ','เลือกความรู้สึกที่ต้องการ เราจะแนะนำสายพันธุ์ที่ดีที่สุดให้คุณ');
       filterProductsByFeeling(activeFeeling);
     }else if(view==='vapes'){
-      el('main-content-title').textContent='Vape ทั้งหมด';
       el('feelings-section').style.display='none';
       updateHeroSection('Vape คุณภาพ พร้อมใช้','สะดวก พกพาง่าย ราคาต่อชิ้น');
-      renderContentCards(vapes,'vapes');
+      buildBrandButtons();
+      filterVapesByBrand(activeBrand);
     }else if(view==='equipments'){
       el('main-content-title').textContent='อุปกรณ์ทั้งหมด';
       el('feelings-section').style.display='none';
+      el('brands-section').style.display='none';
       updateHeroSection('เลือกอุปกรณ์ที่ใช่','อุปกรณ์เสริมคุณภาพสูงสำหรับการใช้งานของคุณ');
       renderContentCards(equipments,'equipments');
     }else if(view==='promotions'){
       el('main-content-title').textContent='โปรโมชั่นพิเศษ';
       el('feelings-section').style.display='none';
+      el('brands-section').style.display='none';
       updateHeroSection('โปรโมชั่นสุดคุ้ม','ห้ามพลาดข้อเสนอดีๆ ที่นี่');
       renderContentCards(promotions,'promotions');
     }
+  }
+
+  // ===== ปุ่มกรองแบรนด์ (แท็บ Vape) — สร้างจากค่า brand ที่มีจริงในชีต =====
+  function buildBrandButtons(){
+    const wrap=el('brands-container'); wrap.innerHTML='';
+    const brands=[...new Set((vapes||[]).map(v=>String(v.brand||'').trim()).filter(Boolean))];
+    if(!brands.length){ el('brands-section').style.display='none'; activeBrand=null; return; }
+    if(activeBrand && !brands.includes(activeBrand)) activeBrand=null;
+    el('brands-section').style.display='block';
+    brands.forEach(b=>{
+      const btn=document.createElement('button');
+      btn.className='feeling-btn bg-green-50 text-gray-800 font-semibold py-2 px-4 rounded-full flex items-center shadow-sm hover:shadow-md'+(activeBrand===b?' active':'');
+      btn.dataset.brand=b; btn.innerHTML='<span class="mr-2 text-lg">💨</span>'+b;
+      btn.addEventListener('click',handleBrandClick); wrap.appendChild(btn);
+    });
+  }
+  function handleBrandClick(e){
+    const b=e.currentTarget.dataset.brand;
+    activeBrand=(activeBrand===b)?null:b;
+    document.querySelectorAll('#brands-container .feeling-btn').forEach(x=>x.classList.toggle('active', x.dataset.brand===activeBrand));
+    filterVapesByBrand(activeBrand);
+  }
+  function filterVapesByBrand(brand){
+    let filtered=vapes||[];
+    if(brand){
+      filtered=filtered.filter(v=>String(v.brand||'').trim()===brand);
+      el('main-content-title').innerHTML='💨 Vape <span class="text-green-600">"'+brand+'"</span>';
+    }else el('main-content-title').textContent='Vape ทั้งหมด';
+    renderContentCards(filtered,'vapes');
   }
 
   function createFeelingButtons(){
@@ -370,7 +408,7 @@
 
   function rerenderCurrentView(){
     if(currentView==='strains') filterProductsByFeeling(activeFeeling);
-    else if(currentView==='vapes') renderContentCards(vapes,'vapes');
+    else if(currentView==='vapes') filterVapesByBrand(activeBrand);
     else if(currentView==='equipments') renderContentCards(equipments,'equipments');
     else if(currentView==='promotions') renderContentCards(promotions,'promotions');
   }

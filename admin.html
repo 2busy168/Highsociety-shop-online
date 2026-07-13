@@ -322,6 +322,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
           <option value="piece">ต่อชิ้น</option>
         </select>
       </div>
+      <div class="field"><label>แบรนด์</label><input id="pm-brand" placeholder="เช่น MUHA MEDS, Dranks"></div>
       <div class="field"><label>Indica %</label><input id="pm-indica" type="number" placeholder="50"></div>
       <div class="field"><label>Sativa %</label><input id="pm-sativa" type="number" placeholder="50"></div>
       <div class="field"><label>THC %</label><input id="pm-thc" type="number" step="0.1" placeholder="20.5"></div>
@@ -650,6 +651,7 @@ function openProductModal(id){
   document.getElementById('pm-desc').value=p?.description||'';
   document.getElementById('pm-unit').value=(String(p?.sale_unit||'').toLowerCase()==='piece')?'piece':'g';
   document.getElementById('pm-price-piece').value=p?.price_piece||'';
+  document.getElementById('pm-brand').value=p?.brand||'';
   onPmUnitChange();
   document.getElementById('pm-img-url').value=p?.imageUrl||'';
   pmImgBase64='';
@@ -703,6 +705,7 @@ document.getElementById('pm-save').onclick=async()=>{
     price_10g:document.getElementById('pm-p10').value,
     sale_unit:document.getElementById('pm-unit').value,
     price_piece:document.getElementById('pm-price-piece').value,
+    brand:document.getElementById('pm-brand').value.trim(),
     imageUrl:document.getElementById('pm-img-url').value,
     description:document.getElementById('pm-desc').value,
     imageBase64:pmImgBase64||'', // ส่งรูปที่ upload ไปด้วย
