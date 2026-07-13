@@ -68,6 +68,7 @@
         </div>
         <nav class="divide-y divide-gray-100">
           <button class="drawer-link w-full text-left px-4 py-3" data-action="go" data-target="strains">สายพันธุ์</button>
+          <button class="drawer-link w-full text-left px-4 py-3" data-action="go" data-target="vapes">Vape</button>
           <button class="drawer-link w-full text-left px-4 py-3" data-action="go" data-target="equipments">อุปกรณ์</button>
           <button class="drawer-link w-full text-left px-4 py-3" data-action="go" data-target="promotions">โปรโมชั่น</button>
           <button class="drawer-link w-full text-left px-4 py-3" data-action="order-history">ประวัติคำสั่งซื้อของฉัน</button>
@@ -232,8 +233,20 @@
     "Hybrid": { icon:"🌿", tagColor:"bg-green-100 text-green-800" }
   };
   const equipmentDescription = { icon:"⚙️", tagColor:"bg-gray-100 text-gray-800" };
+  const vapeDescription = { icon:"💨", tagColor:"bg-blue-100 text-blue-800" };
 
-  let strains=[], equipments=[], promotions=[], cart=[], currentView="strains", activeFeeling=null, searchQuery='';
+  let strains=[], vapes=[], equipments=[], promotions=[], cart=[], currentView="strains", activeFeeling=null, searchQuery='';
+
+  // แยกสินค้าจากชีต Products: type "Vape" ไปแท็บ Vape ที่เหลือเป็นสายพันธุ์
+  function splitProducts(list){
+    const all = list||[];
+    return {
+      strains: all.filter(p=>String(p.type||'').trim()!=='Vape'),
+      vapes:   all.filter(p=>String(p.type||'').trim()==='Vape')
+    };
+  }
+  function isPieceProduct(p){ return String(p.sale_unit||'').toLowerCase()==='piece'; }
+  function piecePriceOf(p){ const v=p.price_piece ?? p.price; return Number(v||0); }
 
   // ===== Helpers =====
   const el = id => document.getElementById(id);
@@ -299,6 +312,11 @@
       el('feelings-section').style.display='block';
       updateHeroSection('ค้นหาสายพันธุ์ที่เหมาะกับคุณ','เลือกความรู้สึกที่ต้องการ เราจะแนะนำสายพันธุ์ที่ดีที่สุดให้คุณ');
       filterProductsByFeeling(activeFeeling);
+    }else if(view==='vapes'){
+      el('main-content-title').textContent='Vape ทั้งหมด';
+      el('feelings-section').style.display='none';
+      updateHeroSection('Vape คุณภาพ พร้อมใช้','สะดวก พกพาง่าย ราคาต่อชิ้น');
+      renderContentCards(vapes,'vapes');
     }else if(view==='equipments'){
       el('main-content-title').textContent='อุปกรณ์ทั้งหมด';
       el('feelings-section').style.display='none';
@@ -342,7 +360,7 @@
   function renderContentCards(items,type){
     const list = el('main-content-list'); list.innerHTML='';
     if(searchQuery){ items=(items||[]).filter(it=>String(it.name||'').toLowerCase().includes(searchQuery)); }
-    if(type==='strains'||type==='equipments'){
+    if(type==='strains'||type==='equipments'||type==='vapes'){
       // สินค้าหมดสต็อกไปอยู่ท้ายกริด แต่ไม่ยุ่งลำดับเดิมภายในกลุ่มที่เหลือ/หมด
       items=[...(items||[])].sort((a,b)=>(Number(a.stock||0)<=0?1:0)-(Number(b.stock||0)<=0?1:0));
     }
@@ -352,14 +370,17 @@
 
   function rerenderCurrentView(){
     if(currentView==='strains') filterProductsByFeeling(activeFeeling);
+    else if(currentView==='vapes') renderContentCards(vapes,'vapes');
     else if(currentView==='equipments') renderContentCards(equipments,'equipments');
     else if(currentView==='promotions') renderContentCards(promotions,'promotions');
   }
 
   // ===== การ์ดสินค้า (รายละเอียดเพิ่ม) =====
   function createProductCard(p){
-    const info = isStrainProduct(p)?strainDescriptions[p.type]:equipmentDescription;
+    const isVape = String(p.type||'').trim()==='Vape';
+    const info = isStrainProduct(p)?strainDescriptions[p.type]:(isVape?vapeDescription:equipmentDescription);
     const out  = Number(p.stock||0)<=0;
+    const piece = isPieceProduct(p);
 
     const aroma   = (p.aroma||'').toString().trim();
     const effects = (p.effects||'').toString().trim();
@@ -381,19 +402,23 @@
     const p5  = p.price_5g   ?? p.price5g   ?? '';
     const p10 = p.price_10g  ?? p.price10g  ?? '';
     const priceParts=[];
-    if(p1)  priceParts.push(`1g ฿${p1}`);
-    if(p35) priceParts.push(`3.5g ฿${p35}`);
-    if(p5)  priceParts.push(`5g ฿${p5}`);
-    if(p10) priceParts.push(`10g ฿${p10}`);
+    if(!piece){
+      if(p1)  priceParts.push(`1g ฿${p1}`);
+      if(p35) priceParts.push(`3.5g ฿${p35}`);
+      if(p5)  priceParts.push(`5g ฿${p5}`);
+      if(p10) priceParts.push(`10g ฿${p10}`);
+    }
 
     const line1=[aroma?`กลิ่น/รส: <span class="font-medium">${aroma}</span>`:'',effects?`เอฟเฟกต์: <span class="font-medium">${effects}</span>`:''].filter(Boolean).join(' | ');
     const line2=[thc?`THC ${thc}`:'',(indica!=null && sativa!=null)?`Indica ${indica}% / Sativa ${sativa}%`:'' ].filter(Boolean).join(' | ');
-    const line3=priceParts.length?('ราคา: '+priceParts.join(' | ')):''; // โชว์เฉพาะที่มีข้อมูล
+    const line3=piece
+      ? ('ราคา: ฿'+piecePriceOf(p).toLocaleString()+' / ชิ้น')
+      : (priceParts.length?('ราคา: '+priceParts.join(' | ')):''); // โชว์เฉพาะที่มีข้อมูล
 
     const stock = out ? '<span class="text-red-500 font-semibold">สินค้าหมด</span>' : '<span class="text-gray-500">เหลือ '+p.stock+' ชิ้น</span>';
     const btn = out
       ? '<button class="bg-gray-400 text-white font-semibold py-2 px-4 rounded-lg cursor-not-allowed" disabled>สินค้าหมด</button>'
-      : '<button class="add-to-cart-btn bg-green-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-700 transition-colors" data-id="'+p.id+'" data-type="'+(isStrainProduct(p)?'strains':'equipments')+'">เพิ่มลงตะกร้า</button>';
+      : '<button class="add-to-cart-btn bg-green-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-700 transition-colors" data-id="'+p.id+'" data-type="'+(isStrainProduct(p)?'strains':(isVape?'vapes':'equipments'))+'">เพิ่มลงตะกร้า</button>';
 
     const d=document.createElement('div');
     d.className='bg-white rounded-lg shadow-md p-6 card-hover flex flex-col justify-between';
@@ -410,7 +435,7 @@
       +  (line3?'<p class="text-sm font-semibold text-gray-900 mt-1">'+line3+'</p>':'')
       +'</div>'
       +'<div class="flex justify-between items-end mt-4">'
-      +  '<div><span class="text-2xl font-bold text-gray-900">฿'+Number(p.price||0)+'</span> '+stock+'</div>'
+      +  '<div><span class="text-2xl font-bold text-gray-900">฿'+(piece?piecePriceOf(p).toLocaleString():Number(p.price||0))+'</span>'+(piece?'<span class="text-sm text-gray-500"> /ชิ้น</span>':'')+' '+stock+'</div>'
       +  btn
       +'</div>';
     return d;
@@ -433,10 +458,11 @@
     return d;
   }
 
-  function getProductById(id,type){ const pool=(type==='strains')?strains:equipments; return pool.find(x=>String(x.id)===String(id)); }
+  function getProductById(id,type){ const pool=(type==='strains')?strains:(type==='vapes')?vapes:equipments; return pool.find(x=>String(x.id)===String(id)); }
 
   // ===== เพิ่มลงตะกร้า (รองรับแพ็ค) =====
   function getPackOptions(p){
+    if(isPieceProduct(p)) return []; // สินค้าขายเป็นชิ้น ไม่มีตัวเลือกแพ็คน้ำหนัก
     const ops = [];
     const map = [
       { key:'1g',   label:'1g',   val: p.price_1g   ?? p.price1g   },
@@ -467,7 +493,7 @@
       const found = getPackOptions(p).find(o=>o.key===packKey);
       if (found){ unitLabel=found.label; unitPrice=found.price; }
     }
-    if (unitPrice==null){ unitPrice = Number(p.price||0); } // fallback
+    if (unitPrice==null){ unitPrice = isPieceProduct(p) ? piecePriceOf(p) : Number(p.price||0); } // fallback
     if (!unitLabel && packKey){ unitLabel = String(packKey); }
 
     const key = type + ':' + p.id + (unitLabel? ':'+unitLabel:'');
@@ -560,7 +586,7 @@
     } else {
       packSection.style.display = 'none';
       addCtx.unitLabel = null;
-      addCtx.unitPrice = Number(p.price||0) || 0;
+      addCtx.unitPrice = (isPieceProduct(p) ? piecePriceOf(p) : Number(p.price||0)) || 0;
     }
 
     // update prices UI
@@ -618,7 +644,7 @@
     const loadingIndicator = el('checkout-loading-indicator');
     const checkoutButton = el('checkout-button'); const closeBtn = el('cart-close-btn');
 
-    try{ showLoading(); const latest=await apiGet({action:'getProducts'}); strains=latest.products||[]; equipments=latest.equipments||[]; } finally{ hideLoading(); }
+    try{ showLoading(); const latest=await apiGet({action:'getProducts'}); const spl=splitProducts(latest.products); strains=spl.strains; vapes=spl.vapes; equipments=latest.equipments||[]; } finally{ hideLoading(); }
 
     if(cart.length===0 || !customerName || !customerEmail){ statusMessage.textContent='กรุณากรอกข้อมูลให้ครบถ้วนและมีสินค้าในตะกร้า'; statusMessage.className='text-center mt-4 text-sm text-red-500'; return; }
 
@@ -650,7 +676,7 @@
   async function initializeData(){
     showLoading();
     try{
-      const r1=await apiGet({action:'getProducts'}); strains=r1.products||[]; equipments=r1.equipments||[];
+      const r1=await apiGet({action:'getProducts'}); const sp=splitProducts(r1.products); strains=sp.strains; vapes=sp.vapes; equipments=r1.equipments||[];
       const r2=await apiGet({action:'getPromotions'}); promotions=r2.promotions||[]; toggleView(currentView);
     } finally { hideLoading(); }
   }
