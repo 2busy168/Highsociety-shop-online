@@ -46,6 +46,37 @@
 
     /* Modals on top */
     #cart-modal-container,#modal-container,#add-modal-container{ z-index:10000; }
+
+    /* ===== Dark mode (สลับด้วยคลาส dark ที่ body) — override เฉพาะโทนสว่าง ส่วนหัวเขียวแบรนด์คงเดิม ===== */
+    body.dark{ background:#0f1412; color:#e5e7eb; }
+    body.dark .bg-white{ background-color:#1a201d !important; }
+    body.dark .bg-gray-50{ background-color:#232a26 !important; }
+    body.dark .bg-gray-100{ background-color:#2a322d !important; }
+    body.dark .bg-gray-200{ background-color:#333b36 !important; }
+    body.dark .bg-gray-400{ background-color:#4b5563 !important; }
+    body.dark .bg-green-50{ background-color:#1d2a22 !important; }
+    body.dark .text-gray-900,body.dark .text-gray-800,body.dark .text-gray-700{ color:#e5e7eb !important; }
+    body.dark .text-gray-600,body.dark .text-gray-500{ color:#9ca3af !important; }
+    body.dark .text-green-700,body.dark .text-green-600{ color:#4ade80 !important; }
+    body.dark input,body.dark textarea,body.dark select{ background-color:#232a26; color:#e5e7eb; border-color:#3a443e; }
+    body.dark input::placeholder,body.dark textarea::placeholder{ color:#6b7280; }
+    body.dark .border,body.dark .border-gray-300{ border-color:#3a443e !important; }
+    body.dark .border-t,body.dark .border-b{ border-color:#3a443e !important; }
+    body.dark .divide-gray-100 > *{ border-color:#2a322d !important; }
+    body.dark #mobile-drawer-panel{ background:#1a201d; color:#e5e7eb; }
+    body.dark #mobile-drawer-panel .drawer-link{ color:#e5e7eb !important; }
+    body.dark .feeling-btn{ background:#1d2a22; color:#e5e7eb; }
+    body.dark .feeling-btn:hover{ background:#25382c; }
+    body.dark .feeling-btn.active{ background:#047857; color:#fff; }
+    body.dark .card-hover:hover{ box-shadow:0 20px 25px -5px rgba(0,0,0,.6); }
+    body.dark .hover\:bg-gray-100:hover{ background-color:#2a322d !important; }
+    body.dark .hover\:bg-gray-300:hover{ background-color:#3f4842 !important; }
+    /* แท็กสีหมวดสินค้า */
+    body.dark .bg-purple-100{ background:#2d2440 !important; } body.dark .text-purple-800{ color:#c4b5fd !important; }
+    body.dark .bg-yellow-100{ background:#3a3320 !important; } body.dark .text-yellow-800{ color:#fde68a !important; }
+    body.dark .bg-green-100{ background:#1d3226 !important; } body.dark .text-green-800{ color:#86efac !important; }
+    body.dark .bg-blue-100{ background:#1e2a3a !important; } body.dark .text-blue-800{ color:#93c5fd !important; }
+    body.dark .bg-red-100{ background:#3b1d1d !important; } body.dark .text-red-800{ color:#f87171 !important; }
   </style>
 
   <script>
@@ -55,6 +86,13 @@
   </script>
 </head>
 <body class="bg-gray-50 text-gray-800">
+<script>
+  // ตั้งธีมก่อนหน้าเรนเดอร์ กันจอกะพริบ: ใช้ค่าที่เคยเลือก ถ้าไม่เคยเลือกตามการตั้งค่าเครื่อง
+  (function(){ try{
+    var t = localStorage.getItem('theme') || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    if (t==='dark') document.body.classList.add('dark');
+  }catch(e){} })();
+</script>
 
   <!-- Header -->
   <header class="gradient-bg text-white shadow-lg p-4 sticky top-0 z-50">
@@ -83,6 +121,7 @@
         <span class="mr-2">🌱</span>H!GH$OC!€T¥
       </div>
       <div id="header-actions" class="flex items-center space-x-4">
+        <button id="theme-toggle" class="text-xl leading-none" aria-label="สลับโหมดมืด/สว่าง">🌙</button>
         <button id="line-login-btn" class="bg-white text-green-700 font-semibold py-1.5 px-3 rounded-full text-sm hover:bg-gray-100">เข้าสู่ระบบด้วย LINE</button>
         <span class="relative cursor-pointer" id="cart-icon-container" aria-label="ตะกร้าสินค้า">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -736,6 +775,18 @@
     el('modal-ok-btn').addEventListener('click', ()=> hideModal('modal-container'));
     el('line-login-btn').addEventListener('click', handleLineLogin);
     el('product-search-input').addEventListener('input', (e)=>{ searchQuery=e.target.value.trim().toLowerCase(); rerenderCurrentView(); });
+
+    // สลับธีมมืด/สว่าง + จำค่าไว้
+    const themeBtn=el('theme-toggle');
+    if(themeBtn){
+      themeBtn.textContent = document.body.classList.contains('dark') ? '☀️' : '🌙';
+      themeBtn.addEventListener('click', ()=>{
+        const dark = !document.body.classList.contains('dark');
+        document.body.classList.toggle('dark', dark);
+        themeBtn.textContent = dark ? '☀️' : '🌙';
+        try{ localStorage.setItem('theme', dark?'dark':'light'); }catch(e){}
+      });
+    }
 
     // เปลี่ยนให้ปุ่ม "เพิ่มลงตะกร้า" เปิดโมดัลเลือกแพ็ค/จำนวน
     document.body.addEventListener('click', (e)=>{
