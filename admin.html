@@ -203,6 +203,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
       <div class="nav-item active" data-page="dashboard"><span class="nav-icon">📊</span>Dashboard</div>
       <div class="nav-item" data-page="orders"><span class="nav-icon">🛒</span>คำสั่งซื้อ<span class="nav-badge" id="pending-count">0</span></div>
       <div class="nav-item" data-page="products"><span class="nav-icon">🌿</span>สินค้า</div>
+      <div class="nav-item" data-page="promotions"><span class="nav-icon">🔥</span>โปรโมชั่น</div>
     </nav>
     <div class="sidebar-footer"><button class="logout-btn" id="logoutBtn">ออกจากระบบ</button></div>
   </aside>
@@ -276,6 +277,14 @@ tr:hover td{background:rgba(255,255,255,.02)}
         </div>
       </div>
       <div id="products-grid" class="product-grid"><div class="empty-state"><span class="spinner"></span></div></div>
+    </div>
+
+    <div class="page" id="page-promotions">
+      <div class="section-header">
+        <div class="section-title">จัดการโปรโมชั่น</div>
+        <button class="btn btn-primary btn-sm" id="add-promotion-btn">+ เพิ่มโปรโมชั่น</button>
+      </div>
+      <div id="promotions-grid" class="product-grid"><div class="empty-state"><span class="spinner"></span></div></div>
     </div>
   </div>
 </div>
@@ -351,14 +360,53 @@ tr:hover td{background:rgba(255,255,255,.02)}
   </div>
 </div>
 
+<!-- ══ PROMOTION MODAL ══ -->
+<div class="modal-backdrop" id="promotion-modal">
+  <div class="modal">
+    <div class="modal-title" id="pmo-title">เพิ่มโปรโมชั่นใหม่</div>
+
+    <label>รูปโปรโมชั่น <span style="color:var(--muted);font-weight:400">(คลิกหรือลากมาวาง · JPG PNG WEBP)</span></label>
+    <div class="img-drop-zone" id="pmo-img-drop-zone">
+      <img id="pmo-img-preview" src="" alt="" style="display:none">
+      <div class="img-drop-placeholder" id="pmo-img-drop-placeholder">
+        <div class="icon">📸</div>
+        <p><strong>คลิกเพื่อเลือกรูป</strong> หรือลากมาวาง</p>
+      </div>
+      <div class="img-overlay" id="pmo-img-overlay">
+        <button class="btn btn-primary btn-sm" onclick="document.getElementById('pmo-file-input').click();event.stopPropagation()">📸 เปลี่ยนรูป</button>
+        <button class="btn btn-danger btn-sm" onclick="clearPromotionImg(event)">✕</button>
+      </div>
+      <input type="file" id="pmo-file-input" class="img-upload-input" accept="image/*">
+    </div>
+    <div class="field">
+      <label>หรือวาง URL รูปภาพ</label>
+      <input id="pmo-img-url" placeholder="https://..." oninput="onPmoUrlChange()">
+    </div>
+
+    <div class="field"><label>ชื่อโปรโมชั่น *</label><input id="pmo-name" placeholder="เช่น ซื้อ 1 แถม 1"></div>
+    <div class="field"><label>คำอธิบาย</label><textarea id="pmo-desc" rows="3" placeholder="รายละเอียดโปรโมชั่น"></textarea></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="field"><label>ส่วนลด (%)</label><input id="pmo-discount" type="number" min="0" max="100" placeholder="20"></div>
+      <div class="field"><label>วันหมดเขต</label><input id="pmo-enddate" type="date"></div>
+    </div>
+    <input type="hidden" id="pmo-id">
+
+    <div class="modal-footer">
+      <button class="btn btn-secondary" id="pmo-cancel">ยกเลิก</button>
+      <button class="btn btn-primary" id="pmo-save">💾 บันทึก</button>
+    </div>
+  </div>
+</div>
+
 <div id="toast"></div>
 
 <script>
 const APP_URL = "https://script.google.com/macros/s/AKfycbzis9Isw6XXUsi7k8MQmI4rJI8gnFnPS0VIDpuvsgw88dC8SwQ4VOHKK5TfeQMDKgLotA/exec";
 let ADMIN_TOKEN = localStorage.getItem('ADMIN_TOKEN') || '';
-let allOrders = [], allProducts = [], allEquipments = [];
+let allOrders = [], allProducts = [], allEquipments = [], allPromotions = [];
 let chartInstance = null;
-let pmImgBase64 = ''; // เก็บรูปที่ upload จากเครื่อง
+let pmImgBase64 = ''; // เก็บรูปที่ upload จากเครื่อง (สินค้า)
+let pmoImgBase64 = ''; // เก็บรูปที่ upload จากเครื่อง (โปรโมชั่น)
 
 // ── API ──
 async function apiGet(p){ const r=await fetch(APP_URL+'?'+new URLSearchParams(p),{cache:'no-store'}); return r.json(); }
@@ -389,7 +437,7 @@ document.querySelectorAll('.nav-item').forEach(item=>{
     document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
     item.classList.add('active');
     document.getElementById('page-'+item.dataset.page).classList.add('active');
-    document.getElementById('page-title').textContent={dashboard:'Dashboard',orders:'คำสั่งซื้อ',products:'สินค้า'}[item.dataset.page];
+    document.getElementById('page-title').textContent={dashboard:'Dashboard',orders:'คำสั่งซื้อ',products:'สินค้า',promotions:'โปรโมชั่น'}[item.dataset.page];
     document.getElementById('sidebar').classList.remove('open');
   };
 });
@@ -397,9 +445,12 @@ document.getElementById('menu-toggle').onclick=()=>document.getElementById('side
 document.getElementById('refresh-btn').onclick=loadAll;
 
 // ── LOAD ──
-async function loadAll(){ await Promise.all([loadProducts(),loadOrders(),loadChart()]); updateStats(); }
+async function loadAll(){ await Promise.all([loadProducts(),loadOrders(),loadChart(),loadPromotions()]); updateStats(); }
 async function loadProducts(){
   try{ const r=await apiGet({action:'getProducts'}); allProducts=r.products||[]; allEquipments=r.equipments||[]; renderProducts(); updateLowStock(); }catch(e){console.warn(e);}
+}
+async function loadPromotions(){
+  try{ const r=await apiGet({action:'getPromotions'}); allPromotions=r.promotions||[]; renderPromotions(); }catch(e){console.warn(e);}
 }
 async function loadOrders(){
   try{ const r=await apiGet({action:'adminListOrders',limit:200}); allOrders=r.orders||[]; renderOrders(); updateOrderStats(); }
@@ -439,6 +490,97 @@ function renderProducts(filter=''){
 }
 document.getElementById('product-search').oninput=function(){renderProducts(this.value);};
 function updateLowStock(){ document.getElementById('stat-low-stock').textContent=[...allProducts,...allEquipments].filter(p=>Number(p.stock||0)<5).length; }
+
+// ── PROMOTIONS ──
+function getPromotionById(id){ return allPromotions.find(p=>String(p.id)===String(id)); }
+function renderPromotions(){
+  const grid=document.getElementById('promotions-grid');
+  if(!allPromotions.length){grid.innerHTML='<div class="empty-state">ยังไม่มีโปรโมชั่น</div>';return;}
+  const now=new Date();
+  grid.innerHTML=allPromotions.map(pm=>{
+    const end=pm.endDate?new Date(pm.endDate):null;
+    const expired = end && end < now;
+    const img=pm.imageUrl||'https://placehold.co/400x300/1a1a1a/444?text=No+Image';
+    return `<div class="product-card">
+      <div class="product-img-wrap">
+        <img src="${img}" onerror="this.src='https://placehold.co/400x300/1a1a1a/444?text=Error'" alt="">
+        <button class="product-img-edit" onclick="openPromotionModal('${pm.id}')">✏️ แก้ไขรูป</button>
+      </div>
+      <div class="product-body">
+        <div class="product-name" title="${pm.title||''}">${pm.title||'-'}</div>
+        <div class="product-meta">${pm.discount?`<span>ลด ${pm.discount}%</span>`:''}${end?`<span style="${expired?'color:var(--red)':''}">${expired?'หมดเขตแล้ว':'ถึง '+end.toLocaleDateString('th-TH')}</span>`:''}</div>
+        <div class="product-actions">
+          <button class="btn btn-secondary" onclick="openPromotionModal('${pm.id}')">✏️ แก้ไข</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+document.getElementById('add-promotion-btn').onclick=()=>openPromotionModal(null);
+
+function openPromotionModal(id){
+  const pm=id?getPromotionById(id):null;
+  document.getElementById('pmo-title').textContent=pm?'แก้ไขโปรโมชั่น':'เพิ่มโปรโมชั่นใหม่';
+  document.getElementById('pmo-id').value=pm?.id||'';
+  document.getElementById('pmo-name').value=pm?.title||'';
+  document.getElementById('pmo-desc').value=pm?.description||'';
+  document.getElementById('pmo-discount').value=pm?.discount||'';
+  document.getElementById('pmo-enddate').value=pm?.endDate?String(pm.endDate).slice(0,10):'';
+  document.getElementById('pmo-img-url').value=pm?.imageUrl||'';
+  pmoImgBase64='';
+  setPmoPreview(pm?.imageUrl||'');
+  document.getElementById('promotion-modal').classList.add('open');
+}
+document.getElementById('pmo-cancel').onclick=()=>document.getElementById('promotion-modal').classList.remove('open');
+
+function setPmoPreview(url){
+  const img=document.getElementById('pmo-img-preview');
+  const ph=document.getElementById('pmo-img-drop-placeholder');
+  if(url){img.src=url;img.style.display='block';ph.style.display='none';}
+  else{img.src='';img.style.display='none';ph.style.display='block';}
+}
+function onPmoUrlChange(){ setPmoPreview(document.getElementById('pmo-img-url').value.trim()); pmoImgBase64=''; }
+function clearPromotionImg(e){ e.stopPropagation(); document.getElementById('pmo-img-url').value=''; pmoImgBase64=''; setPmoPreview(''); }
+
+const pmoDropZone=document.getElementById('pmo-img-drop-zone');
+pmoDropZone.addEventListener('dragover',e=>{e.preventDefault();pmoDropZone.classList.add('drag');});
+pmoDropZone.addEventListener('dragleave',()=>pmoDropZone.classList.remove('drag'));
+pmoDropZone.addEventListener('drop',e=>{ e.preventDefault(); pmoDropZone.classList.remove('drag'); const f=e.dataTransfer.files[0]; if(f) handlePromotionImageFile(f); });
+pmoDropZone.onclick=e=>{ if(!e.target.closest('button')) document.getElementById('pmo-file-input').click(); };
+document.getElementById('pmo-file-input').onchange=e=>{ const f=e.target.files[0]; if(f) handlePromotionImageFile(f); };
+
+function handlePromotionImageFile(file){
+  if(!file.type.startsWith('image/')){ toast('❌ กรุณาเลือกไฟล์รูปภาพ','error'); return; }
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    pmoImgBase64=ev.target.result.split(',')[1];
+    document.getElementById('pmo-img-url').value='';
+    setPmoPreview(ev.target.result);
+  };
+  reader.readAsDataURL(file);
+}
+
+document.getElementById('pmo-save').onclick=async()=>{
+  const title=document.getElementById('pmo-name').value.trim();
+  if(!title){toast('❌ กรุณากรอกชื่อโปรโมชั่น','error');return;}
+  const payload={
+    action:'upsertPromotion', adminToken:ADMIN_TOKEN,
+    id:document.getElementById('pmo-id').value||'',
+    title,
+    description:document.getElementById('pmo-desc').value,
+    discount:document.getElementById('pmo-discount').value,
+    endDate:document.getElementById('pmo-enddate').value,
+    imageUrl:document.getElementById('pmo-img-url').value,
+    imageBase64:pmoImgBase64||'',
+  };
+  const btn=document.getElementById('pmo-save'); btn.textContent='...'; btn.disabled=true;
+  try{
+    const r=await apiPost(payload);
+    if(r.ok||r.status==='success'){ toast('✅ บันทึกสำเร็จ!'); document.getElementById('promotion-modal').classList.remove('open'); await loadPromotions(); }
+    else toast('❌ '+(r.error||r.message||'ผิดพลาด'),'error');
+  }catch(e){toast('❌ '+e.message,'error');}
+  btn.textContent='💾 บันทึก'; btn.disabled=false;
+};
 
 // ── ORDERS ──
 function renderOrders(filter=''){
