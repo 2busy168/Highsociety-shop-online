@@ -29,7 +29,8 @@
 
     .gradient-bg{ background:linear-gradient(115deg,#ff2d78 0%,#ff8a00 20%,#ffe600 40%,#3ddc84 60%,#00c2ff 80%,#a259ff 100%); }
     .font-graffiti{ font-family:'Bangers','Kanit',cursive; letter-spacing:.04em; -webkit-text-stroke:1.5px #000; text-stroke:1.5px #000; text-shadow:2px 2px 0 #000,-1px -1px 0 #000; }
-    #brand-logo{ height:44px; width:auto; filter:drop-shadow(0 2px 3px rgba(0,0,0,.35)); }
+    #brand-logo{ height:60px; width:auto; filter:drop-shadow(0 2px 3px rgba(0,0,0,.35)); }
+    @media (max-width:480px){ #brand-logo{ height:50px; } }
     #hero-section{ position:relative; }
     #hero-section::after{ content:""; position:absolute; inset:0; background:radial-gradient(circle at 50% 0%,rgba(255,255,255,.18),transparent 60%); pointer-events:none; }
     .card-hover{ transition:all .3s ease; } .card-hover:hover{ transform:translateY(-5px); box-shadow:0 20px 25px -5px rgba(0,0,0,.1); }
@@ -153,7 +154,7 @@
 
   <!-- Hero -->
   <section id="hero-section" class="gradient-bg text-white py-10 md:py-20 text-center px-4">
-    <h1 id="hero-title" class="font-graffiti text-3xl md:text-5xl mb-3 md:mb-4">ค้นหาสายพันธุ์ที่เหมาะกับคุณ</h1>
+    <h1 id="hero-title" class="text-3xl md:text-5xl font-bold mb-3 md:mb-4">ค้นหาสายพันธุ์ที่เหมาะกับคุณ</h1>
     <p id="hero-subtitle" class="text-base md:text-xl font-light">เลือกความรู้สึกที่ต้องการ เราจะแนะนำสายพันธุ์ที่ดีที่สุดให้คุณ</p>
   </section>
 
