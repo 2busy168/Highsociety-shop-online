@@ -4,11 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
   <meta name="format-detection" content="telephone=no, email=no, address=no, date=no" />
-  <title>H!GH$OC!€T¥ - Cannabis E-commerce</title>
+  <title>GEN Z TERPZ - Cannabis E-commerce</title>
+  <link rel="icon" type="image/png" href="assets/genz-terpz-logo.png" />
 
   <!-- Tailwind + Font + LIFF -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Bangers&display=swap" rel="stylesheet" />
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 
   <style>
@@ -26,7 +27,11 @@
     /* Layout safety */
     html,body{ width:100%!important; max-width:100%!important; overflow-x:hidden!important; }
 
-    .gradient-bg{ background:linear-gradient(135deg,#065f46 0%,#10b981 100%); }
+    .gradient-bg{ background:linear-gradient(115deg,#ff2d78 0%,#ff8a00 20%,#ffe600 40%,#3ddc84 60%,#00c2ff 80%,#a259ff 100%); }
+    .font-graffiti{ font-family:'Bangers','Kanit',cursive; letter-spacing:.04em; -webkit-text-stroke:1.5px #000; text-stroke:1.5px #000; text-shadow:2px 2px 0 #000,-1px -1px 0 #000; }
+    #brand-logo{ height:44px; width:auto; filter:drop-shadow(0 2px 3px rgba(0,0,0,.35)); }
+    #hero-section{ position:relative; }
+    #hero-section::after{ content:""; position:absolute; inset:0; background:radial-gradient(circle at 50% 0%,rgba(255,255,255,.18),transparent 60%); pointer-events:none; }
     .card-hover{ transition:all .3s ease; } .card-hover:hover{ transform:translateY(-5px); box-shadow:0 20px 25px -5px rgba(0,0,0,.1); }
     .feeling-btn{ transition:all .2s ease; } .feeling-btn:hover{ background:#d1fae5; transform:scale(1.05); }
     .feeling-btn.active{ background:#047857; color:#fff; transform:scale(1.1); box-shadow:0 10px 15px -3px rgba(0,0,0,.1),0 4px 6px -2px rgba(0,0,0,.05); }
@@ -121,7 +126,7 @@
 
     <div class="container mx-auto flex justify-between items-center px-4">
       <div class="text-2xl font-bold flex items-center cursor-pointer" onclick="window.location.reload();">
-        <span class="mr-2">🌱</span>H!GH$OC!€T¥
+        <img id="brand-logo" src="assets/genz-terpz-logo.png" alt="GEN Z TERPZ" />
       </div>
       <div id="header-actions" class="flex items-center">
         <button id="line-login-btn" class="bg-white text-green-700 font-semibold py-1.5 px-3 rounded-full text-sm hover:bg-gray-100">เข้าสู่ระบบ</button>
@@ -148,7 +153,7 @@
 
   <!-- Hero -->
   <section id="hero-section" class="gradient-bg text-white py-10 md:py-20 text-center px-4">
-    <h1 id="hero-title" class="text-3xl md:text-5xl font-bold mb-3 md:mb-4">ค้นหาสายพันธุ์ที่เหมาะกับคุณ</h1>
+    <h1 id="hero-title" class="font-graffiti text-3xl md:text-5xl mb-3 md:mb-4">ค้นหาสายพันธุ์ที่เหมาะกับคุณ</h1>
     <p id="hero-subtitle" class="text-base md:text-xl font-light">เลือกความรู้สึกที่ต้องการ เราจะแนะนำสายพันธุ์ที่ดีที่สุดให้คุณ</p>
   </section>
 
@@ -181,7 +186,7 @@
   <!-- Footer -->
   <footer class="bg-gray-800 text-white py-8 px-4">
     <div class="container mx-auto text-center">
-      <h3 class="text-xl font-bold mb-2">H!GH$OC!€T¥</h3>
+      <h3 class="font-graffiti text-xl mb-2">GEN Z TERPZ</h3>
       <p class="text-sm text-gray-400">คุณภาพดี ราคาเป็นธรรม บริการเป็นมิตร</p>
       <p class="text-xs text-gray-500 mt-4">⚠️ สำหรับผู้ที่มีอายุ 20 ปีขึ้นไปเท่านั้น</p>
     </div>
