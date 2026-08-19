@@ -86,6 +86,18 @@
     body.dark .bg-green-100{ background:#1d3226 !important; } body.dark .text-green-800{ color:#86efac !important; }
     body.dark .bg-blue-100{ background:#1e2a3a !important; } body.dark .text-blue-800{ color:#93c5fd !important; }
     body.dark .bg-red-100{ background:#3b1d1d !important; } body.dark .text-red-800{ color:#f87171 !important; }
+    body.dark .bg-orange-100{ background:#3a2410 !important; } body.dark .text-orange-800{ color:#fdba74 !important; }
+
+    /* ===== หน้าแรก: แถวสินค้าเลื่อนแนวนอน ===== */
+    .home-row{ display:flex; gap:1rem; overflow-x:auto; padding:.25rem .25rem 1rem; scroll-snap-type:x proximity; -webkit-overflow-scrolling:touch; }
+    .home-row::-webkit-scrollbar{ height:6px; }
+    .home-row::-webkit-scrollbar-thumb{ background:#d1d5db; border-radius:9999px; }
+    .home-row > *{ flex:0 0 auto; width:250px; scroll-snap-align:start; }
+    .home-section{ margin-bottom:2rem; }
+    .home-section-head{ display:flex; align-items:baseline; justify-content:space-between; margin-bottom:.75rem; }
+    .home-see-all{ font-size:.875rem; font-weight:600; color:#059669; white-space:nowrap; cursor:pointer; }
+    body.dark .home-see-all{ color:#4ade80; }
+    body.dark .home-row::-webkit-scrollbar-thumb{ background:#3a443e; }
   </style>
 
   <script>
@@ -114,8 +126,10 @@
           <button id="mobile-drawer-close" class="p-2 rounded hover:bg-gray-100" aria-label="ปิดเมนู">✕</button>
         </div>
         <nav class="divide-y divide-gray-100">
+          <button class="drawer-link w-full text-left px-4 py-3" data-action="go" data-target="home">หน้าแรก</button>
           <button class="drawer-link w-full text-left px-4 py-3" data-action="go" data-target="strains">สายพันธุ์</button>
           <button class="drawer-link w-full text-left px-4 py-3" data-action="go" data-target="vapes">Vape</button>
+          <button class="drawer-link w-full text-left px-4 py-3" data-action="go" data-target="prerolls">Pre-Roll</button>
           <button class="drawer-link w-full text-left px-4 py-3" data-action="go" data-target="equipments">อุปกรณ์</button>
           <button class="drawer-link w-full text-left px-4 py-3" data-action="go" data-target="promotions">โปรโมชั่น</button>
           <button class="drawer-link w-full text-left px-4 py-3" data-action="order-history">ประวัติคำสั่งซื้อของฉัน</button>
@@ -159,7 +173,7 @@
   </section>
 
   <!-- Feelings -->
-  <section id="feelings-section" class="py-6 md:py-10 bg-white shadow-lg -mt-8 md:-mt-16 mx-auto rounded-xl max-w-7xl relative z-20">
+  <section id="feelings-section" class="py-6 md:py-10 bg-white shadow-lg -mt-8 md:-mt-16 mx-auto rounded-xl max-w-7xl relative z-20" style="display:none">
     <h2 class="text-center text-xl md:text-2xl font-semibold mb-5 px-4">คุณต้องการความรู้สึกแบบไหน?</h2>
     <div id="feelings-container" class="flex flex-wrap justify-center gap-2 md:gap-4 px-4"></div>
   </section>
@@ -170,8 +184,32 @@
     <div id="brands-container" class="flex flex-wrap justify-center gap-2 md:gap-4 px-4"></div>
   </section>
 
+  <!-- Home: แถวสินค้าแยกหมวด -->
+  <section id="home-sections" class="container mx-auto py-8 md:py-12 px-4" style="display:none">
+    <div id="home-featured" class="home-section" style="display:none">
+      <div class="home-section-head"><h2 class="text-xl md:text-2xl font-bold">⭐ สินค้าแนะนำ</h2></div>
+      <div id="home-featured-row" class="home-row"></div>
+    </div>
+    <div id="home-promotions" class="home-section" style="display:none">
+      <div class="home-section-head"><h2 class="text-xl md:text-2xl font-bold">🔥 โปรโมชั่นลดราคา</h2><span class="home-see-all" onclick="toggleView('promotions')">ดูทั้งหมด →</span></div>
+      <div id="home-promotions-row" class="home-row"></div>
+    </div>
+    <div id="home-prerolls" class="home-section" style="display:none">
+      <div class="home-section-head"><h2 class="text-xl md:text-2xl font-bold">🚬 Pre-Roll Pack</h2><span class="home-see-all" onclick="toggleView('prerolls')">ดูทั้งหมด →</span></div>
+      <div id="home-prerolls-row" class="home-row"></div>
+    </div>
+    <div id="home-35pack" class="home-section" style="display:none">
+      <div class="home-section-head"><h2 class="text-xl md:text-2xl font-bold">🌿 3.5g Pack</h2><span class="home-see-all" onclick="toggleView('strains')">ดูทั้งหมด →</span></div>
+      <div id="home-35pack-row" class="home-row"></div>
+    </div>
+    <div id="home-vapes" class="home-section" style="display:none">
+      <div class="home-section-head"><h2 class="text-xl md:text-2xl font-bold">💨 Vape</h2><span class="home-see-all" onclick="toggleView('vapes')">ดูทั้งหมด →</span></div>
+      <div id="home-vapes-row" class="home-row"></div>
+    </div>
+  </section>
+
   <!-- Main -->
-  <main class="container mx-auto py-8 md:py-12 px-4">
+  <main id="catalog-main" class="container mx-auto py-8 md:py-12 px-4" style="display:none">
     <h2 id="main-content-title" class="text-2xl md:3xl font-bold text-center mb-6">สินค้าทั้งหมด</h2>
     <div class="max-w-md mx-auto mb-6">
       <div class="relative">
@@ -288,17 +326,21 @@
   };
   const equipmentDescription = { icon:"⚙️", tagColor:"bg-gray-100 text-gray-800" };
   const vapeDescription = { icon:"💨", tagColor:"bg-blue-100 text-blue-800" };
+  const prerollDescription = { icon:"🚬", tagColor:"bg-orange-100 text-orange-800" };
 
-  let strains=[], vapes=[], equipments=[], promotions=[], cart=[], currentView="strains", activeFeeling=null, activeBrand=null, searchQuery='';
+  let strains=[], vapes=[], prerolls=[], equipments=[], promotions=[], cart=[], currentView="home", activeFeeling=null, activeBrand=null, searchQuery='';
 
-  // แยกสินค้าจากชีต Products: type "Vape" ไปแท็บ Vape ที่เหลือเป็นสายพันธุ์
+  // แยกสินค้าจากชีต Products: type "Vape" ไปแท็บ Vape, "Pre-Roll" ไปแท็บ Pre-Roll ที่เหลือเป็นสายพันธุ์
   function splitProducts(list){
     const all = list||[];
     return {
-      strains: all.filter(p=>String(p.type||'').trim()!=='Vape'),
-      vapes:   all.filter(p=>String(p.type||'').trim()==='Vape')
+      strains:  all.filter(p=>{ const t=String(p.type||'').trim(); return t!=='Vape' && t!=='Pre-Roll'; }),
+      vapes:    all.filter(p=>String(p.type||'').trim()==='Vape'),
+      prerolls: all.filter(p=>String(p.type||'').trim()==='Pre-Roll')
     };
   }
+  function isFeatured(p){ return p && (p.featured===true || String(p.featured||'').trim().toLowerCase()==='true'); }
+  function has35gPrice(p){ const v=p.price_3_5g ?? p.price3_5g; return !isNaN(Number(v)) && Number(v)>0; }
   function isPieceProduct(p){ return String(p.sale_unit||'').toLowerCase()==='piece'; }
   function piecePriceOf(p){ const v=p.price_piece ?? p.price; return Number(v||0); }
 
@@ -361,6 +403,19 @@
 
   function toggleView(view){
     currentView=view;
+
+    if(view==='home'){
+      el('home-sections').style.display='block';
+      el('catalog-main').style.display='none';
+      el('feelings-section').style.display='none';
+      el('brands-section').style.display='none';
+      updateHeroSection('ค้นหาสายพันธุ์ที่เหมาะกับคุณ','เลือกความรู้สึกที่ต้องการ เราจะแนะนำสายพันธุ์ที่ดีที่สุดให้คุณ');
+      renderHomeSections();
+      return;
+    }
+    el('home-sections').style.display='none';
+    el('catalog-main').style.display='block';
+
     if(view==='strains'){
       el('main-content-title').textContent='สายพันธุ์ทั้งหมด';
       el('feelings-section').style.display='block';
@@ -369,9 +424,16 @@
       filterProductsByFeeling(activeFeeling);
     }else if(view==='vapes'){
       el('feelings-section').style.display='none';
+      el('brands-section').style.display='block';
       updateHeroSection('Vape คุณภาพ พร้อมใช้','สะดวก พกพาง่าย ราคาต่อชิ้น');
       buildBrandButtons();
       filterVapesByBrand(activeBrand);
+    }else if(view==='prerolls'){
+      el('main-content-title').textContent='Pre-Roll Pack ทั้งหมด';
+      el('feelings-section').style.display='none';
+      el('brands-section').style.display='none';
+      updateHeroSection('Pre-Roll พร้อมสูบ','มวนมาแล้ว หยิบใช้ได้ทันที');
+      renderContentCards(prerolls,'prerolls');
     }else if(view==='equipments'){
       el('main-content-title').textContent='อุปกรณ์ทั้งหมด';
       el('feelings-section').style.display='none';
@@ -446,7 +508,7 @@
   function renderContentCards(items,type){
     const list = el('main-content-list'); list.innerHTML='';
     if(searchQuery){ items=(items||[]).filter(it=>String(it.name||'').toLowerCase().includes(searchQuery)); }
-    if(type==='strains'||type==='equipments'||type==='vapes'){
+    if(type==='strains'||type==='equipments'||type==='vapes'||type==='prerolls'){
       // สินค้าหมดสต็อกไปอยู่ท้ายกริด แต่ไม่ยุ่งลำดับเดิมภายในกลุ่มที่เหลือ/หมด
       items=[...(items||[])].sort((a,b)=>(Number(a.stock||0)<=0?1:0)-(Number(b.stock||0)<=0?1:0));
     }
@@ -457,14 +519,34 @@
   function rerenderCurrentView(){
     if(currentView==='strains') filterProductsByFeeling(activeFeeling);
     else if(currentView==='vapes') filterVapesByBrand(activeBrand);
+    else if(currentView==='prerolls') renderContentCards(prerolls,'prerolls');
     else if(currentView==='equipments') renderContentCards(equipments,'equipments');
     else if(currentView==='promotions') renderContentCards(promotions,'promotions');
+  }
+
+  // ===== หน้าแรก: แถวสินค้าแยกหมวด =====
+  function renderHomeRow(sectionId, rowId, items, type, limit){
+    const section = el(sectionId), row = el(rowId);
+    const list = (items||[]).slice(0, limit||10);
+    if(!list.length){ section.style.display='none'; return; }
+    section.style.display='block';
+    row.innerHTML='';
+    list.forEach(it=>{ const card=(type==='promotions')?createPromotionCard(it):createProductCard(it); if(card) row.appendChild(card); });
+  }
+  function renderHomeSections(){
+    const featured = [...strains, ...vapes, ...prerolls, ...equipments].filter(isFeatured);
+    renderHomeRow('home-featured','home-featured-row', featured, 'strains', 10);
+    renderHomeRow('home-promotions','home-promotions-row', promotions, 'promotions', 10);
+    renderHomeRow('home-prerolls','home-prerolls-row', prerolls, 'prerolls', 10);
+    renderHomeRow('home-35pack','home-35pack-row', strains.filter(has35gPrice), 'strains', 10);
+    renderHomeRow('home-vapes','home-vapes-row', vapes, 'vapes', 10);
   }
 
   // ===== การ์ดสินค้า (รายละเอียดเพิ่ม) =====
   function createProductCard(p){
     const isVape = String(p.type||'').trim()==='Vape';
-    const info = isStrainProduct(p)?strainDescriptions[p.type]:(isVape?vapeDescription:equipmentDescription);
+    const isPreroll = String(p.type||'').trim()==='Pre-Roll';
+    const info = isStrainProduct(p)?strainDescriptions[p.type]:(isVape?vapeDescription:(isPreroll?prerollDescription:equipmentDescription));
     const out  = Number(p.stock||0)<=0;
     const piece = isPieceProduct(p);
 
@@ -504,7 +586,7 @@
     const stock = out ? '<span class="text-red-500 font-semibold">สินค้าหมด</span>' : '<span class="text-gray-500">เหลือ '+p.stock+' ชิ้น</span>';
     const btn = out
       ? '<button class="bg-gray-400 text-white font-semibold py-2 px-4 rounded-lg cursor-not-allowed" disabled>สินค้าหมด</button>'
-      : '<button class="add-to-cart-btn bg-green-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-700 transition-colors" data-id="'+p.id+'" data-type="'+(isStrainProduct(p)?'strains':(isVape?'vapes':'equipments'))+'">เพิ่มลงตะกร้า</button>';
+      : '<button class="add-to-cart-btn bg-green-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-700 transition-colors" data-id="'+p.id+'" data-type="'+(isStrainProduct(p)?'strains':(isVape?'vapes':(isPreroll?'prerolls':'equipments')))+'">เพิ่มลงตะกร้า</button>';
 
     const d=document.createElement('div');
     d.className='bg-white rounded-lg shadow-md p-6 card-hover flex flex-col justify-between';
@@ -544,7 +626,7 @@
     return d;
   }
 
-  function getProductById(id,type){ const pool=(type==='strains')?strains:(type==='vapes')?vapes:equipments; return pool.find(x=>String(x.id)===String(id)); }
+  function getProductById(id,type){ const pool=(type==='strains')?strains:(type==='vapes')?vapes:(type==='prerolls')?prerolls:equipments; return pool.find(x=>String(x.id)===String(id)); }
 
   // ===== เพิ่มลงตะกร้า (รองรับแพ็ค) =====
   function getPackOptions(p){
@@ -730,7 +812,7 @@
     const loadingIndicator = el('checkout-loading-indicator');
     const checkoutButton = el('checkout-button'); const closeBtn = el('cart-close-btn');
 
-    try{ showLoading(); const latest=await apiGet({action:'getProducts'}); const spl=splitProducts(latest.products); strains=spl.strains; vapes=spl.vapes; equipments=latest.equipments||[]; } finally{ hideLoading(); }
+    try{ showLoading(); const latest=await apiGet({action:'getProducts'}); const spl=splitProducts(latest.products); strains=spl.strains; vapes=spl.vapes; prerolls=spl.prerolls; equipments=latest.equipments||[]; } finally{ hideLoading(); }
 
     if(cart.length===0 || !customerName || !customerEmail){ statusMessage.textContent='กรุณากรอกข้อมูลให้ครบถ้วนและมีสินค้าในตะกร้า'; statusMessage.className='text-center mt-4 text-sm text-red-500'; return; }
 
@@ -763,7 +845,7 @@
   async function initializeData(){
     showLoading();
     try{
-      const r1=await apiGet({action:'getProducts'}); const sp=splitProducts(r1.products); strains=sp.strains; vapes=sp.vapes; equipments=r1.equipments||[];
+      const r1=await apiGet({action:'getProducts'}); const sp=splitProducts(r1.products); strains=sp.strains; vapes=sp.vapes; prerolls=sp.prerolls; equipments=r1.equipments||[];
       const r2=await apiGet({action:'getPromotions'}); promotions=r2.promotions||[]; toggleView(currentView);
     } finally { hideLoading(); }
   }

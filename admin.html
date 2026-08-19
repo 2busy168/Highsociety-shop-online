@@ -312,6 +312,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
           <option value="Sativa">Sativa ⚡</option>
           <option value="Hybrid">Hybrid 🌿</option>
           <option value="Vape">Vape 💨</option>
+          <option value="Pre-Roll">Pre-Roll 🚬</option>
           <option value="Equipment">Equipment ⚙️</option>
         </select>
       </div>
@@ -336,6 +337,10 @@ tr:hover td{background:rgba(255,255,255,.02)}
     </div>
     <div class="field" id="pm-price-piece-wrap" style="display:none"><label>ราคา/ชิ้น ฿</label><input id="pm-price-piece" type="number" placeholder="เช่น 2290"></div>
     <div class="field"><label>คำอธิบาย</label><textarea id="pm-desc" rows="3"></textarea></div>
+    <div class="field" style="display:flex;align-items:center;gap:8px">
+      <input type="checkbox" id="pm-featured" style="width:auto">
+      <label for="pm-featured" style="margin:0">⭐ สินค้าแนะนำ (โชว์ในแถว "สินค้าแนะนำ" หน้าแรก)</label>
+    </div>
     <input type="hidden" id="pm-id">
 
     <div class="modal-footer">
@@ -421,7 +426,7 @@ function renderProducts(filter=''){
       </div>
       <div class="product-body">
         <div class="product-name" title="${p.name||''}">${p.name||'-'}</div>
-        <div class="product-meta"><span>${p.type||''}</span>${p.thc_percent||p.thc?`<span>THC ~${p.thc_percent||p.thc}%</span>`:''}</div>
+        <div class="product-meta"><span>${p.type||''}</span>${(p.featured===true||String(p.featured||'').trim().toLowerCase()==='true')?'<span>⭐ แนะนำ</span>':''}${p.thc_percent||p.thc?`<span>THC ~${p.thc_percent||p.thc}%</span>`:''}</div>
         <div class="product-stock-row"><span class="stock-pill ${sc}">${st}</span><span class="product-price">${prices}</span></div>
         <div class="product-actions">
           <button class="btn btn-secondary" onclick="openProductModal('${p.id}')">✏️ แก้ไข</button>
@@ -652,6 +657,7 @@ function openProductModal(id){
   document.getElementById('pm-unit').value=(String(p?.sale_unit||'').toLowerCase()==='piece')?'piece':'g';
   document.getElementById('pm-price-piece').value=p?.price_piece||'';
   document.getElementById('pm-brand').value=p?.brand||'';
+  document.getElementById('pm-featured').checked = !!(p && (p.featured===true || String(p.featured||'').trim().toLowerCase()==='true'));
   onPmUnitChange();
   document.getElementById('pm-img-url').value=p?.imageUrl||'';
   pmImgBase64='';
@@ -708,6 +714,7 @@ document.getElementById('pm-save').onclick=async()=>{
     brand:document.getElementById('pm-brand').value.trim(),
     imageUrl:document.getElementById('pm-img-url').value,
     description:document.getElementById('pm-desc').value,
+    featured:document.getElementById('pm-featured').checked,
     imageBase64:pmImgBase64||'', // ส่งรูปที่ upload ไปด้วย
   };
   // ขายต่อชิ้น: ล้างราคาแพ็คน้ำหนักทิ้ง กันข้อมูลเก่าค้างในชีต / ขายตามน้ำหนัก: ล้างราคาต่อชิ้น
