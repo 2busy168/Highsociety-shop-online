@@ -112,6 +112,8 @@ tr:hover td{background:rgba(255,255,255,.02)}
 .product-price{font-size:12px;color:var(--muted);font-family:var(--mono)}
 .product-actions{display:flex;gap:6px}
 .product-actions .btn{flex:1;justify-content:center;padding:7px 8px;font-size:12px}
+.product-card.is-hidden{opacity:.5}
+.hidden-badge{background:rgba(255,68,85,.12);color:var(--red);border:1px solid rgba(255,68,85,.25)}
 
 /* ── IMAGE UPLOAD AREA (direct file) ── */
 .img-drop-zone{width:100%;aspect-ratio:4/3;border-radius:10px;overflow:hidden;border:2px dashed var(--border);background:var(--surface2);display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;transition:border-color .2s;margin-bottom:10px}
@@ -458,6 +460,7 @@ async function loadOrders(){
 }
 
 // ── PRODUCTS ──
+function isProductVisible(p){ return !(p.visible===false || String(p.visible||'').trim().toUpperCase()==='FALSE'); }
 function renderProducts(filter=''){
   const grid=document.getElementById('products-grid');
   let all=[...allProducts,...allEquipments];
@@ -471,18 +474,20 @@ function renderProducts(filter=''){
       ? (p.price_piece?('฿'+Number(p.price_piece).toLocaleString()+'/ชิ้น'):'')
       : [p.price_1g||p.price1g,p.price_3_5g||p.price3_5g].filter(Boolean).map(v=>'฿'+v).join(' / ');
     const img=p.imageUrl||'https://placehold.co/400x300/1a1a1a/444?text=No+Image';
-    return `<div class="product-card">
+    const visible=isProductVisible(p);
+    return `<div class="product-card${visible?'':' is-hidden'}">
       <div class="product-img-wrap">
         <img src="${img}" onerror="this.src='https://placehold.co/400x300/1a1a1a/444?text=Error'" alt="">
         <button class="product-img-edit" onclick="openProductModal('${p.id}')">✏️ แก้ไขรูป</button>
       </div>
       <div class="product-body">
         <div class="product-name" title="${p.name||''}">${p.name||'-'}</div>
-        <div class="product-meta"><span>${p.type||''}</span>${(p.featured===true||String(p.featured||'').trim().toLowerCase()==='true')?'<span>⭐ แนะนำ</span>':''}${p.thc_percent||p.thc?`<span>THC ~${p.thc_percent||p.thc}%</span>`:''}</div>
+        <div class="product-meta"><span>${p.type||''}</span>${(p.featured===true||String(p.featured||'').trim().toLowerCase()==='true')?'<span>⭐ แนะนำ</span>':''}${visible?'':'<span class="hidden-badge">🚫 ซ่อนอยู่</span>'}${p.thc_percent||p.thc?`<span>THC ~${p.thc_percent||p.thc}%</span>`:''}</div>
         <div class="product-stock-row"><span class="stock-pill ${sc}">${st}</span><span class="product-price">${prices}</span></div>
         <div class="product-actions">
           <button class="btn btn-secondary" onclick="openProductModal('${p.id}')">✏️ แก้ไข</button>
           <button class="btn btn-secondary" onclick="quickStock('${p.id}',${stock})">📦 สต็อก</button>
+          <button class="btn btn-secondary" onclick="toggleVisibility('${p.id}',${visible})">${visible?'👁️ ซ่อน':'🚫 แสดง'}</button>
         </div>
       </div>
     </div>`;
@@ -880,6 +885,13 @@ function quickStock(id,current){
   const n=parseInt(val); if(isNaN(n)||n<0){toast('❌ ไม่ถูกต้อง','error');return;}
   apiPost({action:'updateStock',adminToken:ADMIN_TOKEN,id,stock:n})
     .then(r=>{ if(r.ok||r.status==='success'){toast('✅ อัปเดตสต็อกแล้ว');loadProducts();}else toast('❌ '+(r.error||'ผิดพลาด'),'error'); })
+    .catch(e=>toast('❌ '+e.message,'error'));
+}
+
+// Quick show/hide (ซ่อนสินค้าที่ยังไม่พร้อมขาย โดยไม่ต้องลบ)
+function toggleVisibility(id,currentlyVisible){
+  apiPost({action:'updateVisibility',adminToken:ADMIN_TOKEN,id,visible:!currentlyVisible})
+    .then(r=>{ if(r.ok||r.status==='success'){toast(currentlyVisible?'🚫 ซ่อนสินค้าแล้ว':'👁️ แสดงสินค้าแล้ว');loadProducts();}else toast('❌ '+(r.error||'ผิดพลาด'),'error'); })
     .catch(e=>toast('❌ '+e.message,'error'));
 }
 

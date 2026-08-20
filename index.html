@@ -349,6 +349,8 @@
     };
   }
   function isFeatured(p){ return p && (p.featured===true || String(p.featured||'').trim().toLowerCase()==='true'); }
+  // ค่าเริ่มต้นคือ "โชว์" — ซ่อนเฉพาะตอนแอดมินติ๊กปิดชัดเจนเท่านั้น กันสินค้าเก่าที่ยังไม่มีคอลัมน์นี้หายไปหมด
+  function isVisible(p){ return !(p && (p.visible===false || String(p.visible||'').trim().toUpperCase()==='FALSE')); }
   function isPieceProduct(p){ return String(p.sale_unit||'').toLowerCase()==='piece'; }
   function piecePriceOf(p){ const v=p.price_piece ?? p.price; return Number(v||0); }
 
@@ -829,7 +831,7 @@
     const loadingIndicator = el('checkout-loading-indicator');
     const checkoutButton = el('checkout-button'); const closeBtn = el('cart-close-btn');
 
-    try{ showLoading(); const latest=await apiGet({action:'getProducts'}); const spl=splitProducts(latest.products); strains=spl.strains; vapes=spl.vapes; prerolls=spl.prerolls; comboPacks=spl.comboPacks; equipments=latest.equipments||[]; } finally{ hideLoading(); }
+    try{ showLoading(); const latest=await apiGet({action:'getProducts'}); const spl=splitProducts((latest.products||[]).filter(isVisible)); strains=spl.strains; vapes=spl.vapes; prerolls=spl.prerolls; comboPacks=spl.comboPacks; equipments=(latest.equipments||[]).filter(isVisible); } finally{ hideLoading(); }
 
     if(cart.length===0 || !customerName || !customerEmail){ statusMessage.textContent='กรุณากรอกข้อมูลให้ครบถ้วนและมีสินค้าในตะกร้า'; statusMessage.className='text-center mt-4 text-sm text-red-500'; return; }
 
@@ -862,7 +864,7 @@
   async function initializeData(){
     showLoading();
     try{
-      const r1=await apiGet({action:'getProducts'}); const sp=splitProducts(r1.products); strains=sp.strains; vapes=sp.vapes; prerolls=sp.prerolls; comboPacks=sp.comboPacks; equipments=r1.equipments||[];
+      const r1=await apiGet({action:'getProducts'}); const sp=splitProducts((r1.products||[]).filter(isVisible)); strains=sp.strains; vapes=sp.vapes; prerolls=sp.prerolls; comboPacks=sp.comboPacks; equipments=(r1.equipments||[]).filter(isVisible);
       const r2=await apiGet({action:'getPromotions'}); promotions=r2.promotions||[]; toggleView(currentView);
     } finally { hideLoading(); }
   }
