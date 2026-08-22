@@ -200,6 +200,10 @@
       <div class="home-section-head"><h2 class="text-xl md:text-2xl font-bold">💰 Budget Selection</h2></div>
       <div id="home-budget-row" class="home-row"></div>
     </div>
+    <div id="home-limited" class="home-section" style="display:none">
+      <div class="home-section-head"><h2 class="text-xl md:text-2xl font-bold">🎯 Limited Offer</h2></div>
+      <div id="home-limited-row" class="home-row"></div>
+    </div>
     <div id="home-prerolls" class="home-section" style="display:none">
       <div class="home-section-head"><h2 class="text-xl md:text-2xl font-bold">🚬 Pre-Roll Pack</h2><span class="home-see-all" onclick="toggleView('prerolls')">ดูทั้งหมด →</span></div>
       <div id="home-prerolls-row" class="home-row"></div>
@@ -354,6 +358,7 @@
   }
   function isFeatured(p){ return p && (p.featured===true || String(p.featured||'').trim().toLowerCase()==='true'); }
   function isBudget(p){ return p && (p.budget===true || String(p.budget||'').trim().toLowerCase()==='true'); }
+  function isLimited(p){ return p && (p.limited===true || String(p.limited||'').trim().toLowerCase()==='true'); }
   // ค่าเริ่มต้นคือ "โชว์" — ซ่อนเฉพาะตอนแอดมินติ๊กปิดชัดเจนเท่านั้น กันสินค้าเก่าที่ยังไม่มีคอลัมน์นี้หายไปหมด
   function isVisible(p){ return !(p && (p.visible===false || String(p.visible||'').trim().toUpperCase()==='FALSE')); }
   function isPieceProduct(p){ return String(p.sale_unit||'').toLowerCase()==='piece'; }
@@ -561,6 +566,8 @@
     renderHomeRow('home-featured','home-featured-row', featured, 'strains', 10);
     const budget = [...strains, ...vapes, ...prerolls, ...comboPacks, ...equipments].filter(isBudget);
     renderHomeRow('home-budget','home-budget-row', budget, 'strains', 10);
+    const limited = [...strains, ...vapes, ...prerolls, ...comboPacks, ...equipments].filter(isLimited);
+    renderHomeRow('home-limited','home-limited-row', limited, 'strains', 10);
     renderHomeRow('home-prerolls','home-prerolls-row', prerolls, 'prerolls', 10);
     renderHomeRow('home-strains','home-strains-row', strains, 'strains', 10);
     renderHomeRow('home-combopack','home-combopack-row', comboPacks, 'combopacks', 10);
