@@ -363,10 +363,16 @@
   function isVisible(p){ return !(p && (p.visible===false || String(p.visible||'').trim().toUpperCase()==='FALSE')); }
   function isPieceProduct(p){ return String(p.sale_unit||'').toLowerCase()==='piece'; }
   function piecePriceOf(p){ const v=p.price_piece ?? p.price; return Number(v||0); }
-  // ราคาหลัก (headline) ก่อนลด — ไม่ยุ่งกับราคาแพ็คน้ำหนัก (1g/3.5g/5g/10g) ของสายพันธุ์ดอก
-  function originalPriceOf(p){ return isPieceProduct(p) ? piecePriceOf(p) : Number(p.price||0); }
-  function hasSalePrice(p){ const sp=Number(p.sale_price||0); return sp>0 && sp<originalPriceOf(p); }
-  function currentPriceOf(p){ return hasSalePrice(p) ? Number(p.sale_price) : originalPriceOf(p); }
+  // ราคาลด — ใช้ 2 ช่องที่แอดมินกรอกเอง (original_price/sale_price) แยกขาดจากราคา/ชิ้น กับราคาแพ็คน้ำหนัก
+  // (1g/3.5g/5g/10g) ของสายพันธุ์ดอก ไม่ต้องพึ่ง field "price" เดิมที่ฟอร์มไม่เคยเขียนค่าให้
+  function hasSalePrice(p){
+    const orig=Number(p.original_price||0), sale=Number(p.sale_price||0);
+    return orig>0 && sale>0 && sale<orig;
+  }
+  function currentPriceOf(p){
+    if (hasSalePrice(p)) return Number(p.sale_price);
+    return isPieceProduct(p) ? piecePriceOf(p) : Number(p.price||0);
+  }
 
   // ===== Helpers =====
   const el = id => document.getElementById(id);
@@ -622,7 +628,7 @@
 
     const onSale = hasSalePrice(p);
     const priceHtml = onSale
-      ? '<span class="text-base text-gray-400 line-through mr-1">฿'+originalPriceOf(p).toLocaleString()+'</span><span class="text-2xl font-bold text-red-600">฿'+Number(p.sale_price).toLocaleString()+'</span>'
+      ? '<span class="text-base text-red-600 line-through mr-1">฿'+Number(p.original_price).toLocaleString()+'</span><span class="text-2xl font-bold text-gray-900">฿'+Number(p.sale_price).toLocaleString()+'</span>'
       : '<span class="text-2xl font-bold text-gray-900">฿'+(piece?piecePriceOf(p).toLocaleString():Number(p.price||0))+'</span>';
 
     const stock = out ? '<span class="text-red-500 font-semibold">สินค้าหมด</span>' : '<span class="text-gray-500">เหลือ '+p.stock+' ชิ้น</span>';
