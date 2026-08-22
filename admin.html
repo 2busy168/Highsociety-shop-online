@@ -348,11 +348,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
       <div class="field"><label>10g ฿</label><input id="pm-p10" type="number"></div>
     </div>
     <div class="field" id="pm-price-piece-wrap" style="display:none"><label>ราคา/ชิ้น ฿</label><input id="pm-price-piece" type="number" placeholder="เช่น 2290"></div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-      <div class="field"><label>ราคาก่อนลด ฿ <span style="color:var(--muted);font-weight:400">(ไม่บังคับ)</span></label><input id="pm-original-price" type="number" placeholder="เช่น 990"></div>
-      <div class="field"><label>ราคาหลังลด ฿ <span style="color:var(--muted);font-weight:400">(ไม่บังคับ)</span></label><input id="pm-sale-price" type="number" placeholder="เช่น 690"></div>
-    </div>
-    <p style="color:var(--muted);font-size:12px;margin:-6px 0 8px">กรอกทั้ง 2 ช่องเพื่อโชว์ราคาลดหน้าร้าน (ขีดฆ่าราคาก่อนลด) — เว้นว่างช่องใดช่องหนึ่งจะโชว์ราคาปกติเหมือนเดิม ไม่เกี่ยวกับราคาแพ็คน้ำหนัก 1g/3.5g/5g/10g</p>
+    <div class="field"><label>ราคาหลังลด ฿ <span style="color:var(--muted);font-weight:400">(ไม่บังคับ — เว้นว่างถ้าไม่ลดราคา)</span></label><input id="pm-sale-price" type="number" placeholder="เช่น 990 (ต้องน้อยกว่าราคาหลัก)"></div>
     <div class="field"><label>คำอธิบาย</label><textarea id="pm-desc" rows="3"></textarea></div>
     <div class="field" style="display:flex;align-items:center;gap:8px">
       <input type="checkbox" id="pm-featured" style="width:auto">
@@ -814,7 +810,6 @@ function openProductModal(id){
   document.getElementById('pm-p35').value=p?.price_3_5g||p?.price3_5g||'';
   document.getElementById('pm-p5').value=p?.price_5g||p?.price5g||'';
   document.getElementById('pm-p10').value=p?.price_10g||p?.price10g||'';
-  document.getElementById('pm-original-price').value=p?.original_price||'';
   document.getElementById('pm-sale-price').value=p?.sale_price||'';
   document.getElementById('pm-desc').value=p?.description||'';
   document.getElementById('pm-unit').value=(String(p?.sale_unit||'').toLowerCase()==='piece')?'piece':'g';
@@ -876,7 +871,6 @@ document.getElementById('pm-save').onclick=async()=>{
     price_10g:document.getElementById('pm-p10').value,
     sale_unit:document.getElementById('pm-unit').value,
     price_piece:document.getElementById('pm-price-piece').value,
-    original_price:document.getElementById('pm-original-price').value,
     sale_price:document.getElementById('pm-sale-price').value,
     brand:document.getElementById('pm-brand').value.trim(),
     imageUrl:document.getElementById('pm-img-url').value,
