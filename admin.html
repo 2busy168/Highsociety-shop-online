@@ -348,6 +348,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
       <div class="field"><label>10g ฿</label><input id="pm-p10" type="number"></div>
     </div>
     <div class="field" id="pm-price-piece-wrap" style="display:none"><label>ราคา/ชิ้น ฿</label><input id="pm-price-piece" type="number" placeholder="เช่น 2290"></div>
+    <div class="field"><label>ราคาหลังลด ฿ <span style="color:var(--muted);font-weight:400">(ไม่บังคับ — เว้นว่างถ้าไม่ลดราคา)</span></label><input id="pm-sale-price" type="number" placeholder="เช่น 990 (ต้องน้อยกว่าราคาหลัก)"></div>
     <div class="field"><label>คำอธิบาย</label><textarea id="pm-desc" rows="3"></textarea></div>
     <div class="field" style="display:flex;align-items:center;gap:8px">
       <input type="checkbox" id="pm-featured" style="width:auto">
@@ -490,7 +491,7 @@ function renderProducts(filter=''){
       </div>
       <div class="product-body">
         <div class="product-name" title="${p.name||''}">${p.name||'-'}</div>
-        <div class="product-meta"><span>${p.type||''}</span>${(p.featured===true||String(p.featured||'').trim().toLowerCase()==='true')?'<span>⭐ แนะนำ</span>':''}${(p.budget===true||String(p.budget||'').trim().toLowerCase()==='true')?'<span>💰 Budget</span>':''}${(p.limited===true||String(p.limited||'').trim().toLowerCase()==='true')?'<span>🎯 Limited</span>':''}${visible?'':'<span class="hidden-badge">🚫 ซ่อนอยู่</span>'}${p.thc_percent||p.thc?`<span>THC ~${p.thc_percent||p.thc}%</span>`:''}</div>
+        <div class="product-meta"><span>${p.type||''}</span>${(p.featured===true||String(p.featured||'').trim().toLowerCase()==='true')?'<span>⭐ แนะนำ</span>':''}${(p.budget===true||String(p.budget||'').trim().toLowerCase()==='true')?'<span>💰 Budget</span>':''}${(p.limited===true||String(p.limited||'').trim().toLowerCase()==='true')?'<span>🎯 Limited</span>':''}${Number(p.sale_price||0)>0?'<span style="color:var(--red)">🔻 ลดราคา</span>':''}${visible?'':'<span class="hidden-badge">🚫 ซ่อนอยู่</span>'}${p.thc_percent||p.thc?`<span>THC ~${p.thc_percent||p.thc}%</span>`:''}</div>
         <div class="product-stock-row"><span class="stock-pill ${sc}">${st}</span><span class="product-price">${prices}</span></div>
         <div class="product-actions">
           <button class="btn btn-secondary" onclick="openProductModal('${p.id}')">✏️ แก้ไข</button>
@@ -809,6 +810,7 @@ function openProductModal(id){
   document.getElementById('pm-p35').value=p?.price_3_5g||p?.price3_5g||'';
   document.getElementById('pm-p5').value=p?.price_5g||p?.price5g||'';
   document.getElementById('pm-p10').value=p?.price_10g||p?.price10g||'';
+  document.getElementById('pm-sale-price').value=p?.sale_price||'';
   document.getElementById('pm-desc').value=p?.description||'';
   document.getElementById('pm-unit').value=(String(p?.sale_unit||'').toLowerCase()==='piece')?'piece':'g';
   document.getElementById('pm-price-piece').value=p?.price_piece||'';
@@ -869,6 +871,7 @@ document.getElementById('pm-save').onclick=async()=>{
     price_10g:document.getElementById('pm-p10').value,
     sale_unit:document.getElementById('pm-unit').value,
     price_piece:document.getElementById('pm-price-piece').value,
+    sale_price:document.getElementById('pm-sale-price').value,
     brand:document.getElementById('pm-brand').value.trim(),
     imageUrl:document.getElementById('pm-img-url').value,
     description:document.getElementById('pm-desc').value,
