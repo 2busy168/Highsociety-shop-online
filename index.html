@@ -188,6 +188,10 @@
 
   <!-- Home: แถวสินค้าแยกหมวด -->
   <section id="home-sections" class="container mx-auto py-8 md:py-12 px-4" style="display:none">
+    <div id="home-promotions" class="home-section" style="display:none">
+      <div class="home-section-head"><h2 class="text-xl md:text-2xl font-bold">🔥 โปรโมชั่นประจำเดือน</h2><span class="home-see-all" onclick="toggleView('promotions')">ดูทั้งหมด →</span></div>
+      <div id="home-promotions-row" class="home-row"></div>
+    </div>
     <div id="home-featured" class="home-section" style="display:none">
       <div class="home-section-head"><h2 class="text-xl md:text-2xl font-bold">⭐ สินค้าแนะนำ</h2></div>
       <div id="home-featured-row" class="home-row"></div>
@@ -195,10 +199,6 @@
     <div id="home-budget" class="home-section" style="display:none">
       <div class="home-section-head"><h2 class="text-xl md:text-2xl font-bold">💰 Budget Selection</h2></div>
       <div id="home-budget-row" class="home-row"></div>
-    </div>
-    <div id="home-promotions" class="home-section" style="display:none">
-      <div class="home-section-head"><h2 class="text-xl md:text-2xl font-bold">🔥 โปรโมชั่นลดราคา</h2><span class="home-see-all" onclick="toggleView('promotions')">ดูทั้งหมด →</span></div>
-      <div id="home-promotions-row" class="home-row"></div>
     </div>
     <div id="home-prerolls" class="home-section" style="display:none">
       <div class="home-section-head"><h2 class="text-xl md:text-2xl font-bold">🚬 Pre-Roll Pack</h2><span class="home-see-all" onclick="toggleView('prerolls')">ดูทั้งหมด →</span></div>
@@ -556,11 +556,11 @@
     list.forEach(it=>{ const card=(type==='promotions')?createPromotionCard(it):createProductCard(it); if(card) row.appendChild(card); });
   }
   function renderHomeSections(){
+    renderHomeRow('home-promotions','home-promotions-row', promotions, 'promotions', 10);
     const featured = [...strains, ...vapes, ...prerolls, ...comboPacks, ...equipments].filter(isFeatured);
     renderHomeRow('home-featured','home-featured-row', featured, 'strains', 10);
     const budget = [...strains, ...vapes, ...prerolls, ...comboPacks, ...equipments].filter(isBudget);
     renderHomeRow('home-budget','home-budget-row', budget, 'strains', 10);
-    renderHomeRow('home-promotions','home-promotions-row', promotions, 'promotions', 10);
     renderHomeRow('home-prerolls','home-prerolls-row', prerolls, 'prerolls', 10);
     renderHomeRow('home-strains','home-strains-row', strains, 'strains', 10);
     renderHomeRow('home-combopack','home-combopack-row', comboPacks, 'combopacks', 10);
