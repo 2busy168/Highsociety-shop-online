@@ -305,6 +305,11 @@
           <span class="flex-1">🖐️ Hand Roll (มวนให้)</span>
           <span class="font-semibold text-gray-700">+฿20/ชิ้น</span>
         </label>
+        <div id="handroll-qty-wrap" class="flex items-center gap-2 mt-2 pl-2" style="display:none">
+          <span class="text-sm text-gray-600">จะให้มวนกี่ชิ้น:</span>
+          <input id="handroll-qty" type="number" min="1" value="1" class="w-16 text-center border rounded py-1">
+          <span id="handroll-qty-hint" class="text-xs text-gray-500"></span>
+        </div>
       </div>
 
       <div class="mb-4">
@@ -778,11 +783,19 @@
   const addCtx = { id:null, type:null, stock:0, unitPrice:0, unitLabel:null };
   const HAND_ROLL_FEE = 20; // ค่าบริการมวนมือ ต่อชิ้น — เฉพาะสายพันธุ์ดอก (ไม่ใช่แพ็คหรือหน่วยเดิม)
   function updateAddModalPrices(){
-    const fee = (el('handroll-toggle')?.checked) ? HAND_ROLL_FEE : 0;
     const qty = Number(el('qty-input').value||1);
-    const unit = addCtx.unitPrice + fee;
-    el('unit-price').textContent = '฿'+unit;
-    el('total-price').textContent = '฿'+(unit*qty);
+    const handrollOn = el('handroll-section').style.display!=='none' && el('handroll-toggle').checked;
+    let handrollQty = 0;
+    if (handrollOn){
+      const hrInput = el('handroll-qty');
+      handrollQty = Math.min(qty, Math.max(1, Number(hrInput.value||1)));
+      hrInput.value = handrollQty;
+      hrInput.max = qty;
+      el('handroll-qty-hint').textContent = `(จาก ${qty} ชิ้น)`;
+    }
+    el('handroll-qty-wrap').style.display = handrollOn ? 'flex' : 'none';
+    el('unit-price').textContent = '฿'+addCtx.unitPrice;
+    el('total-price').textContent = '฿'+(addCtx.unitPrice*qty + handrollQty*HAND_ROLL_FEE);
   }
   function openAddModal(id,type){
     const p = getProductById(id,type); if(!p) return;
@@ -844,7 +857,11 @@
       }
     }, { once:false });
 
-    handrollToggle.onchange = updateAddModalPrices;
+    handrollToggle.onchange = ()=>{
+      if (handrollToggle.checked) el('handroll-qty').value = el('qty-input').value; // ค่าเริ่มต้น: มวนทั้งหมด
+      updateAddModalPrices();
+    };
+    el('handroll-qty').oninput = updateAddModalPrices;
   }
 
   // ===== LIFF =====
@@ -980,25 +997,22 @@
 
     // ====== bind โมดัลเลือกแพ็ค/จำนวน ======
     const qtyInput = el('qty-input');
-    const unitPrice = el('unit-price');
-    const totalPrice = el('total-price');
 
     el('qty-dec').addEventListener('click', ()=>{
-      let v = Math.max(1, Number(qtyInput.value||1)-1);
-      qtyInput.value = v;
-      totalPrice.textContent = '฿'+(Number(unitPrice.textContent.replace('฿','')) * v);
+      qtyInput.value = Math.max(1, Number(qtyInput.value||1)-1);
+      updateAddModalPrices();
     });
     el('qty-inc').addEventListener('click', ()=>{
       let v = Number(qtyInput.value||1)+1;
       if (addCtx.stock) v = Math.min(addCtx.stock, v);
       qtyInput.value = v;
-      totalPrice.textContent = '฿'+(Number(unitPrice.textContent.replace('฿','')) * v);
+      updateAddModalPrices();
     });
     qtyInput.addEventListener('input', ()=>{
       let v = Math.max(1, Number(qtyInput.value||1));
       if (addCtx.stock) v = Math.min(addCtx.stock, v);
       qtyInput.value = v;
-      totalPrice.textContent = '฿'+(Number(unitPrice.textContent.replace('฿','')) * v);
+      updateAddModalPrices();
     });
 
     el('add-cancel').addEventListener('click', ()=> hideModal('add-modal-container'));
@@ -1015,7 +1029,11 @@
         packPrice = Number((ptext.replace(/[^\d.]/g,''))||0);
       }
       const handrollOn = el('handroll-section').style.display!=='none' && el('handroll-toggle').checked;
-      addToCart(addCtx.id, addCtx.type, qty, packKey, packLabel, packPrice, handrollOn?HAND_ROLL_FEE:0, handrollOn?'Hand Roll':null);
+      const handrollQty = handrollOn ? Math.min(qty, Math.max(1, Number(el('handroll-qty').value||1))) : 0;
+      // แยกเป็น 2 รายการถ้ามวนแค่บางส่วน (เช่น ซื้อ 5 มวนแค่ 2) — ส่วนที่เหลือเป็นราคาปกติ
+      if (handrollQty>0) addToCart(addCtx.id, addCtx.type, handrollQty, packKey, packLabel, packPrice, HAND_ROLL_FEE, 'Hand Roll');
+      const plainQty = qty - handrollQty;
+      if (plainQty>0) addToCart(addCtx.id, addCtx.type, plainQty, packKey, packLabel, packPrice);
       hideModal('add-modal-container');
     });
   });
