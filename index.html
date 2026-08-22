@@ -363,6 +363,10 @@
   function isVisible(p){ return !(p && (p.visible===false || String(p.visible||'').trim().toUpperCase()==='FALSE')); }
   function isPieceProduct(p){ return String(p.sale_unit||'').toLowerCase()==='piece'; }
   function piecePriceOf(p){ const v=p.price_piece ?? p.price; return Number(v||0); }
+  // ราคาหลัก (headline) ก่อนลด — ไม่ยุ่งกับราคาแพ็คน้ำหนัก (1g/3.5g/5g/10g) ของสายพันธุ์ดอก
+  function originalPriceOf(p){ return isPieceProduct(p) ? piecePriceOf(p) : Number(p.price||0); }
+  function hasSalePrice(p){ const sp=Number(p.sale_price||0); return sp>0 && sp<originalPriceOf(p); }
+  function currentPriceOf(p){ return hasSalePrice(p) ? Number(p.sale_price) : originalPriceOf(p); }
 
   // ===== Helpers =====
   const el = id => document.getElementById(id);
@@ -616,6 +620,11 @@
       ? ('ราคา: ฿'+piecePriceOf(p).toLocaleString()+' / ชิ้น')
       : (priceParts.length?('ราคา: '+priceParts.join(' | ')):''); // โชว์เฉพาะที่มีข้อมูล
 
+    const onSale = hasSalePrice(p);
+    const priceHtml = onSale
+      ? '<span class="text-base text-gray-400 line-through mr-1">฿'+originalPriceOf(p).toLocaleString()+'</span><span class="text-2xl font-bold text-red-600">฿'+Number(p.sale_price).toLocaleString()+'</span>'
+      : '<span class="text-2xl font-bold text-gray-900">฿'+(piece?piecePriceOf(p).toLocaleString():Number(p.price||0))+'</span>';
+
     const stock = out ? '<span class="text-red-500 font-semibold">สินค้าหมด</span>' : '<span class="text-gray-500">เหลือ '+p.stock+' ชิ้น</span>';
     const btn = out
       ? '<button class="bg-gray-400 text-white font-semibold py-2 px-4 rounded-lg cursor-not-allowed" disabled>สินค้าหมด</button>'
@@ -636,7 +645,7 @@
       +  (line3?'<p class="text-sm font-semibold text-gray-900 mt-1">'+line3+'</p>':'')
       +'</div>'
       +'<div class="flex justify-between items-end mt-4">'
-      +  '<div><span class="text-2xl font-bold text-gray-900">฿'+(piece?piecePriceOf(p).toLocaleString():Number(p.price||0))+'</span>'+(piece?'<span class="text-sm text-gray-500"> /ชิ้น</span>':'')+' '+stock+'</div>'
+      +  '<div>'+priceHtml+(piece?'<span class="text-sm text-gray-500"> /ชิ้น</span>':'')+' '+stock+'</div>'
       +  btn
       +'</div>';
     return d;
@@ -694,7 +703,7 @@
       const found = getPackOptions(p).find(o=>o.key===packKey);
       if (found){ unitLabel=found.label; unitPrice=found.price; }
     }
-    if (unitPrice==null){ unitPrice = isPieceProduct(p) ? piecePriceOf(p) : Number(p.price||0); } // fallback
+    if (unitPrice==null){ unitPrice = currentPriceOf(p); } // fallback
     if (!unitLabel && packKey){ unitLabel = String(packKey); }
 
     const key = type + ':' + p.id + (unitLabel? ':'+unitLabel:'');
@@ -787,7 +796,7 @@
     } else {
       packSection.style.display = 'none';
       addCtx.unitLabel = null;
-      addCtx.unitPrice = (isPieceProduct(p) ? piecePriceOf(p) : Number(p.price||0)) || 0;
+      addCtx.unitPrice = currentPriceOf(p) || 0;
     }
 
     // update prices UI
