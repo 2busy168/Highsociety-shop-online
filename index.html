@@ -307,8 +307,9 @@
         </label>
         <div id="handroll-qty-wrap" class="flex items-center gap-2 mt-2 pl-2" style="display:none">
           <span class="text-sm text-gray-600">จะให้มวนกี่มวน:</span>
-          <input id="handroll-qty" type="number" min="1" value="1" class="w-16 text-center border rounded py-1">
-          <span class="text-xs text-gray-500">(เลือกได้อิสระ ไม่ต้องเท่ากับจำนวนแพ็คที่ซื้อ)</span>
+          <button id="handroll-qty-dec" type="button" class="px-3 py-1 border rounded">-</button>
+          <input id="handroll-qty" type="number" min="1" value="1" class="w-14 text-center border rounded py-1">
+          <button id="handroll-qty-inc" type="button" class="px-3 py-1 border rounded">+</button>
         </div>
       </div>
 
@@ -1009,6 +1010,17 @@
       qtyInput.value = v;
       updateAddModalPrices();
     });
+    el('handroll-qty-dec').addEventListener('click', ()=>{
+      const hrInput = el('handroll-qty');
+      hrInput.value = Math.max(1, Number(hrInput.value||1)-1);
+      updateAddModalPrices();
+    });
+    el('handroll-qty-inc').addEventListener('click', ()=>{
+      const hrInput = el('handroll-qty');
+      hrInput.value = Math.max(1, Number(hrInput.value||1)+1);
+      updateAddModalPrices();
+    });
+
     qtyInput.addEventListener('input', ()=>{
       let v = Math.max(1, Number(qtyInput.value||1));
       if (addCtx.stock) v = Math.min(addCtx.stock, v);
