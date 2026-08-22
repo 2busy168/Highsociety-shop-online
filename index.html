@@ -299,6 +299,14 @@
         <div id="pack-options" class="grid grid-cols-2 gap-2"></div>
       </div>
 
+      <div id="handroll-section" class="mb-4" style="display:none">
+        <label class="border rounded px-3 py-2 flex items-center gap-2 cursor-pointer">
+          <input type="checkbox" id="handroll-toggle">
+          <span class="flex-1">🖐️ Hand Roll (มวนให้)</span>
+          <span class="font-semibold text-gray-700">+฿20/ชิ้น</span>
+        </label>
+      </div>
+
       <div class="mb-4">
         <h4 class="font-semibold mb-2">จำนวน</h4>
         <div class="flex items-center gap-2">
@@ -687,7 +695,7 @@
     return ops;
   }
 
-  function addToCart(id, type, qty = 1, packKey = null, packLabel = null, packPrice = null){
+  function addToCart(id, type, qty = 1, packKey = null, packLabel = null, packPrice = null, addonFee = 0, addonLabel = null){
     const p = getProductById(id, type);
     if(!p) return;
 
@@ -705,6 +713,13 @@
     }
     if (unitPrice==null){ unitPrice = currentPriceOf(p); } // fallback
     if (!unitLabel && packKey){ unitLabel = String(packKey); }
+
+    // ตัวเลือกเสริม (เช่น มวนมือ +20/ชิ้น) — บวกราคาต่อหน่วย + ต่อป้ายชื่อ กัน merge กับแบบไม่มีตัวเลือกเสริม
+    addonFee = Number(addonFee)||0;
+    if (addonFee>0 && addonLabel){
+      unitPrice += addonFee;
+      unitLabel = (unitLabel? unitLabel+' + ':'') + addonLabel;
+    }
 
     const key = type + ':' + p.id + (unitLabel? ':'+unitLabel:'');
     const ex  = cart.find(i => i.key===key);
@@ -761,6 +776,14 @@
 
   // ===== โมดัลเลือกแพ็ค + จำนวน =====
   const addCtx = { id:null, type:null, stock:0, unitPrice:0, unitLabel:null };
+  const HAND_ROLL_FEE = 20; // ค่าบริการมวนมือ ต่อชิ้น — เฉพาะสายพันธุ์ดอก (ไม่ใช่แพ็คหรือหน่วยเดิม)
+  function updateAddModalPrices(){
+    const fee = (el('handroll-toggle')?.checked) ? HAND_ROLL_FEE : 0;
+    const qty = Number(el('qty-input').value||1);
+    const unit = addCtx.unitPrice + fee;
+    el('unit-price').textContent = '฿'+unit;
+    el('total-price').textContent = '฿'+(unit*qty);
+  }
   function openAddModal(id,type){
     const p = getProductById(id,type); if(!p) return;
 
@@ -799,10 +822,13 @@
       addCtx.unitPrice = currentPriceOf(p) || 0;
     }
 
-    // update prices UI
-    el('unit-price').textContent = '฿'+addCtx.unitPrice;
-    el('total-price').textContent = '฿'+(addCtx.unitPrice * Number(el('qty-input').value||1));
+    // มวนมือ — เฉพาะสายพันธุ์ดอก (Indica/Sativa/Hybrid)
+    const handrollSection = el('handroll-section');
+    const handrollToggle = el('handroll-toggle');
+    handrollToggle.checked = false;
+    handrollSection.style.display = isStrainProduct(p) ? '' : 'none';
 
+    updateAddModalPrices();
     showModal('add-modal-container');
 
     // bind change pack
@@ -813,11 +839,12 @@
         if(found){
           addCtx.unitLabel = found.label;
           addCtx.unitPrice = found.price;
-          el('unit-price').textContent = '฿'+addCtx.unitPrice;
-          el('total-price').textContent = '฿'+(addCtx.unitPrice * Number(el('qty-input').value||1));
+          updateAddModalPrices();
         }
       }
     }, { once:false });
+
+    handrollToggle.onchange = updateAddModalPrices;
   }
 
   // ===== LIFF =====
@@ -987,7 +1014,8 @@
         const ptext = item ? item.querySelector('span.font-semibold')?.textContent || '' : '';
         packPrice = Number((ptext.replace(/[^\d.]/g,''))||0);
       }
-      addToCart(addCtx.id, addCtx.type, qty, packKey, packLabel, packPrice);
+      const handrollOn = el('handroll-section').style.display!=='none' && el('handroll-toggle').checked;
+      addToCart(addCtx.id, addCtx.type, qty, packKey, packLabel, packPrice, handrollOn?HAND_ROLL_FEE:0, handrollOn?'Hand Roll':null);
       hideModal('add-modal-container');
     });
   });
