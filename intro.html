@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>GEN Z TERPZ Intro</title>
+<link rel="icon" type="image/png" href="assets/genz-terpz-logo.png" />
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600;700;800&family=Bangers&family=IBM+Plex+Mono:wght@500;700&display=swap" rel="stylesheet" />
+<!--
+  Feature intro สำหรับหน้าร้าน — แอนิเมชันทั้งหมดคำนวณจากเวลา (pure function ของ t)
+  เพลงสังเคราะห์สดด้วย WebAudio ที่ 160 BPM ภาพซิงก์กับนาฬิกาของเสียง
+  รีวิวทีละเฟรม: intro.html?t=12.5 (วินาที) หรือ ?b=34 (บีต) | เล่นไม่มีเสียง: ?autoplay
+  คีย์ลัด: Space หยุด/เล่น, ←/→ ทีละเฟรม (Shift = ทีละบีต), D = debug, M = ปิดเสียง
+-->
+<style>
+  :root{
+    --pink:#ff2d78; --orange:#ff8a00; --yellow:#ffe600; --green:#3ddc84; --cyan:#00c2ff; --purple:#a259ff;
+    --ink:#07070b; --leaf:#047857; --neon:#00ff88;
+    --rainbow:linear-gradient(115deg,#ff2d78 0%,#ff8a00 20%,#ffe600 40%,#3ddc84 60%,#00c2ff 80%,#a259ff 100%);
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; height:100%; background:#000; overflow:hidden; font-family:'Kanit',sans-serif; color:#fff; }
+  #stage{ position:absolute; left:0; top:0; width:1920px; height:1080px; overflow:hidden; background:var(--ink); transform-origin:0 0; }
+  #lens{ position:absolute; inset:0; }
+  #world{ position:absolute; left:0; top:0; transform-origin:0 0; will-change:transform; }
+  #world-bg{ position:absolute; left:-3000px; top:-3000px; width:16880px; height:9880px;
+    background:
+      repeating-linear-gradient(90deg, rgba(255,255,255,.05) 0 2px, transparent 2px 160px),
+      repeating-linear-gradient(0deg, rgba(255,255,255,.05) 0 2px, transparent 2px 160px),
+      radial-gradient(circle at 50% 50%, #1a1030 0%, #07070b 60%); }
+  .panel{ position:absolute; width:1920px; height:1080px; overflow:hidden; border-radius:36px;
+    box-shadow:0 0 0 8px rgba(255,255,255,.07), 0 60px 160px rgba(0,0,0,.7); }
+  .plabel{ position:absolute; font-family:'Bangers',Impact,sans-serif; font-size:170px; letter-spacing:.04em; color:transparent;
+    -webkit-text-stroke:3px rgba(255,255,255,.22); white-space:nowrap; }
+  .abs{ position:absolute; }
+  [data-fx]{ opacity:0; }
+  .graffiti{ font-family:'Bangers',Impact,'Kanit',sans-serif; letter-spacing:.04em; -webkit-text-stroke:5px #000; paint-order:stroke fill; text-shadow:10px 10px 0 #000; }
+  .center-x{ left:0; width:1920px; text-align:center; }
+
+  /* ===== mock UI (โทนเดียวกับหน้าร้าน) ===== */
+  .card{ background:#fff; color:#1f2937; border-radius:28px; box-shadow:0 24px 60px rgba(0,0,0,.35); }
+  .chip{ border-radius:999px; background:#ecfdf5; color:#1f2937; font-weight:600; font-size:40px; display:flex; align-items:center; justify-content:center; gap:14px; box-shadow:0 8px 20px rgba(0,0,0,.18); }
+  .chip.active{ background:#3ddc84; color:#000; box-shadow:0 0 0 8px #fff, 0 24px 50px rgba(61,220,132,.7); }
+  .btn{ background:#16a34a; color:#fff; border-radius:20px; font-weight:700; display:flex; align-items:center; justify-content:center; box-shadow:0 10px 0 #14532d; }
+  .btn.pressed{ background:#15803d; box-shadow:0 2px 0 #14532d; margin-top:8px; }
+  .tag{ border-radius:999px; padding:6px 24px; font-weight:600; display:inline-flex; align-items:center; gap:10px; }
+  .t-indica{ background:#f3e8ff; color:#6b21a8; } .t-sativa{ background:#fef9c3; color:#854d0e; } .t-hybrid{ background:#dcfce7; color:#166534; }
+  .h-title{ font-weight:700; font-size:76px; line-height:1.15; }
+  .bud{ border-radius:24px; overflow:hidden; position:relative;
+    background:
+      radial-gradient(circle at 30% 35%, #a3e635 0 12%, transparent 13%),
+      radial-gradient(circle at 62% 30%, #84cc16 0 14%, transparent 15%),
+      radial-gradient(circle at 48% 58%, #65a30d 0 18%, transparent 19%),
+      radial-gradient(circle at 70% 66%, #7c3aed 0 10%, transparent 11%),
+      radial-gradient(circle at 32% 70%, #a855f7 0 9%, transparent 10%),
+      radial-gradient(circle at 50% 50%, #14532d, #052e16); }
+  .bud::after{ content:""; position:absolute; inset:0; background:radial-gradient(circle at 40% 30%, rgba(255,255,255,.35), transparent 45%); }
+
+  .mini{ position:absolute; width:300px; height:150px; border-radius:22px; background:#fff; color:#111; box-shadow:0 10px 24px rgba(0,0,0,.15); overflow:hidden; }
+  .mini .band{ height:56px; }
+  .mini .nm{ font-size:28px; font-weight:700; padding:6px 18px 0; white-space:nowrap; }
+  .mini .pr{ font-size:26px; font-weight:600; color:#047857; padding:0 18px; }
+  .mini .pr s{ color:#9ca3af; font-weight:400; margin-right:8px; }
+  .mini .pr b{ color:#dc2626; }
+
+  /* admin (ธีมเดียวกับ admin.html) */
+  .adm{ background:#0a0a0a; color:#f0f0f0; }
+  .adm .surface{ background:#111; border:2px solid #2a2a2a; border-radius:22px; }
+  .mono{ font-family:'IBM Plex Mono',monospace; }
+  .neon{ color:#00ff88; }
+  .pill{ border-radius:999px; padding:8px 26px; font-weight:600; display:inline-flex; align-items:center; gap:10px; }
+  .pill.pending{ background:rgba(255,204,0,.12); color:#ffcc00; border:2px solid #ffcc00; }
+  .pill.paid{ background:rgba(0,255,136,.12); color:#00ff88; border:2px solid #00ff88; }
+  .abtn{ border-radius:14px; background:#1a1a1a; border:2px solid #2a2a2a; color:#f0f0f0; font-weight:600; display:flex; align-items:center; justify-content:center; font-size:30px; }
+  .abtn.primary{ background:#00ff88; color:#000; border-color:#00ff88; }
+  .abtn.pressed{ background:#00ff88; color:#000; border-color:#00ff88; box-shadow:0 0 40px rgba(0,255,136,.6); }
+  .acard.hiddenp{ opacity:.4; filter:grayscale(1); }
+  .acard .img{ height:220px; border-radius:18px 18px 0 0; }
+  .acard.newimg .img{ background:linear-gradient(135deg,#ff2d78,#ffe600) !important; }
+
+  /* HUD caption */
+  #hud{ position:absolute; left:70px; bottom:64px; pointer-events:none; }
+  #cap-kick{ display:inline-block; font-family:'Bangers',Impact,sans-serif; font-size:38px; letter-spacing:.08em; color:#000; background:var(--rainbow); padding:6px 22px 2px; border-radius:10px; margin-bottom:14px; }
+  #cap-band{ position:relative; padding:14px 44px 20px 30px; background:#000; transform:skewX(-8deg); border-left:14px solid var(--green); box-shadow:0 20px 40px rgba(0,0,0,.5); }
+  #cap-text{ display:block; transform:skewX(8deg); font-weight:800; font-size:68px; line-height:1.15; white-space:nowrap; }
+  #flash{ position:absolute; inset:0; background:#fff; opacity:0; pointer-events:none; mix-blend-mode:screen; }
+  #vignette{ position:absolute; inset:0; pointer-events:none; background:radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,.55) 100%); }
+  #progress{ position:absolute; left:0; bottom:0; height:8px; width:0; background:var(--rainbow); }
+  #endfade{ position:absolute; inset:0; background:#000; opacity:0; pointer-events:none; }
+  #debug{ position:absolute; right:20px; top:20px; font:600 28px 'IBM Plex Mono',monospace; background:rgba(0,0,0,.7); padding:10px 18px; border-radius:10px; display:none; }
+
+  /* gate / end */
+  .overlay{ position:fixed; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:22px; background:#07070b; z-index:10; text-align:center; padding:16px; }
+  .overlay.hidden{ display:none; }
+  .play{ font-family:'Bangers',Impact,sans-serif; font-size:44px; letter-spacing:.06em; color:#000; background:var(--rainbow); border:0; border-radius:999px; padding:18px 56px 12px; cursor:pointer; box-shadow:0 0 0 6px #000, 0 0 0 10px #fff; }
+  .play:focus-visible{ outline:4px solid #fff; outline-offset:10px; }
+  .sub{ color:#9ca3af; font-size:16px; }
+  #rotate-hint{ position:fixed; left:50%; bottom:16px; transform:translateX(-50%); font-size:14px; color:#9ca3af; display:none; z-index:5; }
+  @media (orientation:portrait){ #rotate-hint{ display:block; } }
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <filter id="mb" x="-10%" y="-10%" width="120%" height="120%" color-interpolation-filters="sRGB">
+    <feGaussianBlur id="mb-blur" in="SourceGraphic" stdDeviation="0 0" />
+  </filter>
+</svg>
+
+<div id="stage">
+  <div id="lens"><div id="world"><div id="world-bg"></div></div></div>
+  <div id="vignette"></div>
+  <div id="hud" aria-live="polite"><div id="cap-kick"></div><br><div id="cap-band"><span id="cap-text"></span></div></div>
+  <div id="flash"></div>
+  <div id="endfade"></div>
+  <div id="progress"></div>
+  <div id="debug"></div>
+</div>
+
+<div id="gate" class="overlay">
+  <img src="assets/genz-terpz-logo.png" alt="GEN Z TERPZ" style="width:min(260px,50vw)">
+  <button id="play-btn" class="play">▶ PLAY INTRO</button>
+  <div class="sub">เปิดเสียงเพื่อประสบการณ์เต็ม · ~53 วินาที</div>
+</div>
+<div id="end" class="overlay hidden">
+  <img src="assets/genz-terpz-logo.png" alt="GEN Z TERPZ" style="width:min(220px,45vw)">
+  <button id="replay-btn" class="play">↻ REPLAY</button>
+  <a href="index.html" class="sub" style="color:#3ddc84;font-size:18px">เข้าสู่ร้าน →</a>
+</div>
+<div id="rotate-hint">หมุนจอแนวนอนเพื่อดูเต็มจอ ↻</div>
+
+<script>
+/* ================= TIMING ================= */
+const BPM = 160, B = 60 / BPM;          // 1 บีต = 0.375 วินาที
+const END_BEAT = 140;                   // จบเพลง/ภาพที่บีต 140 (~52.5s)
+const sec = b => b * B;
+
+/* ================= WORLD LAYOUT ================= */
+// แต่ละฉากเป็น panel บน "โลก" ขนาดใหญ่ กล้องวิ่งไปมาระหว่าง panel (เดินแบบงู ซ้าย→ขวา, ขวา→ซ้าย)
+const PX = 2240, PY = 1400;
+const GRID = [[0,0],[1,0],[2,0],[3,0],[4,0],[4,1],[3,1],[2,1],[1,1],[0,1],[0,2],[1,2],[2,2],[3,2],[4,2]];
+const WORLD_CENTER = { x:(4*PX+1920)/2, y:(2*PY+1080)/2 };
+const panelCenter = i => ({ x: GRID[i][0]*PX + 960, y: GRID[i][1]*PY + 540 });
+
+/* ---------- helpers สร้าง HTML ---------- */
+const P = (x,y,w,h) => `left:${x}px;top:${y}px;` + (w!=null?`width:${w}px;`:'') + (h!=null?`height:${h}px;`:'');
+// fx: ชื่อเอฟเฟกต์, b: บีตที่เข้า, o: {d: ความยาว(บีต), out: บีตที่ออก, rot, ...data}
+function F(fx, b, o={}){
+  let s = ` data-fx="${fx}" data-in="${b}"`;
+  for (const k in o) s += ` data-${k}="${o[k]}"`;
+  return s;
+}
+const SEQ = arr => ` data-seq='${JSON.stringify(arr)}'`;
+
+/* ================= PANELS ================= */
+const PANELS = [];
+
+// 0 — LOGO SLAM (hook ในวินาทีแรก)
+PANELS.push(`
+  <div class="abs" style="${P(-440,-860,2800,2800)};background:conic-gradient(from 0deg,#ff2d78,#ff8a00,#ffe600,#3ddc84,#00c2ff,#a259ff,#ff2d78);border-radius:50%" ${F('spin',-9,{speed:9})}></div>
+  <div class="abs" style="${P(0,0,1920,1080)};background:radial-gradient(circle at 50% 38%, rgba(255,255,255,.95) 0 22%, rgba(255,255,255,0) 42%)"></div>
+  <img class="abs" src="assets/genz-terpz-logo.png" alt="" style="${P(700,30,520,520)}" ${F('slam',0,{d:.35})}>
+  <div class="abs graffiti center-x" style="top:520px;font-size:190px;color:#fff" ${F('slam',2,{d:.35})}>HIGHSOCIETY</div>
+  <div class="abs center-x" style="top:790px" ${F('fromB',3,{d:.6})}><span style="display:inline-block;background:#000;padding:8px 44px 16px;border-radius:20px;font-size:76px;font-weight:800">ช้อปสายเขียว ครบในมือถือ</span></div>
+`);
+
+// 1 — FEEL FINDER
+{
+  const feel = [[['🌿','ดูหนัง'],['🌿','ฟังเพลง'],['🌿','เล่นเกม']],[['😴','ลดเครียด'],['😴','นอนไม่หลับ']],[['⚡','มีสมาธิ'],['⚡','ไอเดียใหม่'],['⚡','ปาร์ตี้']]];
+  let chips='', i=0;
+  feel.forEach((row,r)=>row.forEach((f,c)=>{
+    const isParty = f[1]==='ปาร์ตี้';
+    chips += `<div class="abs chip" style="${P(110+c*310,250+r*140,290,108)}" ${F('pop',8.25+i*0.5)} ${isParty?'data-cls="active@13"':''}><span>${f[0]}</span>${f[1]}</div>`;
+    i++;
+  }));
+  const picks=[['Sour Diesel','~22%'],['Jack Herer','~20%'],['Super Lemon Haze','~21%']];
+  PANELS.push(`
+    <div class="abs" style="${P(0,0,1920,1080)};background:radial-gradient(circle at 20% 20%,#065f46,#022c22 55%,#07070b)"></div>
+    <div class="abs" style="${P(0,0,1920,14)};background:var(--rainbow)"></div>
+    <div class="abs h-title" style="${P(110,80)}" ${F('fromR',7.7)}>คุณต้องการความรู้สึกแบบไหน?</div>
+    ${chips}
+    <div class="abs" style="${P(1035,676,130,14)};background:#3ddc84;border-radius:8px;transform-origin:left" ${F('fillx',14,{d:.6})}></div>
+    <div class="abs card" style="${P(1180,250,640,560)}" ${F('fromR',15)}>
+      <div style="padding:34px 40px 10px"><span class="tag t-sativa" style="font-size:34px">⚡ Sativa</span></div>
+      <div style="padding:0 40px;font-size:50px;font-weight:700;color:#047857">สายพันธุ์สำหรับ "ปาร์ตี้"</div>
+      ${picks.map((p,k)=>`<div class="abs" style="${P(40,220+k*104,560,88)};background:#f0fdf4;border-radius:18px;display:flex;align-items:center;justify-content:space-between;padding:0 26px;font-size:34px;font-weight:600" ${F('fromR',15.5+k*0.5)}><span>${p[0]}</span><span style="color:#854d0e">THC ${p[1]}</span></div>`).join('')}
+    </div>
+  `);
+}
+
+// 2 — SMART SORT (% Indica/Sativa)
+PANELS.push(`
+  <div class="abs" style="${P(0,0,1920,1080)};background:radial-gradient(circle at 70% 10%,#4c1d95,#1e0b3a 50%,#07070b)"></div>
+  <div class="abs h-title" style="${P(160,70)}" ${F('fromR',19.7)}>จัดกลุ่มอัตโนมัติ</div>
+  <div class="abs card" style="${P(160,200,1000,330)}" ${F('fromR',19.85)}>
+    <div style="padding:30px 44px 0;font-size:60px;font-weight:700;color:#047857">Purple Punch</div>
+    <div class="abs" style="${P(44,140,912,76)};background:#fde047;border-radius:40px;overflow:hidden">
+      <div class="abs" style="${P(0,0,657,76)};background:#7c3aed;transform-origin:left" ${F('fillx',21,{d:2})}></div>
+    </div>
+    <div class="abs" style="${P(44,236)};font-size:40px;font-weight:700;color:#6b21a8">Indica <span data-count="21,2,72" data-suf="%"></span></div>
+    <div class="abs" style="${P(700,236,256)};text-align:right;font-size:40px;font-weight:700;color:#854d0e">Sativa <span data-count="21,2,28" data-suf="%"></span></div>
+  </div>
+  <div class="abs" style="${P(1250,270)}" ${F('slam',24,{rot:-6})}><span class="tag t-indica" style="font-size:80px;padding:14px 48px;box-shadow:0 20px 50px rgba(0,0,0,.5)">😴 Indica</span></div>
+  <div class="abs" style="${P(160,560)};font-size:36px;color:#c4b5fd" ${F('fade',22.5)}>Indica ≥ 60% → Indica · ต่างกันไม่เกิน 20% → Hybrid</div>
+  ${[['😴 Indica','t-indica'],['⚡ Sativa','t-sativa'],['🌿 Hybrid','t-hybrid']].map((g,k)=>`
+    <div class="abs ${g[1]}" style="${P(160+k*560,640,500,190)};border-radius:28px;display:flex;align-items:center;justify-content:center;font-size:62px;font-weight:700;${k===0?'':'opacity:.85'}" ${F('fromB',22+k*0.5)} ${k===0?'data-cls="glow@25"':''}>${g[0]}</div>`).join('')}
+  <div class="abs" style="${P(470,610)};background:#16a34a;color:#fff;font-size:40px;font-weight:700;padding:6px 22px;border-radius:999px" ${F('pop',25)}>+1</div>
+  <style>.glow{ box-shadow:0 0 0 10px #a259ff, 0 0 80px #a259ff; }</style>
+`);
+
+// 3 — CATALOG 5 หมวด
+{
+  const cats=[['🌿','สายพันธุ์','Indica · Sativa · Hybrid','#16a34a'],['🚬','Pre-Roll','พร้อมสูบ','#ea580c'],['🎁','Combo Pack','คุ้มกว่า','#db2777'],['💨','Vape','หลายแบรนด์','#0284c7'],['⚙️','อุปกรณ์','ครบทุกชิ้น','#4b5563']];
+  PANELS.push(`
+    <div class="abs" style="${P(0,0,1920,1080)};background:linear-gradient(160deg,#111827,#07070b)"></div>
+    <div class="abs h-title" style="${P(110,60)}" ${F('fromR',33)}>เลือกได้ทุกหมวด</div>
+    ${cats.map((c,k)=>`
+      <div class="abs" style="${P(110+k*350,200,320,560)};border-radius:32px;background:linear-gradient(170deg,${c[3]},#000);border:6px solid rgba(255,255,255,.2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px" ${F('fromB',k?28+k:27.75,{d:.5})}>
+        <div style="font-size:150px;line-height:1">${c[0]}</div>
+        <div style="font-size:54px;font-weight:800">${c[1]}</div>
+        <div style="font-size:30px;opacity:.85">${c[2]}</div>
+      </div>`).join('')}
+  `);
+}
+
+// 4 — HOME FEED (แถวเลื่อนแนวนอน)
+{
+  const rows=[['🔥 โปรโมชั่นประจำเดือน','#ff2d78',true],['⭐ สินค้าแนะนำ','#ffe600',false],['💰 Budget Selection','#3ddc84',false],['🎯 Limited Offer','#a259ff',false]];
+  const names=['Purple Punch','Gelato 41','OG Kush','Blue Dream','Zkittlez','Wedding Cake','Runtz','Gorilla Glue','Sour Diesel','Jack Herer'];
+  let html=`<div class="abs" style="${P(0,0,1920,1080)};background:#f3f4f6"></div>`;
+  rows.forEach((r,k)=>{
+    const y=40+k*205, b=36+k*2;
+    let cards='';
+    for(let j=0;j<10;j++){
+      const nm=names[(j+k*3)%names.length];
+      const price = r[2] ? `<s>฿${450+j*10}</s><b>฿${390+j*10}</b>` : `฿${[190,250,290,390,450][(j+k)%5]}`;
+      cards+=`<div class="mini" style="left:${j*330}px;top:0"><div class="band" style="background:linear-gradient(90deg,${r[1]},#047857)"></div><div class="nm">${nm}</div><div class="pr">${price}</div></div>`;
+    }
+    html+=`<div class="abs" style="${P(70,y)};font-size:50px;font-weight:700;color:#111" ${F('fromR',b-0.35)}>${r[0]}</div>`;
+    html+=`<div class="abs" style="${P(70,y+68,3400,150)}" ${F('scroll',b-0.2,{speed:28*(k%2?-1:1)})}>${cards}</div>`;
+  });
+  PANELS.push(html);
+}
+
+// 5 — PRODUCT CARD
+PANELS.push(`
+  <div class="abs" style="${P(0,0,1920,1080)};background:linear-gradient(150deg,#065f46,#022c22 60%,#07070b)"></div>
+  <div class="abs card" style="${P(110,80,1700,800)}" ${F('pop',45.7,{d:.5})}></div>
+  <div class="abs bud" style="${P(160,130,640,640)}" ${F('fromB',45.85)}><div class="abs" style="${P(0,180,640)};text-align:center;font-size:260px;line-height:1">🌿</div></div>
+  <div class="abs" style="${P(860,130)};font-size:84px;font-weight:800;color:#047857" ${F('fromR',46.5)}>Purple Punch</div>
+  <div class="abs" style="${P(1500,160)}" ${F('pop',47)}><span class="tag t-indica" style="font-size:38px">😴 Indica</span></div>
+  <div class="abs" style="${P(860,268)};background:#000;color:#3ddc84;font-size:58px;font-weight:800;padding:4px 30px;border-radius:16px;box-shadow:0 0 0 4px #3ddc84" ${F('slam',48,{rot:-2})}>THC ~24.5%</div>
+  <div class="abs" style="${P(860,390)};font-size:42px;color:#374151" ${F('fromR',48.5)}>กลิ่น/รส: <b>Grape · Berry</b></div>
+  <div class="abs" style="${P(860,452)};font-size:42px;color:#374151" ${F('fromR',49)}>เอฟเฟกต์: <b>ผ่อนคลาย · หลับสบาย</b></div>
+  <div class="abs" style="${P(860,514)};font-size:42px;color:#374151" ${F('fromR',49.5)}>Indica 80% / Sativa 20%</div>
+  <div class="abs" style="${P(860,600)};font-size:72px;color:#9ca3af;font-weight:600" ${F('fromR',50.5)}>฿450<div class="abs" style="${P(-6,50,180,8)};background:#dc2626;transform-origin:left;border-radius:4px" ${F('fillx',51,{d:.6})}></div></div>
+  <div class="abs" style="${P(1070,572)};font-size:110px;color:#dc2626;font-weight:800" ${F('slam',52)}>฿390</div>
+  <div class="abs" style="${P(1350,596)};background:#dc2626;color:#fff;font-family:Bangers,Impact,sans-serif;font-size:54px;padding:6px 22px 0;border-radius:12px" ${F('pop',52.5,{rot:8})}>SALE</div>
+  <div class="abs" style="${P(860,760)};font-size:38px;color:#6b7280" ${F('fromR',53)}>เหลือ 7 ชิ้น</div>
+  <div class="abs btn" style="${P(1400,720,360,110)};font-size:42px" ${F('pop',53.5)} data-cls="pressed@55">เพิ่มลงตะกร้า</div>
+`);
+
+// 6 — PACK & HAND ROLL
+{
+  const packs=[['1g','฿120'],['3.5g','฿390'],['5g','฿520'],['10g','฿990']];
+  PANELS.push(`
+    <div class="abs" style="${P(0,0,1920,1080)};background:radial-gradient(circle at 80% 20%,#9d174d,#3b0a24 55%,#07070b)"></div>
+    <div class="abs card" style="${P(440,50,1040,880)}" ${F('pop',55.75,{d:.5})}></div>
+    <div class="abs" style="${P(500,90)};font-size:64px;font-weight:800;color:#111" ${F('fromL',55.85)}>เลือกแพ็ค &amp; จำนวน</div>
+    <div class="abs" style="${P(500,180)};font-size:36px;color:#6b7280" ${F('fromL',56.5)}>Purple Punch · ขนาดแพ็ค</div>
+    ${packs.map((p,k)=>`<div class="abs pack" style="${P(500+(k%2)*470,250+Math.floor(k/2)*130,450,110)}" ${F('pop',56+k*0.25)} ${k===1?'data-cls="sel@59"':''}><b>${p[0]}</b><span>${p[1]}</span></div>`).join('')}
+    <div class="abs hr" style="${P(500,530,920,100)}" ${F('fromL',60)} data-cls="on@61"><span class="box"></span><span style="flex:1">🖐️ Hand Roll (มวนให้)</span><b>+฿20/ชิ้น</b></div>
+    <div class="abs" style="${P(540,660,880,96)};display:flex;align-items:center;gap:22px;font-size:40px;color:#374151" ${F('fromL',61.5)}>
+      <span>จะให้มวนกี่มวน:</span>
+      <span class="step">−</span><span class="stepv"${SEQ([[0,'1'],[62.5,'2'],[63,'3'],[63.5,'4']])}>1</span><span class="step">+</span>
+    </div>
+    <div class="abs" style="${P(500,800)};font-size:46px;font-weight:700;color:#111"${SEQ([[0,'รวม: ฿390'],[61.5,'รวม: ฿410'],[62.5,'รวม: ฿430'],[63,'รวม: ฿450'],[63.5,'รวม: ฿470']])} ${F('fromL',59)}>รวม: ฿390</div>
+    <div class="abs btn" style="${P(1080,790,360,96)};font-size:40px" ${F('pop',60)} data-cls="pressed@65">เพิ่มลงตะกร้า</div>
+    <style>
+      .pack{ border:4px solid #e5e7eb; border-radius:20px; display:flex; align-items:center; justify-content:space-between; padding:0 34px; font-size:46px; color:#111; background:#fff; }
+      .pack.sel{ border-color:#16a34a; background:#dcfce7; box-shadow:0 0 0 8px rgba(22,163,74,.35); }
+      .hr{ border:4px solid #e5e7eb; border-radius:20px; display:flex; align-items:center; gap:22px; padding:0 30px; font-size:42px; color:#111; background:#fff; }
+      .hr .box{ width:48px; height:48px; border:4px solid #9ca3af; border-radius:10px; }
+      .hr.on{ border-color:#16a34a; background:#f0fdf4; }
+      .hr.on .box{ background:#16a34a; border-color:#16a34a; box-shadow:inset 0 0 0 8px #fff; }
+      .step{ width:76px; height:76px; border:4px solid #d1d5db; border-radius:16px; display:flex; align-items:center; justify-content:center; font-weight:700; }
+      .stepv{ width:110px; height:76px; border:4px solid #16a34a; border-radius:16px; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:48px; color:#047857; }
+    </style>
+  `);
+}
+
+// 7 — SEARCH + VAPE BRANDS
+PANELS.push(`
+  <div class="abs" style="${P(0,0,1920,1080)};background:#f9fafb"></div>
+  <div class="abs" style="${P(360,90,1200,120)};background:#fff;border:4px solid #16a34a;border-radius:999px;box-shadow:0 0 0 10px rgba(22,163,74,.2);display:flex;align-items:center;gap:24px;padding:0 44px;font-size:56px;color:#111" ${F('fromL',67.7)}>
+    <span style="font-size:48px">🔍</span><span data-type="68.5,0.25" data-text="purple"></span><span class="caret"></span>
+  </div>
+  ${['Purple Punch','Purple Haze','Purple Kush'].map((n,k)=>`
+    <div class="abs card" style="${P(360+k*410,270,380,270)};overflow:hidden" ${F('fromB',70.5+k*0.5)}>
+      <div class="bud" style="height:150px;border-radius:0"></div>
+      <div style="padding:14px 24px;font-size:38px;font-weight:700;color:#047857">${n}</div>
+    </div>`).join('')}
+  <div class="abs" style="${P(360,600)};font-size:52px;font-weight:700;color:#111" ${F('fromL',72)}>💨 เลือกแบรนด์ Vape</div>
+  ${['Cloud 9','Terp Lab','Hi-Vape','Nimbus'].map((n,k)=>`
+    <div class="abs chip" style="${P(360+k*300,690,270,100)};background:#e0f2fe;font-size:40px" ${F('pop',72.5+k*0.25)} ${k===1?'data-cls="active@74"':''}>${n}</div>`).join('')}
+  <style>.caret{ width:5px; height:64px; background:#16a34a; }</style>
+`);
+
+// 8 — CART → LINE
+PANELS.push(`
+  <div class="abs" style="${P(0,0,1920,1080)};background:linear-gradient(140deg,#06c755,#065f2c 45%,#07070b)"></div>
+  <div class="abs card" style="${P(100,50,940,960)}" ${F('pop',75.7,{d:.5})}></div>
+  <div class="abs" style="${P(150,90)};font-size:62px;font-weight:800;color:#111" ${F('fromL',75.85)}>ตะกร้าสินค้า</div>
+  <div class="abs" style="${P(640,104)};background:#06c755;color:#fff;font-size:30px;font-weight:700;padding:8px 24px;border-radius:999px" ${F('pop',77)}>LINE ✓ สวัสดี, มายด์</div>
+  ${[['Purple Punch (3.5g)','฿390 x 1'],['🖐️ ค่าบริการมวนมือ','฿20 x 4'],['Gelato 41 (5g)','฿520 x 2']].map((it,k)=>`
+    <div class="abs" style="${P(150,200+k*112,840,96)};background:#f9fafb;border-radius:18px;display:flex;align-items:center;justify-content:space-between;padding:0 30px;color:#111;font-size:38px" ${F('fromL',76+k*0.25)}><b>${it[0]}</b><span style="color:#6b7280">${it[1]}</span></div>`).join('')}
+  <div class="abs" style="${P(150,550,840)};text-align:right;font-size:56px;font-weight:800;color:#111" ${F('fromL',78)}>ยอดรวม: <span data-count="78,1.5,1510" data-pre="฿"></span></div>
+  <div class="abs inp" style="${P(150,640,840,84)}" ${F('fromL',78.5)}><span data-type="78.5,0.125" data-text="มายด์ ไฮโซ"></span></div>
+  <div class="abs inp" style="${P(150,744,840,84)}" ${F('fromL',79)}><span data-type="79.25,0.0625" data-text="123 สุขุมวิท กรุงเทพฯ"></span></div>
+  <div class="abs btn" style="${P(150,870,840,96)};font-size:44px" ${F('pop',80)} data-cls="pressed@81">ยืนยันคำสั่งซื้อ</div>
+  <div class="abs" style="${P(1220,30,560,1020)};background:#111;border-radius:70px;box-shadow:0 40px 100px rgba(0,0,0,.6)" ${F('fromR',77)}>
+    <div class="abs" style="${P(20,20,520,980)};background:#8cabd9;border-radius:54px;overflow:hidden">
+      <div style="height:120px;background:#1e293b;display:flex;align-items:flex-end;padding:0 30px 18px;gap:16px;font-size:34px;font-weight:700"><span style="width:52px;height:52px;border-radius:50%;background:var(--rainbow)"></span>HIGHSOCIETY</div>
+    </div>
+  </div>
+  <div class="abs" style="${P(1290,200,440)};background:#06c755;color:#000;border-radius:30px 30px 6px 30px;padding:22px 26px;font-size:28px;line-height:1.45;box-shadow:0 10px 30px rgba(0,0,0,.3)" ${F('pop',82)}>
+    <b>🛒 คำสั่งซื้อใหม่</b><br>• Purple Punch (3.5g) x 1 = ฿390<br>• 🖐️ ค่าบริการมวนมือ x 4 = ฿80<br>• Gelato 41 (5g) x 2 = ฿1040<br><b>ยอดรวม: ฿1510</b><br>ชื่อผู้สั่ง: มายด์ ไฮโซ
+  </div>
+  <div class="abs" style="${P(1270,620,400)};background:#fff;color:#111;border-radius:30px 30px 30px 6px;padding:22px 26px;font-size:30px;line-height:1.4;box-shadow:0 10px 30px rgba(0,0,0,.25)" ${F('pop',84)}>รับออเดอร์แล้วครับ 🙏<br>โอนแล้วส่งสลิปได้เลย</div>
+  <style>.inp{ border:3px solid #d1d5db; border-radius:16px; display:flex; align-items:center; padding:0 26px; font-size:38px; color:#111; background:#fff; }</style>
+`);
+
+// 9 — ORDER HISTORY + RECEIPT
+{
+  const rows=[['01/10 20:14','HS-0127','฿1,510','⏳ รอยืนยัน','-'],['28/09 18:02','HS-0119','฿890','✅ ชำระแล้ว','ดาวน์โหลด'],['21/09 21:40','HS-0102','฿1,240','✅ ชำระแล้ว','ดาวน์โหลด'],['12/09 19:05','HS-0088','฿520','✅ ชำระแล้ว','ดาวน์โหลด']];
+  const cols=[40,400,720,960,1340];
+  PANELS.push(`
+    <div class="abs" style="${P(0,0,1920,1080)};background:linear-gradient(180deg,#e5e7eb,#f9fafb)"></div>
+    <div class="abs h-title" style="${P(120,60)};color:#111" ${F('fromL',87.7)}>ประวัติคำสั่งซื้อ</div>
+    <div class="abs" style="${P(120,200,1680,72)};background:#111827;border-radius:16px;color:#fff;font-size:34px;font-weight:600" ${F('fromL',87.85)}>
+      ${['เวลา','Order','รวม','สถานะ','ใบเสร็จ'].map((h,k)=>`<span class="abs" style="left:${cols[k]}px;top:12px">${h}</span>`).join('')}
+    </div>
+    ${rows.map((r,j)=>`
+      <div class="abs" style="${P(120,290+j*96,1680,84)};background:#fff;border-radius:16px;color:#111;font-size:36px;box-shadow:0 4px 14px rgba(0,0,0,.08)" ${F('fromL',88+j*0.25)}>
+        ${r.map((v,k)=>k===4&&v!=='-'?`<span class="abs dl" style="left:${cols[k]}px;top:12px" ${j===1?'data-cls="hot@91"':''}>${v}</span>`:`<span class="abs" style="left:${cols[k]}px;top:16px">${v}</span>`).join('')}
+      </div>`).join('')}
+    <div class="abs" style="${P(1220,330,540,640)}" ${F('fromB',92,{rot:-3})}>
+      <div class="card" style="width:540px;height:640px;padding:40px;font-size:30px;line-height:1.6;color:#111">
+        <div style="font-size:44px;font-weight:800">ใบเสร็จรับเงิน</div>
+        <div style="color:#6b7280">HIGHSOCIETY · HS-0119</div>
+        <hr style="border:0;border-top:3px dashed #d1d5db;margin:18px 0">
+        <div style="display:flex;justify-content:space-between"><span>Gelato 41 (3.5g)</span><span>฿390</span></div>
+        <div style="display:flex;justify-content:space-between"><span>Pre-Roll Pack</span><span>฿500</span></div>
+        <hr style="border:0;border-top:3px dashed #d1d5db;margin:18px 0">
+        <div style="display:flex;justify-content:space-between;font-size:40px;font-weight:800"><span>รวม</span><span>฿890</span></div>
+        <div style="margin-top:30px;color:#047857;font-weight:800;font-size:38px">✓ ชำระแล้ว</div>
+      </div>
+    </div>
+    <style>
+      .dl{ background:#16a34a; color:#fff; padding:2px 22px; border-radius:12px; font-size:30px; top:16px !important; }
+      .dl.hot{ background:#ff2d78; box-shadow:0 0 0 8px rgba(255,45,120,.35); }
+    </style>
+  `);
+}
+
+// 10 — DARK MODE (หน้าร้านจำลอง สว่าง → มืด ด้วย iris จากปุ่ม 🌙)
+function storefront(dark){
+  const bg=dark?'#0f1412':'#f9fafb', card=dark?'#1a201d':'#fff', tx=dark?'#e5e7eb':'#1f2937', sub=dark?'#9ca3af':'#6b7280', gr=dark?'#4ade80':'#047857';
+  const items=[['Purple Punch','฿390'],['Gelato 41','฿420'],['Blue Dream','฿350'],['OG Kush','฿290']];
+  return `
+    <div class="abs" style="${P(0,0,1920,1080)};background:${bg}"></div>
+    <div class="abs" style="${P(0,0,1920,180)};background:var(--rainbow)">
+      <img class="abs" src="assets/genz-terpz-logo.png" alt="" style="${P(50,10,160,160)}">
+      <div class="abs" style="${P(1290,58)};background:#fff;color:#047857;font-size:32px;font-weight:700;padding:6px 26px;border-radius:999px">สวัสดี, มายด์</div>
+      <div class="abs" style="${P(1580,48)};font-size:56px">🛒</div>
+      <div class="abs moon" style="${P(1690,40,100,100)}" ${dark?'':'data-cls="pressed@95"'}>${dark?'☀️':'🌙'}</div>
+      <div class="abs" style="${P(1820,46)};font-size:56px;color:#111">☰</div>
+    </div>
+    <div class="abs" style="${P(0,180,1920,240)};background:var(--rainbow);opacity:.92;display:flex;flex-direction:column;align-items:center;justify-content:center">
+      <div style="font-size:72px;font-weight:800;color:#fff;text-shadow:0 4px 0 rgba(0,0,0,.25)">ค้นหาสายพันธุ์ที่เหมาะกับคุณ</div>
+    </div>
+    <div class="abs" style="${P(80,470)};font-size:54px;font-weight:700;color:${tx}">⭐ สินค้าแนะนำ</div>
+    ${items.map((it,k)=>`
+      <div class="abs" style="${P(80+k*450,560,410,320)};background:${card};border-radius:26px;box-shadow:0 14px 34px rgba(0,0,0,${dark?.6:.12});overflow:hidden">
+        <div class="bud" style="height:170px;border-radius:0"></div>
+        <div style="padding:14px 26px 0;font-size:40px;font-weight:700;color:${gr}">${it[0]}</div>
+        <div style="padding:0 26px;font-size:36px;font-weight:700;color:${tx}">${it[1]} <span style="font-size:26px;color:${sub};font-weight:400">· เหลือ 9 ชิ้น</span></div>
+      </div>`).join('')}`;
+}
+PANELS.push(`
+  <div class="abs" style="${P(0,0,1920,1080)}">${storefront(false)}</div>
+  <div class="abs" style="${P(0,0,1920,1080)}" ${F('iris',96,{d:1.2,cx:1740,cy:90})}>${storefront(true)}</div>
+  <style>.moon{ border-radius:50%; background:rgba(0,0,0,.25); display:flex; align-items:center; justify-content:center; font-size:60px; } .moon.pressed{ background:#000; box-shadow:0 0 0 8px #fff; }</style>
+`);
+
+// 11 — ADMIN DASHBOARD
+{
+  const kpi=[['SALES เดือนนี้',128450,'฿','+18% จากเดือนก่อน'],['SALES ทั้งหมด',1284900,'฿','1,036 ออเดอร์'],['รอยืนยัน',6,'','pending'],['สต็อกต่ำ',3,'','รายการ <5']];
+  const bars=[120,180,150,240,210,290,260,200,310,280,330,300,360,340];
+  PANELS.push(`
+    <div class="abs adm" style="${P(0,0,1920,1080)}"></div>
+    <div class="abs" style="${P(0,0,300,1080)};background:#111;border-right:2px solid #2a2a2a" ${F('fromL',99.7,{d:.5})}>
+      <div class="mono neon" style="padding:40px 30px 0;font-size:34px;font-weight:700">H!GH$OC!€T¥</div>
+      <div class="mono" style="padding:4px 30px 30px;font-size:22px;color:#666">ADMIN v4</div>
+      ${['📊 Dashboard','🛒 คำสั่งซื้อ','🌿 สินค้า','🔥 โปรโมชั่น'].map((n,k)=>`<div style="padding:22px 30px;font-size:32px;${k===0?'color:#00ff88;border-left:6px solid #00ff88;background:rgba(0,255,136,.06)':'color:#999'}">${n}</div>`).join('')}
+    </div>
+    <div class="abs" style="${P(360,40)};font-size:66px;font-weight:700" ${F('fromL',99.85)}>Dashboard</div>
+    <div class="abs mono neon" style="${P(740,62)};border:3px solid #00ff88;border-radius:999px;padding:4px 24px;font-size:28px;display:flex;align-items:center;gap:12px" ${F('pop',100.5)}><span style="width:16px;height:16px;border-radius:50%;background:#00ff88" ${F('blink',-9)}></span>LIVE</div>
+    ${kpi.map((k,j)=>`
+      <div class="abs surface" style="${P(360+j*385,150,360,210)};padding:26px 30px" ${F('fromB',100+j*0.25)}>
+        <div class="mono" style="font-size:24px;color:#888">${k[0]}</div>
+        <div style="font-size:${k[1]>99999?58:70}px;font-weight:800;color:${j===2?'#ffcc00':j===3?'#ff4455':'#00ff88'}" data-count="${100+j*0.25},2,${k[1]}" data-pre="${k[2]}"></div>
+        <div class="mono" style="font-size:22px;color:#666">${k[3]}</div>
+      </div>`).join('')}
+    <div class="abs surface" style="${P(360,400,1505,500)}" ${F('fromB',102.5)}>
+      <div style="padding:24px 34px;font-size:40px;font-weight:700">ยอดขายรายวัน</div>
+      ${bars.map((h,i)=>`<div class="abs" style="${P(60+i*102,440-h,64,h)};border-radius:10px 10px 0 0;background:linear-gradient(180deg,${['#ff2d78','#ff8a00','#ffe600','#3ddc84','#00c2ff','#a259ff'][i%6]},#00ff88);transform-origin:bottom" ${F('grow',103+i*0.25,{d:.5})}></div>`).join('')}
+    </div>
+  `);
+}
+
+// 12 — ORDERS + SLIP CHECK
+PANELS.push(`
+  <div class="abs adm" style="${P(0,0,1920,1080)}"></div>
+  <div class="abs" style="${P(80,40)};font-size:66px;font-weight:700" ${F('fromR',109.7)}>คำสั่งซื้อ</div>
+  ${['ทุกสถานะ','⏳ รอยืนยัน','✅ ชำระแล้ว','❌ ยกเลิก'].map((n,k)=>`<div class="abs abtn" style="${P(80+k*260,150,240,70)};font-size:28px;${k===1?'border-color:#ffcc00;color:#ffcc00':''}" ${F('pop',110.25+k*0.25)}>${n}</div>`).join('')}
+  <div class="abs surface" style="${P(80,260,1000,190)}" ${F('fromR',109.85)}>
+    <div class="abs mono" style="${P(36,28)};font-size:34px;color:#888">#HS-0127</div>
+    <div class="abs" style="${P(36,80)};font-size:46px;font-weight:700">มายด์ ไฮโซ · ฿1,510</div>
+    <div class="abs" style="${P(620,40)}"><span class="pill pending" style="font-size:36px" ${SEQ([[0,'⏳ รอยืนยัน'],[114,'✅ ชำระแล้ว']])} data-cls="paid@114,-pending@114">⏳ รอยืนยัน</span></div>
+  </div>
+  <div class="abs abtn" style="${P(80,480,640,84)}" ${F('pop',111)} data-cls="pressed@113.75">✅ ยืนยัน + บันทึกสลิป</div>
+  <div class="abs" style="${P(780,440)};font-family:Bangers,Impact,sans-serif;font-size:130px;color:#00ff88;border:10px solid #00ff88;border-radius:20px;padding:0 30px;line-height:1.1;text-shadow:0 0 30px rgba(0,255,136,.6)" ${F('slam',114,{rot:-12})}>PAID</div>
+  <div class="abs" style="${P(1200,100,560,840)};background:#fff;color:#111;border-radius:30px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.6)" ${F('fromR',111.5)}>
+    <div style="background:#16a34a;color:#fff;padding:34px;font-size:44px;font-weight:800">โอนเงินสำเร็จ ✓</div>
+    <div style="padding:30px 40px;font-size:32px;line-height:1.8">
+      <div style="color:#6b7280">จำนวนเงิน</div>
+      <div style="font-size:84px;font-weight:800">฿1,510.00</div>
+      <div>จาก: นาย ม. ไฮโซ</div><div>ไปยัง: HIGHSOCIETY</div><div style="color:#6b7280">01 ต.ค. · 20:16</div>
+      <div class="mono" style="color:#6b7280;font-size:26px">REF 0127-8842-1510</div>
+    </div>
+    <div class="abs" style="${P(0,0,560,10)};background:#00ff88;box-shadow:0 0 30px #00ff88" ${F('scan',112.25,{d:1.5,h:830})}></div>
+  </div>
+  <div class="abs" style="${P(1250,820)};display:flex;gap:16px" ${F('pop',113.5)}><span class="pill paid" style="font-size:32px;background:#000">ยอดตรง ✓</span><span class="pill paid" style="font-size:32px;background:#000">บัญชีตรง ✓</span></div>
+`);
+
+// 13 — PRODUCT / STOCK / PROMO MANAGEMENT
+PANELS.push(`
+  <div class="abs adm" style="${P(0,0,1920,1080)}"></div>
+  <div class="abs" style="${P(80,40)};font-size:66px;font-weight:700" ${F('fromR',117.7)}>จัดการสินค้า</div>
+  <div class="abs abtn primary" style="${P(1500,40,340,96)};font-size:38px" ${F('slam',119)}>+ เพิ่มสินค้า</div>
+  ${[['Purple Punch','สต็อก 2','#7c3aed'],['Gelato 41','สต็อก 18','#16a34a'],['🔥 โปร ลด 15%','ถึง 31 ต.ค.','#ff2d78']].map((c,k)=>`
+    <div class="abs surface acard" style="${P(80+k*600,200,560,600)}" ${F('fromR',117.85+k*0.25)} ${k===1?'data-cls="hiddenp@121"':''} ${k===2?'data-cls="newimg@122"':''}>
+      <div class="img" style="background:linear-gradient(135deg,${c[2]},#000)"></div>
+      <div style="padding:22px 30px 0;font-size:46px;font-weight:700">${c[0]}</div>
+      <div style="padding:0 30px;font-size:34px;color:${k===0?'#ff4455':'#888'}" ${k===0?SEQ([[0,'สต็อก 2 ⚠️'],[120,'สต็อก 50 ✓']])+' data-cls="okc@120"':''}>${c[1]}</div>
+      ${k===0?`<div class="abs" style="${P(30,500,240,70)}" data-cls="pressed@120" ><div class="abtn" style="height:70px">📦 สต็อก</div></div>`:''}
+      ${k===1?`<div class="abs abtn" style="${P(30,500,240,70)}" ${SEQ([[0,'👁️ ซ่อน'],[121,'🚫 แสดง']])}>👁️ ซ่อน</div>`:''}
+      ${k===2?`<div class="abs abtn" style="${P(30,500,300,70)}" data-cls="pressed@122">📸 เปลี่ยนรูป</div>`:''}
+      <div class="abs abtn" style="${P(290+(k===2?50:0),500,220,70)}">✏️ แก้ไข</div>
+    </div>`).join('')}
+  <style>.okc{ color:#00ff88 !important; } .pressed > .abtn{ background:#00ff88; color:#000; border-color:#00ff88; box-shadow:0 0 40px rgba(0,255,136,.6); }</style>
+`);
+
+// 14 — OUTRO
+PANELS.push(`
+  <div class="abs" style="${P(-440,-860,2800,2800)};background:conic-gradient(from 90deg,#a259ff,#00c2ff,#3ddc84,#ffe600,#ff8a00,#ff2d78,#a259ff);border-radius:50%" ${F('spin',-9,{speed:-12})}></div>
+  <div class="abs" style="${P(0,0,1920,1080)};background:radial-gradient(circle at 50% 30%, rgba(255,255,255,.95) 0 18%, rgba(255,255,255,0) 38%)"></div>
+  <img class="abs" src="assets/genz-terpz-logo.png" alt="" style="${P(730,20,460,460)}" ${F('slam',130,{d:.35})}>
+  <div class="abs graffiti center-x" style="top:440px;font-size:170px;color:#fff" ${F('slam',131,{d:.35})}>HIGHSOCIETY</div>
+  <div class="abs graffiti center-x" style="top:620px;font-size:84px;color:#ffe600;-webkit-text-stroke:4px #000;text-shadow:6px 6px 0 #000" ${F('fromR',131.5)}>SHOP ONLINE</div>
+  <div class="abs center-x" style="top:770px" ${F('pop',132)}><span style="display:inline-flex;align-items:center;gap:20px;background:#06c755;color:#fff;font-size:60px;font-weight:800;padding:14px 50px;border-radius:999px;box-shadow:0 0 0 8px #000">สั่งเลยผ่าน LINE <span class="mono" style="font-size:46px">@176ssaqa</span></span></div>
+  <div class="abs center-x" style="top:950px" ${F('fromB',133)}><span style="background:#000;padding:8px 30px;border-radius:14px;font-size:40px">⚠️ สำหรับผู้ที่มีอายุ 20 ปีขึ้นไปเท่านั้น</span></div>
+`);
+
+const LABELS=['GEN Z TERPZ','01 FEEL FINDER','02 SMART SORT','03 CATALOG','04 HOME FEED','05 PRODUCT','06 PACK + HAND ROLL','07 SEARCH','08 CHECKOUT × LINE','09 MY ORDERS','10 DARK MODE','11 DASHBOARD','12 SLIP CHECK','13 MANAGE','SHOP NOW'];
+
+/* ================= CAMERA ================= */
+// [beat, panel(-1 = กลางโลก), dx, dy (จากจุดกลาง panel), scale, rot, ease ของช่วงที่มาถึงคีย์นี้]
+// whip  : ออกตัวก่อนบีต ~0.55 แล้ว "ลง" บนบีต (expo in-out)
+// snap  : crash zoom เริ่ม "บน" บีตทันที (quint out)
+// lin   : ช่วง hold — กล้องยังไหลช้าๆ ไม่เคยหยุด
+// sine/ramp : เคลื่อนนุ่ม / speed ramp (เร็ว-สโลว์-เร็ว)
+const KEYS = [
+  [0,     0,    0, -80, 3.2, -8, 'lin'],
+  [0.45,  0,    0,   0, 1.0,  0, 'snap'],
+  [7.45,  0,   30, -10, 1.07, 0, 'lin'],
+  [8.1,   1,    0,   0, 1.0,  0, 'whip'],
+  [13,    1, -170,   0, 1.08, 0, 'lin'],
+  [13.45, 1, -100,   8, 1.75, 0, 'snap'],
+  [14.45, 1,  -90,  12, 1.8,  0, 'lin'],
+  [15.1,  1,  560, -10, 1.38, 0, 'whip'],
+  [19.45, 1,  590,   0, 1.46, 0, 'lin'],
+  [20.1,  2, -200,-180, 1.35, 0, 'whip'],
+  [24,    2, -150,-170, 1.42, 0, 'lin'],
+  [24.45, 2,    0, -20, 1.0,  0, 'snap'],
+  [27.45, 2,   60,  20, 1.06, 0, 'lin'],
+  [28.1,  3, -690, -40, 1.6,  0, 'whip'],
+  [28.55, 3, -680, -40, 1.62, 0, 'lin'],
+  [29.05, 3, -340, -40, 1.6,  0, 'whip'],
+  [29.55, 3, -330, -40, 1.62, 0, 'lin'],
+  [30.05, 3,   10, -40, 1.6,  0, 'whip'],
+  [30.55, 3,   20, -40, 1.62, 0, 'lin'],
+  [31.05, 3,  360, -40, 1.6,  0, 'whip'],
+  [31.55, 3,  370, -40, 1.62, 0, 'lin'],
+  [32.05, 3,  710, -40, 1.6,  0, 'whip'],
+  [33,    3,  720, -40, 1.66, 0, 'lin'],
+  [33.45, 3,    0,   0, 1.0,  0, 'snap'],
+  [35.45, 3,   40,   0, 1.05, 0, 'lin'],
+  [36.1,  4, -260,-390, 1.5,  0, 'whip'],
+  [37.45, 4, -230,-390, 1.52, 0, 'lin'],
+  [38.1,  4, -260,-185, 1.5,  0, 'whip'],
+  [39.45, 4, -230,-185, 1.52, 0, 'lin'],
+  [40.1,  4, -260,  20, 1.5,  0, 'whip'],
+  [41.45, 4, -230,  20, 1.52, 0, 'lin'],
+  [42.1,  4, -260, 225, 1.5,  0, 'whip'],
+  [44,    4, -220, 225, 1.53, 0, 'lin'],
+  [44.45, 4,    0,   0, 1.0,  0, 'snap'],
+  [45.45, 4,    0,  30, 1.04, 0, 'lin'],
+  [46.1,  5,    0,   0, 1.0,  0, 'whip'],
+  [48,    5,   20, -20, 1.03, 0, 'lin'],
+  [48.45, 5,   60,-230, 1.5,  0, 'snap'],
+  [52,    5,  100, -40, 1.5,  0, 'lin'],
+  [52.45, 5,  180, 100, 1.7,  0, 'snap'],
+  [53,    5,  190, 105, 1.72, 0, 'lin'],
+  [54,    5,  300, 130, 1.25, 0, 'sine'],
+  [55,    5,  320, 140, 1.27, 0, 'lin'],
+  [55.45, 5,  620, 235, 2.6,  0, 'snap'],
+  [56.1,  6,    0,   0, 1.0,  0, 'whip'],
+  [59,    6,   20, -20, 1.04, 0, 'lin'],
+  [59.45, 6,  225,-195, 1.6,  0, 'snap'],
+  [60,    6,  225,-190, 1.62, 0, 'lin'],
+  [61,    6,    0,  40, 1.4,  0, 'sine'],
+  [62,    6,    0,  45, 1.42, 0, 'lin'],
+  [62.45, 6, -170, 170, 1.7,  0, 'snap'],
+  [64,    6, -160, 175, 1.72, 0, 'lin'],
+  [65,    6,  140, 270, 1.4,  0, 'sine'],
+  [67.45, 6,  180, 260, 1.5,  0, 'lin'],
+  [68.1,  7, -320,-390, 1.6,  0, 'whip'],
+  [70,    7,  -80,-390, 1.6,  0, 'lin'],
+  [70.45, 7,    0,-120, 1.15, 0, 'snap'],
+  [72,    7,    0,-100, 1.17, 0, 'lin'],
+  [73,    7,    0, 200, 1.3,  0, 'sine'],
+  [75.45, 7,  -40, 210, 1.36, 0, 'lin'],
+  [76.1,  8, -460,-200, 1.35, 0, 'whip'],
+  [81,    8, -460, 140, 1.35, 0, 'lin'],
+  [81.45, 8, -390, 380, 1.6,  0, 'snap'],
+  [82.1,  8,  540,-110, 1.5,  0, 'whip'],
+  [87.45, 8,  540, -40, 1.45, 0, 'lin'],
+  [88.1,  9,    0,-120, 1.15, 0, 'whip'],
+  [91,    9,    0, -60, 1.15, 0, 'lin'],
+  [91.45, 9,  600,-130, 1.6,  0, 'snap'],
+  [92,    9,  600,-120, 1.62, 0, 'lin'],
+  [93,    9,  530, 100, 1.3,  0, 'sine'],
+  [93.45, 9,  530, 115, 1.32, 0, 'lin'],
+  [94.1, 10,    0,   0, 1.0,  0, 'whip'],
+  [95,   10,    0,  10, 1.03, 0, 'lin'],
+  [95.45,10,  780,-450, 2.6,  0, 'snap'],
+  [96,   10,  780,-450, 2.65, 0, 'lin'],
+  [96.45,10,    0,   0, 1.0,  0, 'snap'],
+  [99.45,10,    0,  30, 1.06, 0, 'lin'],
+  [100.1,11,    0,   0, 1.0,  0, 'whip'],
+  [101,  11,   20, -20, 1.04, 0, 'lin'],
+  [102,  11,  165,-290, 1.45, 0, 'sine'],
+  [102.5,11,  175,-285, 1.46, 0, 'lin'],
+  [103.25,11,-280, 120, 1.4,  0, 'sine'],
+  [106.75,11, 640, 120, 1.4,  0, 'lin'],
+  [107,  11,  650, 120, 1.41, 0, 'lin'],
+  [107.45,11,   0,   0, 1.0,  0, 'snap'],
+  [109.45,11,  40,   0, 1.04, 0, 'lin'],
+  [110.1,12, -380,-185, 1.35, 0, 'whip'],
+  [111.45,12,-360,-185, 1.37, 0, 'lin'],
+  [112.1,12,  520, -60, 1.2,  0, 'whip'],
+  [114,  12,  520,  60, 1.25, 0, 'lin'],
+  [114.45,12,-170,-180, 1.7,  0, 'snap'],
+  [115,  12, -170,-175, 1.72, 0, 'lin'],
+  [116,  12,  -60, -60, 1.12, 0, 'sine'],
+  [117.45,12, -20, -50, 1.15, 0, 'lin'],
+  [118.1,13,    0,-100, 1.0,  0, 'whip'],
+  [119,  13,   10,-100, 1.03, 0, 'lin'],
+  [119.45,13, 710,-445, 1.8,  0, 'snap'],
+  [120.1,13, -600, -40, 1.5,  0, 'whip'],
+  [120.45,13,-590, -40, 1.52, 0, 'lin'],
+  [121.1,13,    0, -40, 1.5,  0, 'whip'],
+  [121.45,13,  10, -40, 1.52, 0, 'lin'],
+  [122.1,13,  600, -40, 1.5,  0, 'whip'],
+  [124,  13,  650, -20, 1.56, 0, 'lin'],
+  [124.9,-1,    0,   0, 0.165, -2, 'snap'],
+  [129.45,-1,   0,   0, 0.15, 2, 'lin'],
+  [130.1,14,    0,   0, 1.0,  0, 'whip'],
+  [140,  14,    0,   0, 1.08, 0, 'lin'],
+  [142,  14,    0,   0, 1.12, 0, 'lin'],
+].map(k=>{ const c = k[1]<0 ? WORLD_CENTER : panelCenter(k[1]); return { b:k[6]==='whip'?k[0]-0.08:k[0], x:c.x+k[2], y:c.y+k[3], s:k[4], r:k[5], e:k[6] }; });
+
+// กล้อง "punch" (ซูมกระแทกสั้นๆ) บนจังหวะสำคัญ
+const PUNCH = [[0,.12],[1,.04],[2,.09],[3,.04],[13,.06],[15,.05],[24,.07],[25,.04],[29,.04],[30,.04],[31,.04],[32,.04],[33,.06],[44,.06],[48,.05],[52,.08],[55,.06],[59,.06],[61,.04],[63,.05],[65,.05],[74,.05],[81,.06],[82,.05],[84,.04],[91,.05],[95,.05],[96,.1],[107,.06],[114,.1],[119,.06],[120,.05],[121,.05],[122,.05],[130,.12],[131,.07],[132,.04],[136,.03],[140,.1]];
+const FLASH = [[0,.55],[2,.3],[24,.25],[52,.3],[82,.25],[96,.55],[114,.45],[130,.7],[140,.7]];
+const IMPACTS = [[0,1],[2,.6],[13,.4],[24,.6],[33,.5],[44,.4],[52,.7],[55,.5],[59,.4],[81,.5],[82,.5],[91,.4],[96,1],[107,.5],[114,.9],[119,.5],[130,1],[140,1]];
+const BLIPS = [8.25,8.75,9.25,9.75,10.25,10.75,11.25,11.75,13,22,22.5,23,25,56,56.25,56.5,56.75,59,61,62.5,63,63.5,65,70.5,71,71.5,72.5,72.75,73,73.25,74,76,76.25,76.5,80,88,88.25,88.5,88.75,91,95,110.25,110.5,110.75,111,113.75,120,121,122];
+const TYPES = [[68.5,.25,6],[78.5,.125,10],[79.25,.0625,22]];
+
+const CAPTIONS = [
+  { in:8.5,   out:19.45, k:'01 · FEEL FINDER',      t:'บอกฟีลที่อยากได้ เราแนะนำสายพันธุ์ให้', d:'L' },
+  { in:20.5,  out:27.45, k:'02 · SMART SORT',       t:'จัดกลุ่มอัตโนมัติจาก % Indica / Sativa', d:'L' },
+  { in:28.5,  out:35.45, k:'03 · CATALOG',          t:'ครบ 5 หมวด ในร้านเดียว', d:'L' },
+  { in:36.5,  out:45.45, k:'04 · HOME FEED',        t:'โปร · แนะนำ · Budget · Limited', d:'L' },
+  { in:46.5,  out:55,    k:'05 · PRODUCT',          t:'THC · กลิ่น · เอฟเฟกต์ · ราคาลด ครบในการ์ด', d:'U' },
+  { in:56.5,  out:67.45, k:'06 · PACK + HAND ROLL', t:'เลือกแพ็ค 1g–10g + มวนให้ ฿20/มวน', d:'R' },
+  { in:68.5,  out:75.45, k:'07 · SEARCH',           t:'ค้นหาไว + กรองแบรนด์ Vape', d:'R' },
+  { in:76.5,  out:87.45, k:'08 · CHECKOUT × LINE',  t:'สั่งปุ๊บ สรุปออเดอร์ส่งเข้า LINE ร้านทันที', d:'R' },
+  { in:88.5,  out:93.45, k:'09 · MY ORDERS',        t:'ประวัติออเดอร์ + ใบเสร็จ', d:'R' },
+  { in:94.5,  out:99.45, k:'10 · DARK MODE',        t:'โหมดมืด สบายตา จำค่าไว้ให้', d:'U' },
+  { in:100.5, out:109.45,k:'11 · ADMIN',            t:'แดชบอร์ดยอดขาย LIVE', d:'L' },
+  { in:110.5, out:117.45,k:'12 · ORDERS',           t:'ตรวจสลิป ยืนยันออเดอร์ในคลิกเดียว', d:'L' },
+  { in:118.5, out:123.6, k:'13 · MANAGE',           t:'จัดการสินค้า สต็อก โปร', d:'L' },
+  { in:124.9, out:129.45,k:'ALL IN ONE',            t:'ทุกฟีเจอร์ ในร้านเดียว', d:'U' },
+];
+
+/* ================= EASING ================= */
+const clamp = (v,a=0,b=1)=>Math.min(b,Math.max(a,v));
+const EASE = {
+  lin: u=>u,
+  sine: u=>0.5-0.5*Math.cos(Math.PI*u),
+  whip: u=> u<=0?0:u>=1?1: u<.5 ? Math.pow(2,20*u-10)/2 : (2-Math.pow(2,-20*u+10))/2,
+  snap: u=>1-Math.pow(1-u,5),
+  ramp: u=>u+0.9*Math.sin(2*Math.PI*u)/(2*Math.PI),
+};
+const expoOut = u=> u>=1?1:1-Math.pow(2,-10*u);
+const backOut = u=>{ const c1=1.9,c3=c1+1; return 1+c3*Math.pow(u-1,3)+c1*Math.pow(u-1,2); };
+
+/* ================= CAMERA EVAL ================= */
+function camBase(bt){
+  if (bt<=KEYS[0].b) return {...KEYS[0], seg:null, u:0};
+  for (let i=0;i<KEYS.length-1;i++){
+    const a=KEYS[i], z=KEYS[i+1];
+    if (bt<z.b){
+      const u=(bt-a.b)/(z.b-a.b), e=EASE[z.e](u);
+      const c={ x:a.x+(z.x-a.x)*e, y:a.y+(z.y-a.y)*e, s:Math.exp(Math.log(a.s)+(Math.log(z.s)-Math.log(a.s))*e), r:a.r+(z.r-a.r)*e, seg:z.e, u };
+      if (z.e==='whip'){ // เอียงตามทิศ + ถอยกล้องเล็กน้อยกลางทาง ให้ whip มีน้ำหนัก
+        const dir=Math.sign((z.x-a.x)||(z.y-a.y)), bell=Math.sin(Math.PI*u);
+        c.r += dir*5*bell; c.s *= 1-0.12*bell;
+      }
+      return c;
+    }
+  }
+  return {...KEYS[KEYS.length-1], seg:null, u:1};
+}
+function punchAt(bt){
+  let m=1;
+  for (const [b,a] of PUNCH){ const d=bt-b; if(d>=0&&d<1.5) m*=1+a*Math.exp(-d*B*14); }
+  // ชีพจรเบาๆ ทุกบีต (กล้องเต้นตาม kick) ยกเว้นช่วง breakdown
+  if (bt>=0 && !(bt>=124&&bt<130) && bt<END_BEAT){ const d=bt-Math.floor(bt); m*=1+0.012*Math.exp(-d*B*18); }
+  return m;
+}
+function cam(bt){ const c=camBase(bt); c.s*=punchAt(bt); return c; }
+
+/* ================= BUILD DOM ================= */
+const world=document.getElementById('world');
+PANELS.forEach((html,i)=>{
+  const g=GRID[i];
+  const lab=document.createElement('div'); lab.className='plabel'; lab.textContent=LABELS[i];
+  lab.style.left=(g[0]*PX)+'px'; lab.style.top=(g[1]*PY-210)+'px'; world.appendChild(lab);
+  const p=document.createElement('div'); p.className='panel'; p.style.left=(g[0]*PX)+'px'; p.style.top=(g[1]*PY)+'px';
+  p.innerHTML=html; world.appendChild(p);
+});
+const seg = (typeof Intl!=='undefined' && Intl.Segmenter) ? new Intl.Segmenter('th',{granularity:'grapheme'}) : null;
+const graphemes = s => seg ? [...seg.segment(s)].map(x=>x.segment) : [...s];
+const fmt = n => Math.round(n).toLocaleString('en-US');
+
+const panels=[...document.querySelectorAll('.panel')].map((el,i)=>{
+  const items=[];
+  el.querySelectorAll('[data-fx],[data-seq],[data-cls],[data-type],[data-count]').forEach(n=>{
+    const d=n.dataset, it={ el:n, last:{} };
+    if (d.fx){ it.fx=d.fx; it.tin=+d.in; it.dur=d.d!=null?+d.d:({slam:.35,pop:.6,grow:.5,fade:.5}[d.fx]||.6); it.out=d.out!=null?+d.out:null; it.rot=+(d.rot||0); it.speed=+(d.speed||0); it.cx=+(d.cx||0); it.cy=+(d.cy||0); it.h=+(d.h||0); }
+    if (d.seq) it.seq=JSON.parse(d.seq);
+    if (d.cls) it.cls=d.cls.split(',').map(s=>{ const [c,b]=s.split('@'); return { on:c[0]!=='-', c:c.replace(/^-/,''), b:+b }; });
+    if (d.type){ const [b,r]=d.type.split(',').map(Number); it.type={ b, r, g:graphemes(d.text||'') }; }
+    if (d.count){ const [b,du,to]=d.count.split(',').map(Number); it.count={ b, du, to, pre:d.pre||'', suf:d.suf||'' }; }
+    items.push(it);
+  });
+  return { el, items, c:panelCenter(i), vis:null };
+});
+
+/* ================= ELEMENT FX ================= */
+function setIf(it,k,v,apply){ if(it.last[k]!==v){ it.last[k]=v; apply(v); } }
+function fxState(it,bt){
+  const p=clamp((bt-it.tin)/it.dur);
+  let o=1,x=0,y=0,s=1,sx=1,sy=1,rot=it.rot, clip=null;
+  if (bt<it.tin && !['spin','blink'].includes(it.fx)) return { o:0 };
+  switch(it.fx){
+    case 'slam': s=1+2.4*(1-expoOut(p)); o=clamp(p*8); break;
+    case 'pop': s=0.3+0.7*backOut(p); o=clamp(p*5); break;
+    case 'fromL': x=-360*(1-expoOut(p)); o=clamp(p*4); break;
+    case 'fromR': x= 360*(1-expoOut(p)); o=clamp(p*4); break;
+    case 'fromB': y= 240*(1-expoOut(p)); o=clamp(p*4); break;
+    case 'fromT': y=-240*(1-expoOut(p)); o=clamp(p*4); break;
+    case 'fade': o=p; break;
+    case 'grow': sy=expoOut(p); break;
+    case 'fillx': sx=expoOut(p); break;
+    case 'spin': rot+=bt*it.speed; break;
+    case 'blink': o=(Math.floor(bt)%2)?.25:1; break;
+    case 'scroll': x=600*(1-expoOut(p)) - (bt-it.tin)*it.speed; o=clamp(p*4); break;
+    case 'scan': y=it.h*EASE.sine(p); o= p>=1 ? clamp(1-(bt-it.tin-it.dur)*3) : 1; break;
+    case 'iris': clip=`circle(${(expoOut(p)*2300).toFixed(1)}px at ${it.cx}px ${it.cy}px)`; break;
+  }
+  if (it.out!=null && bt>=it.out){ const q=clamp((bt-it.out)/.3); o*=1-q; s*=1-.1*q; }
+  return { o, tf:`translate(${x.toFixed(1)}px,${y.toFixed(1)}px) rotate(${rot.toFixed(2)}deg) scale(${(s*sx).toFixed(4)},${(s*sy).toFixed(4)})`, clip };
+}
+function updateItem(it,bt){
+  if (it.fx){
+    const st=fxState(it,bt);
+    setIf(it,'o',st.o.toFixed(3),v=>{ it.el.style.opacity=v; it.el.style.visibility=(+v>0)?'visible':'hidden'; });
+    if (st.tf) setIf(it,'tf',st.tf,v=>it.el.style.transform=v);
+    if (it.fx==='iris') setIf(it,'clip',st.clip||'circle(0px at 0 0)',v=>{ it.el.style.clipPath=v; it.el.style.webkitClipPath=v; });
+  }
+  if (it.seq){ let txt=it.seq[0][1]; for(const [b,t] of it.seq) if(bt>=b) txt=t; setIf(it,'seq',txt,v=>it.el.textContent=v); }
+  if (it.cls){ const st={}; for(const c of it.cls){ if(bt>=c.b) st[c.c]=c.on; else if(!(c.c in st)) st[c.c]=false; }
+    for (const c in st) setIf(it,'c_'+c,st[c],v=>it.el.classList.toggle(c,v)); }
+  if (it.type){ const n=bt<it.type.b?0:Math.min(it.type.g.length,Math.floor((bt-it.type.b)/it.type.r)+1); setIf(it,'ty',n,v=>it.el.textContent=it.type.g.slice(0,v).join('')); }
+  if (it.count){ const p=clamp((bt-it.count.b)/it.count.du); setIf(it,'ct',p,v=>it.el.textContent=it.count.pre+fmt(it.count.to*expoOut(v))+it.count.suf); }
+}
+
+/* ================= HUD ================= */
+const hud=document.getElementById('hud'), capKick=document.getElementById('cap-kick'), capText=document.getElementById('cap-text'), capBand=document.getElementById('cap-band');
+let capIdx=-2;
+function renderHud(bt){
+  const i=CAPTIONS.findIndex(c=>bt>=c.in-0.01 && bt<c.out+0.3);
+  if (i!==capIdx){ capIdx=i; if(i>=0){ capKick.textContent=CAPTIONS[i].k; capText.textContent=CAPTIONS[i].t; } }
+  if (i<0){ hud.style.opacity=0; return; }
+  const c=CAPTIONS[i], pin=clamp((bt-c.in)/0.5), pout=clamp((bt-c.out)/0.3);
+  const ein=expoOut(pin), dx={L:1,R:-1,U:0}[c.d], dy=c.d==='U'?1:0;
+  // เข้าตามทิศที่กล้องพามา ออกไปทางที่กล้องจะไปต่อ (นำสายตา)
+  const x=dx*220*(1-ein) - dx*260*pout*pout, y=dy*120*(1-ein) - dy*80*pout;
+  hud.style.opacity=(clamp(pin*3)*(1-pout)).toFixed(3);
+  hud.style.transform=`translate(${x.toFixed(1)}px,${y.toFixed(1)}px)`;
+  const wipe=(1-ein)*100; capBand.style.clipPath=`inset(0 ${c.d==='R'?0:wipe}% 0 ${c.d==='R'?wipe:0}%)`;
+}
+
+/* ================= RENDER ================= */
+const lens=document.getElementById('lens'), blurEl=document.getElementById('mb-blur'), flashEl=document.getElementById('flash'),
+      progEl=document.getElementById('progress'), endEl=document.getElementById('endfade'), dbg=document.getElementById('debug');
+let lastBlur='';
+function render(t){
+  const bt=t/B;
+  const c=cam(bt);
+  world.style.transform=`translate(960px,540px) rotate(${c.r.toFixed(3)}deg) scale(${c.s.toFixed(5)}) translate(${(-c.x).toFixed(2)}px,${(-c.y).toFixed(2)}px)`;
+
+  // motion blur ตามความเร็วกล้อง (ทิศทางจริงบนจอ)
+  const dtb=(1/120)/B, cb=camBase(bt), p0=camBase(bt-dtb);
+  const rr=c.r*Math.PI/180, dx=(p0.x-cb.x)*cb.s, dy=(p0.y-cb.y)*cb.s;
+  const vx=(dx*Math.cos(rr)-dy*Math.sin(rr))*120, vy=(dx*Math.sin(rr)+dy*Math.cos(rr))*120;
+  const zv=Math.abs(Math.log(cb.s/p0.s))*120;
+  const bx=Math.min(70,Math.abs(vx)*0.0032+zv*1.0), by=Math.min(70,Math.abs(vy)*0.0032+zv*1.0);
+  const key=(bx+by<3)?'none':`${bx.toFixed(1)} ${by.toFixed(1)}`;
+  if (key!==lastBlur){ lastBlur=key; if(key==='none') lens.style.filter='none'; else { blurEl.setAttribute('stdDeviation',key); lens.style.filter='url(#mb)'; } }
+
+  // วาดเฉพาะ panel ที่อยู่ในเฟรม
+  const cr=Math.cos(rr), sr=Math.sin(rr), rad=c.s*1110;
+  for (const p of panels){
+    const ox=(p.c.x-c.x)*c.s, oy=(p.c.y-c.y)*c.s;
+    const sx=ox*cr-oy*sr, sy=ox*sr+oy*cr;
+    const v=Math.abs(sx)<960+rad && Math.abs(sy)<540+rad;
+    if (v!==p.vis){ p.vis=v; p.el.style.visibility=v?'visible':'hidden'; }
+    if (v) for (const it of p.items) updateItem(it,bt);
+  }
+
+  renderHud(bt);
+  let f=0; for (const [b,a] of FLASH){ const d=bt-b; if(d>=0&&d<2) f+=a*Math.exp(-d*B*9); }
+  flashEl.style.opacity=clamp(f).toFixed(3);
+  progEl.style.width=(clamp(bt/END_BEAT)*100).toFixed(2)+'%';
+  endEl.style.opacity=clamp((bt-END_BEAT-0.3)/1.2).toFixed(3);
+  if (debugOn) dbg.textContent=`t ${t.toFixed(3)}s · beat ${bt.toFixed(2)} · bar ${Math.floor(bt/4)+1}.${Math.floor(bt%4)+1}`;
+}
+
+/* ================= STAGE FIT ================= */
+const stage=document.getElementById('stage');
+function fit(){ const s=Math.min(innerWidth/1920, innerHeight/1080); stage.style.transform=`translate(${(innerWidth-1920*s)/2}px,${(innerHeight-1080*s)/2}px) scale(${s})`; }
+addEventListener('resize',fit); fit();
+
+/* ================= AUDIO (สังเคราะห์สด 160 BPM) ================= */
+let AC=null, out=null, noiseBuf=null, t0=0, events=[], evIdx=0, schedTimer=null, muted=false;
+function initAudio(){
+  AC=new (window.AudioContext||window.webkitAudioContext)();
+  const comp=AC.createDynamicsCompressor(); comp.threshold.value=-14; comp.ratio.value=4; comp.attack.value=.003; comp.release.value=.2;
+  out=AC.createGain(); out.gain.value=.85; out.connect(comp); comp.connect(AC.destination);
+  noiseBuf=AC.createBuffer(1,AC.sampleRate*2,AC.sampleRate); const d=noiseBuf.getChannelData(0); for(let i=0;i<d.length;i++) d[i]=Math.random()*2-1;
+}
+function G(v=1){ const g=AC.createGain(); g.gain.value=v; return g; }
+function envAD(g,t,peak,a,d){ g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(peak,t+a); g.gain.exponentialRampToValueAtTime(0.0001,t+a+d); }
+function osc(type,f,t,dur){ const o=AC.createOscillator(); o.type=type; o.frequency.setValueAtTime(f,t); o.start(t); o.stop(t+dur+.05); return o; }
+function noise(t,dur){ const s=AC.createBufferSource(); s.buffer=noiseBuf; s.start(t,Math.random()*1.5,dur+.05); return s; }
+function filt(type,f,q=1){ const b=AC.createBiquadFilter(); b.type=type; b.frequency.value=f; b.Q.value=q; return b; }
+
+function kick(t){ const o=osc('sine',165,t,.4), g=G(0); o.frequency.exponentialRampToValueAtTime(44,t+.12); envAD(g,t,1,.002,.32); o.connect(g).connect(out);
+  const n=noise(t,.02), f=filt('bandpass',3500,1), g2=G(0); envAD(g2,t,.25,.001,.02); n.connect(f).connect(g2).connect(out); }
+function clap(t){ const n=noise(t,.25), f=filt('bandpass',1700,1.2), g=G(0); envAD(g,t,.55,.002,.18); n.connect(f).connect(g).connect(out);
+  const o=osc('triangle',190,t,.1), g2=G(0); envAD(g2,t,.2,.001,.08); o.connect(g2).connect(out); }
+function hat(t,open,v=1){ const n=noise(t,open?.3:.06), f=filt('highpass',8000), g=G(0); envAD(g,t,(open?.16:.09)*v,.001,open?.22:.035); n.connect(f).connect(g).connect(out); }
+function bass(t,f,dur){ const o=osc('sawtooth',f,t,dur), s=osc('sine',f/2,t,dur), lp=filt('lowpass',2200,7), g=G(0);
+  lp.frequency.setValueAtTime(2400,t); lp.frequency.exponentialRampToValueAtTime(220,t+dur); envAD(g,t,.32,.004,dur);
+  o.connect(lp); s.connect(lp); lp.connect(g).connect(out); }
+function pluck(t,f){ const o=osc('square',f,t,.14), lp=filt('lowpass',2600,2), g=G(0); envAD(g,t,.045,.002,.11); o.connect(lp).connect(g).connect(out); }
+function stab(t,fs){ fs.forEach(f=>{ [-7,7].forEach(dt=>{ const o=osc('sawtooth',f,t,.35); o.detune.value=dt; const lp=filt('lowpass',3200,1), g=G(0); envAD(g,t,.05,.003,.3); o.connect(lp).connect(g).connect(out); }); }); }
+function impact(t,a){ const o=osc('sine',120,t,1.4), g=G(0); o.frequency.exponentialRampToValueAtTime(30,t+.9); envAD(g,t,.9*a,.002,1.2); o.connect(g).connect(out);
+  const n=noise(t,.8), lp=filt('lowpass',1400), g2=G(0); envAD(g2,t,.5*a,.002,.6); n.connect(lp).connect(g2).connect(out);
+  const c=noise(t,1.6), hp=filt('highpass',5500), g3=G(0); envAD(g3,t,.22*a,.002,1.4); c.connect(hp).connect(g3).connect(out); }
+function whoosh(t,dur,dir){ const n=noise(t,dur+.1), bp=filt('bandpass',400,1.4), g=G(0), pan=AC.createStereoPanner?AC.createStereoPanner():null;
+  bp.frequency.setValueAtTime(300,t); bp.frequency.exponentialRampToValueAtTime(4200,t+dur*.7); bp.frequency.exponentialRampToValueAtTime(900,t+dur);
+  g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(.5,t+dur*.65); g.gain.exponentialRampToValueAtTime(.0001,t+dur+.08);
+  n.connect(bp).connect(g); if(pan){ pan.pan.setValueAtTime(-.8*dir,t); pan.pan.linearRampToValueAtTime(.8*dir,t+dur); g.connect(pan).connect(out); } else g.connect(out); }
+function blip(t){ const o=osc('sine',1500,t,.07), g=G(0); o.frequency.exponentialRampToValueAtTime(900,t+.05); envAD(g,t,.09,.001,.05); o.connect(g).connect(out); }
+function tick(t){ const n=noise(t,.02), hp=filt('highpass',4000), g=G(0); envAD(g,t,.12,.001,.015); n.connect(hp).connect(g).connect(out); }
+function riser(t,dur){ const n=noise(t,dur), bp=filt('bandpass',300,3), g=G(0); bp.frequency.setValueAtTime(250,t); bp.frequency.exponentialRampToValueAtTime(8000,t+dur);
+  g.gain.setValueAtTime(.01,t); g.gain.exponentialRampToValueAtTime(.4,t+dur); g.gain.setValueAtTime(.0001,t+dur+.01); n.connect(bp).connect(g).connect(out);
+  const o=osc('sawtooth',110,t,dur), lp=filt('lowpass',1800), g2=G(0); o.frequency.exponentialRampToValueAtTime(880,t+dur);
+  g2.gain.setValueAtTime(.0001,t); g2.gain.exponentialRampToValueAtTime(.07,t+dur); g2.gain.setValueAtTime(.0001,t+dur+.01); o.connect(lp).connect(g2).connect(out); }
+function pad(t,dur){ [220,261.63,329.63,440].forEach(f=>[-9,9].forEach(dt=>{ const o=osc('sawtooth',f,t,dur); o.detune.value=dt; const lp=filt('lowpass',700), g=G(0);
+  lp.frequency.setValueAtTime(600,t); lp.frequency.exponentialRampToValueAtTime(2600,t+dur); g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(.035,t+dur*.6); g.gain.setValueAtTime(.0001,t+dur);
+  o.connect(lp).connect(g).connect(out); })); }
+
+function buildEvents(){
+  const E=[], at=(b,f)=>E.push({t:sec(b),f});
+  const ROOTS=[55,43.65,65.41,49];                                     // Am F C G
+  const CH=[[440,523.25,659.25],[349.23,440,523.25],[523.25,659.25,783.99],[392,493.88,587.33]];
+  const ARP=[0,1,2,1,2,0,1,2];
+  for (let b=0;b<END_BEAT;b++){
+    const brk=b>=124&&b<130, bar=Math.floor(b/4)%4, root=ROOTS[bar];
+    if (!brk){ at(b,kick); if(b%2===1) at(b,clap); }
+    for (let k=0;k<4;k++){ if(brk && k%2) continue; const v=brk?.5+(b-124)/12:1; at(b+k/4,T=>hat(T,k===2,v)); }
+    if (!brk){ at(b+.5,T=>bass(T,root,.16)); at(b+.75,T=>bass(T,root*2,.1)); if(b%4===3) at(b+.25,T=>bass(T,root*1.5,.1)); }
+    if (!brk && b>=8) for (let k=0;k<4;k++){ const n=CH[bar][ARP[((b%2)*4+k)%8]]; at(b+k/4,T=>pluck(T,n*(k===3?2:1))); }
+  }
+  // stab ทุกต้นห้องของแต่ละฉาก
+  [0,8,20,28,36,46,56,68,76,88,94,100,110,118,130].forEach(b=>at(b,T=>stab(T,CH[Math.floor(b/4)%4].map(f=>f/2))));
+  IMPACTS.forEach(([b,a])=>at(b,T=>impact(T,a)));
+  BLIPS.forEach(b=>at(b,blip));
+  TYPES.forEach(([b,r,n])=>{ for(let i=0;i<n;i++) at(b+i*r,tick); });
+  at(124.9,T=>riser(T,sec(130-124.9)));
+  at(124.9,T=>pad(T,sec(130-124.9)));
+  // whoosh อัตโนมัติจากทุกการเคลื่อนกล้องแบบ whip / snap
+  for (let i=1;i<KEYS.length;i++){ const a=KEYS[i-1], z=KEYS[i]; if(z.e!=='whip'&&z.e!=='snap') continue;
+    const dir=Math.sign(z.x-a.x)||1, dur=sec(z.b-a.b); at(a.b,T=>whoosh(T,Math.max(.12,dur),dir)); }
+  return E.sort((p,q)=>p.t-q.t);
+}
+
+/* ================= CLOCK / TRANSPORT ================= */
+const params=new URLSearchParams(location.search);
+let debugOn=params.has('debug'), playing=false, paused=false, clockBase=0, clockStart=0, frozenT=null;
+const latency=()=>AC?((AC.outputLatency||0)+(AC.baseLatency||0)):0;
+function now(){
+  if (frozenT!=null) return frozenT;
+  if (AC && !muted) return AC.currentTime-t0-latency();
+  return paused?clockBase:clockBase+(performance.now()-clockStart)/1000;
+}
+function scheduler(){
+  const horizon=AC.currentTime-t0+.2;
+  while (evIdx<events.length && events[evIdx].t<horizon){ const e=events[evIdx++]; const T=t0+e.t; if(T>=AC.currentTime-.02) e.f(Math.max(T,AC.currentTime)); }
+}
+function loop(){
+  if (!playing) return;
+  const t=now(); render(t);
+  if (t/B>END_BEAT+2){ playing=false; document.getElementById('end').classList.remove('hidden'); return; }
+  requestAnimationFrame(loop);
+}
+function start(withAudio){
+  document.getElementById('gate').classList.add('hidden'); document.getElementById('end').classList.add('hidden');
+  frozenT=null; capIdx=-2; playing=true; paused=false;
+  if (withAudio){
+    try{
+      if(!AC) initAudio(); if(AC.state==='suspended') AC.resume();
+      events=buildEvents(); evIdx=0; t0=AC.currentTime+.12; muted=false;
+      clearInterval(schedTimer); schedTimer=setInterval(scheduler,25); scheduler();
+    }catch(e){ console.warn('audio unavailable',e); muted=true; }
+  } else muted=true;
+  clockBase=withAudio&&!muted?0:-0.12; clockStart=performance.now();
+  requestAnimationFrame(loop);
+}
+document.getElementById('play-btn').addEventListener('click',()=>start(true));
+document.getElementById('replay-btn').addEventListener('click',()=>start(!muted));
+
+addEventListener('keydown',e=>{
+  if (e.key==='d'||e.key==='D'){ debugOn=!debugOn; dbg.style.display=debugOn?'block':'none'; render(now()); }
+  if (e.key==='m'||e.key==='M'){ if(AC){ out.gain.value = out.gain.value>0 ? 0 : .85; } }
+  if (e.code==='Space' && playing){ e.preventDefault();
+    if (!paused){ paused=true; if(AC&&!muted) AC.suspend(); else clockBase=now(); }
+    else { paused=false; if(AC&&!muted) AC.resume(); else clockStart=performance.now(); } }
+  if ((e.key==='ArrowRight'||e.key==='ArrowLeft') && (frozenT!=null||paused)){
+    const step=(e.shiftKey?B:1/30)*(e.key==='ArrowRight'?1:-1);
+    frozenT=Math.max(0,now()+step); render(frozenT); }
+});
+
+// โหมดรีวิว: ?t=วินาที หรือ ?b=บีต → ค้างเฟรมนั้น (ใช้ ←/→ เลื่อนทีละเฟรม)
+window.__render=render; window.__B=B; window.__CAPTIONS=CAPTIONS; window.__KEYS=KEYS;
+if (params.has('t')||params.has('b')){
+  document.getElementById('gate').classList.add('hidden');
+  frozenT=params.has('t')?+params.get('t'):sec(+params.get('b'));
+  if (debugOn) dbg.style.display='block';
+  const draw=()=>render(frozenT); draw(); document.fonts&&document.fonts.ready.then(draw);
+} else if (params.has('autoplay')){
+  start(false);
+} else {
+  render(0);
+}
+if (debugOn) dbg.style.display='block';
+
+// ตรวจความยาวคำบรรยาย: ต้องค้างบนจอนานพอให้อ่านทัน (0.6s + 45ms/ตัวอักษร)
+CAPTIONS.forEach(c=>{ const need=.6+.045*graphemes(c.t).length, have=sec(c.out-c.in); if(have<need) console.warn('caption too short',c.t,have.toFixed(2),'<',need.toFixed(2)); });
+</script>
+</body>
+</html>
