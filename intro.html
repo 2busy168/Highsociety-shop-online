@@ -9,7 +9,7 @@
 <!--
   Feature intro สำหรับหน้าร้าน — แอนิเมชันทั้งหมดคำนวณจากเวลา (pure function ของ t)
   เพลงสังเคราะห์สดด้วย WebAudio ที่ 160 BPM ภาพซิงก์กับนาฬิกาของเสียง
-  รีวิวทีละเฟรม: intro.html?t=12.5 (วินาที) หรือ ?b=34 (บีต) | เล่นไม่มีเสียง: ?autoplay
+  รีวิวทีละเฟรม: intro.html?t=12.5 (วินาที) หรือ ?b=34 (บีต) | เล่นไม่มีเสียง: ?autoplay | แนวตั้ง 9:16: ?v
   คีย์ลัด: Space หยุด/เล่น, ←/→ ทีละเฟรม (Shift = ทีละบีต), D = debug, M = ปิดเสียง
 -->
 <style>
@@ -97,6 +97,14 @@
   .sub{ color:#9ca3af; font-size:16px; }
   #rotate-hint{ position:fixed; left:50%; bottom:16px; transform:translateX(-50%); font-size:14px; color:#9ca3af; display:none; z-index:5; }
   @media (orientation:portrait){ #rotate-hint{ display:block; } }
+  /* แนวตั้ง 9:16 — เว้นขอบบน ~220px และล่าง ~420px ให้พ้น UI ของ Reels/TikTok */
+  .v .panel{ width:1080px; height:1920px; }
+  .v .center-x{ width:1080px; }
+  .v .plabel{ font-size:120px; }
+  .v #hud{ left:50px; right:110px; bottom:330px; }
+  .v #cap-kick{ font-size:34px; }
+  .v #cap-text{ white-space:normal; font-size:58px; }
+  .v #rotate-hint{ display:none !important; }
 </style>
 </head>
 <body>
@@ -137,10 +145,15 @@ const sec = b => b * B;
 
 /* ================= WORLD LAYOUT ================= */
 // แต่ละฉากเป็น panel บน "โลก" ขนาดใหญ่ กล้องวิ่งไปมาระหว่าง panel (เดินแบบงู ซ้าย→ขวา, ขวา→ซ้าย)
-const PX = 2240, PY = 1400;
+const params=new URLSearchParams(location.search);
+// ?v หรือ #vertical = เวอร์ชันแนวตั้ง 9:16 (Reels / TikTok) — จังหวะ เพลง คำบรรยายเหมือนเดิม จัดเลย์เอาต์ใหม่ทุกฉาก
+const V = params.has('v') || location.hash==='#vertical';
+const SW = V?1080:1920, SH = V?1920:1080;
+if (V) document.documentElement.classList.add('v');
+const PX = V?1300:2240, PY = V?2200:1400;
 const GRID = [[0,0],[1,0],[2,0],[3,0],[4,0],[4,1],[3,1],[2,1],[1,1],[0,1],[0,2],[1,2],[2,2],[3,2],[4,2]];
-const WORLD_CENTER = { x:(4*PX+1920)/2, y:(2*PY+1080)/2 };
-const panelCenter = i => ({ x: GRID[i][0]*PX + 960, y: GRID[i][1]*PY + 540 });
+const WORLD_CENTER = { x:(4*PX+SW)/2, y:(2*PY+SH)/2 };
+const panelCenter = i => ({ x: GRID[i][0]*PX + SW/2, y: GRID[i][1]*PY + SH/2 });
 
 /* ---------- helpers สร้าง HTML ---------- */
 const P = (x,y,w,h) => `left:${x}px;top:${y}px;` + (w!=null?`width:${w}px;`:'') + (h!=null?`height:${h}px;`:'');
@@ -475,13 +488,436 @@ PANELS.push(`
 
 const LABELS=['GEN Z TERPZ','01 FEEL FINDER','02 SMART SORT','03 CATALOG','04 HOME FEED','05 PRODUCT','06 PACK + HAND ROLL','07 SEARCH','08 CHECKOUT × LINE','09 MY ORDERS','10 DARK MODE','11 DASHBOARD','12 SLIP CHECK','13 MANAGE','SHOP NOW'];
 
+/* ================= VERTICAL 9:16 LAYOUTS ================= */
+// พื้นที่เนื้อหาหลัก y ≈ 200–1500 (ด้านล่างเป็นคำบรรยาย + UI ของแอป)
+const KEYS_V = [
+  [0,     0,    0,-240, 3.2, -8, 'lin'],
+  [0.45,  0,    0, -60, 1.0,  0, 'snap'],
+  [7.45,  0,    0, -80, 1.07, 0, 'lin'],
+  [8.1,   1,    0,-120, 1.0,  0, 'whip'],
+  [13,    1,   40, -60, 1.06, 0, 'lin'],
+  [13.45, 1,  225, -15, 1.6,  0, 'snap'],
+  [14.45, 1,  230,  -5, 1.65, 0, 'lin'],
+  [15.1,  1,    0, 410, 1.05, 0, 'whip'],
+  [19.45, 1,    0, 440, 1.1,  0, 'lin'],
+  [20.1,  2,    0,-380, 1.08, 0, 'whip'],
+  [24,    2,    0,-360, 1.12, 0, 'lin'],
+  [24.45, 2,    0, -80, 1.0,  0, 'snap'],
+  [27.45, 2,    0, -40, 1.05, 0, 'lin'],
+  [28.1,  3,    0,-555, 1.15, 0, 'whip'],
+  [28.55, 3,    0,-550, 1.17, 0, 'lin'],
+  [29.05, 3,    0,-315, 1.15, 0, 'whip'],
+  [29.55, 3,    0,-310, 1.17, 0, 'lin'],
+  [30.05, 3,    0, -75, 1.15, 0, 'whip'],
+  [30.55, 3,    0, -70, 1.17, 0, 'lin'],
+  [31.05, 3,    0, 165, 1.15, 0, 'whip'],
+  [31.55, 3,    0, 170, 1.17, 0, 'lin'],
+  [32.05, 3,    0, 405, 1.15, 0, 'whip'],
+  [33,    3,    0, 410, 1.2,  0, 'lin'],
+  [33.45, 3,    0, -80, 1.0,  0, 'snap'],
+  [35.45, 3,    0, -40, 1.04, 0, 'lin'],
+  [36.1,  4, -110,-590, 1.4,  0, 'whip'],
+  [37.45, 4,  -80,-590, 1.42, 0, 'lin'],
+  [38.1,  4, -110,-290, 1.4,  0, 'whip'],
+  [39.45, 4,  -80,-290, 1.42, 0, 'lin'],
+  [40.1,  4, -110,  10, 1.4,  0, 'whip'],
+  [41.45, 4,  -80,  10, 1.42, 0, 'lin'],
+  [42.1,  4, -110, 310, 1.4,  0, 'whip'],
+  [44,    4,  -70, 310, 1.43, 0, 'lin'],
+  [44.45, 4,    0,-150, 1.0,  0, 'snap'],
+  [45.45, 4,    0,-120, 1.04, 0, 'lin'],
+  [46.1,  5,    0, -80, 1.0,  0, 'whip'],
+  [48,    5,    0, -60, 1.03, 0, 'lin'],
+  [48.45, 5, -200, -10, 1.45, 0, 'snap'],
+  [52,    5, -180, 160, 1.45, 0, 'lin'],
+  [52.45, 5, -100, 300, 1.6,  0, 'snap'],
+  [53,    5,  -90, 305, 1.62, 0, 'lin'],
+  [54,    5,    0, 250, 1.1,  0, 'sine'],
+  [55,    5,   20, 260, 1.12, 0, 'lin'],
+  [55.45, 5,  280, 455, 2.6,  0, 'snap'],
+  [56.1,  6,    0,-100, 1.0,  0, 'whip'],
+  [59,    6,    0, -80, 1.04, 0, 'lin'],
+  [59.45, 6,  230,-505, 1.6,  0, 'snap'],
+  [60,    6,  230,-500, 1.62, 0, 'lin'],
+  [61,    6,    0,-230, 1.3,  0, 'sine'],
+  [62,    6,    0,-225, 1.32, 0, 'lin'],
+  [62.45, 6, -110,-100, 1.7,  0, 'snap'],
+  [64,    6, -100, -95, 1.72, 0, 'lin'],
+  [65,    6,    0,  90, 1.3,  0, 'sine'],
+  [67.45, 6,    0, 110, 1.36, 0, 'lin'],
+  [68.1,  7, -200,-640, 1.6,  0, 'whip'],
+  [70,    7,  -40,-640, 1.6,  0, 'lin'],
+  [70.45, 7,    0,-370, 1.1,  0, 'snap'],
+  [72,    7,    0,-350, 1.12, 0, 'lin'],
+  [73,    7,    0,  60, 1.2,  0, 'sine'],
+  [75.45, 7,    0,  80, 1.25, 0, 'lin'],
+  [76.1,  8,    0,-380, 1.1,  0, 'whip'],
+  [81,    8,    0,-180, 1.1,  0, 'lin'],
+  [81.45, 8,    0,  10, 1.5,  0, 'snap'],
+  [82.1,  8,    0, 460, 1.15, 0, 'whip'],
+  [87.45, 8,    0, 520, 1.12, 0, 'lin'],
+  [88.1,  9,    0,-300, 1.05, 0, 'whip'],
+  [91,    9,    0,-260, 1.05, 0, 'lin'],
+  [91.45, 9,  150,-320, 1.5,  0, 'snap'],
+  [92,    9,  150,-315, 1.52, 0, 'lin'],
+  [93,    9,    0, 420, 1.15, 0, 'sine'],
+  [93.45, 9,    0, 440, 1.17, 0, 'lin'],
+  [94.1, 10,    0,   0, 1.0,  0, 'whip'],
+  [95,   10,    0,  10, 1.03, 0, 'lin'],
+  [95.45,10,  375,-855, 2.6,  0, 'snap'],
+  [96,   10,  375,-855, 2.65, 0, 'lin'],
+  [96.45,10,    0,   0, 1.0,  0, 'snap'],
+  [99.45,10,    0,  30, 1.05, 0, 'lin'],
+  [100.1,11,    0, -60, 1.0,  0, 'whip'],
+  [101,  11,    0, -60, 1.03, 0, 'lin'],
+  [102,  11,    0,-330, 1.25, 0, 'sine'],
+  [102.5,11,    0,-325, 1.26, 0, 'lin'],
+  [103.25,11,-240, 250, 1.5,  0, 'sine'],
+  [106.75,11, 240, 250, 1.5,  0, 'lin'],
+  [107,  11,  250, 250, 1.51, 0, 'lin'],
+  [107.45,11,   0, -60, 1.0,  0, 'snap'],
+  [109.45,11,   0, -40, 1.04, 0, 'lin'],
+  [110.1,12,    0,-350, 1.1,  0, 'whip'],
+  [111.45,12,   0,-340, 1.12, 0, 'lin'],
+  [112.1,12,    0, 300, 1.1,  0, 'whip'],
+  [114,  12,    0, 380, 1.12, 0, 'lin'],
+  [114.45,12, 160,-200, 1.35, 0, 'snap'],
+  [115,  12,  160,-195, 1.37, 0, 'lin'],
+  [116,  12,    0,-150, 1.0,  0, 'sine'],
+  [117.45,12,   0,-130, 1.03, 0, 'lin'],
+  [118.1,13,    0,-200, 1.0,  0, 'whip'],
+  [119,  13,    0,-190, 1.03, 0, 'lin'],
+  [119.45,13, 280,-732, 1.8,  0, 'snap'],
+  [120.1,13,    0,-445, 1.15, 0, 'whip'],
+  [120.45,13,   0,-440, 1.17, 0, 'lin'],
+  [121.1,13,    0, -45, 1.15, 0, 'whip'],
+  [121.45,13,   0, -40, 1.17, 0, 'lin'],
+  [122.1,13,    0, 355, 1.15, 0, 'whip'],
+  [124,  13,    0, 375, 1.2,  0, 'lin'],
+  [124.9,-1,    0,   0, 0.16, -2, 'snap'],
+  [129.45,-1,   0,   0, 0.145, 2, 'lin'],
+  [130.1,14,    0, -60, 1.0,  0, 'whip'],
+  [140,  14,    0, -60, 1.08, 0, 'lin'],
+  [142,  14,    0, -60, 1.12, 0, 'lin'],
+];
+
+if (V){
+  PANELS.length = 0;
+  const FULL = `${P(0,0,1080,1920)}`;
+
+  // 0 — LOGO
+  PANELS.push(`
+    <div class="abs" style="${P(-860,-440,2800,2800)};background:conic-gradient(from 0deg,#ff2d78,#ff8a00,#ffe600,#3ddc84,#00c2ff,#a259ff,#ff2d78);border-radius:50%" ${F('spin',-9,{speed:9})}></div>
+    <div class="abs" style="${FULL};background:radial-gradient(circle at 50% 30%, rgba(255,255,255,.95) 0 20%, rgba(255,255,255,0) 40%)"></div>
+    <img class="abs" src="assets/genz-terpz-logo.png" alt="" style="${P(240,250,600,600)}" ${F('slam',0,{d:.35})}>
+    <div class="abs graffiti center-x" style="top:880px;font-size:120px;color:#fff" ${F('slam',2,{d:.35})}>HIGHSOCIETY</div>
+    <div class="abs center-x" style="top:1090px" ${F('fromB',3,{d:.6})}><span style="display:inline-block;background:#000;padding:8px 36px 14px;border-radius:20px;font-size:62px;font-weight:800">ช้อปสายเขียว ครบในมือถือ</span></div>
+  `);
+
+  // 1 — FEEL FINDER
+  {
+    const feel=[['🌿','ดูหนัง'],['🌿','ฟังเพลง'],['🌿','เล่นเกม'],['😴','ลดเครียด'],['😴','นอนไม่หลับ'],['⚡','มีสมาธิ'],['⚡','ไอเดียใหม่'],['⚡','ปาร์ตี้']];
+    const picks=[['Sour Diesel','~22%'],['Jack Herer','~20%'],['Super Lemon Haze','~21%']];
+    PANELS.push(`
+      <div class="abs" style="${FULL};background:radial-gradient(circle at 20% 15%,#065f46,#022c22 55%,#07070b)"></div>
+      <div class="abs" style="${P(0,0,1080,14)};background:var(--rainbow)"></div>
+      <div class="abs h-title" style="${P(60,220,960)};font-size:70px" ${F('fromR',7.7)}>คุณต้องการความรู้สึก<br>แบบไหน?</div>
+      ${feel.map((f,i)=>`<div class="abs chip" style="${P(60+(i%2)*490,470+Math.floor(i/2)*140,470,112)}" ${F('pop',8.25+i*0.5)} ${f[1]==='ปาร์ตี้'?'data-cls="active@13"':''}><span>${f[0]}</span>${f[1]}</div>`).join('')}
+      <div class="abs" style="${P(765,1020,16,90)};background:#3ddc84;border-radius:8px;transform-origin:top" ${F('grow',14,{d:.6})}></div>
+      <div class="abs card" style="${P(60,1130,960,540)}" ${F('fromB',15)}>
+        <div style="padding:34px 40px 10px"><span class="tag t-sativa" style="font-size:34px">⚡ Sativa</span></div>
+        <div style="padding:0 40px;font-size:52px;font-weight:700;color:#047857">สายพันธุ์สำหรับ "ปาร์ตี้"</div>
+        ${picks.map((p,k)=>`<div class="abs" style="${P(40,220+k*104,880,88)};background:#f0fdf4;border-radius:18px;display:flex;align-items:center;justify-content:space-between;padding:0 26px;font-size:36px;font-weight:600" ${F('fromB',15.5+k*0.5)}><span>${p[0]}</span><span style="color:#854d0e">THC ${p[1]}</span></div>`).join('')}
+      </div>
+    `);
+  }
+
+  // 2 — SMART SORT
+  PANELS.push(`
+    <div class="abs" style="${FULL};background:radial-gradient(circle at 70% 10%,#4c1d95,#1e0b3a 50%,#07070b)"></div>
+    <div class="abs h-title" style="${P(60,230)}" ${F('fromR',19.7)}>จัดกลุ่มอัตโนมัติ</div>
+    <div class="abs card" style="${P(60,400,960,330)}" ${F('fromR',19.85)}>
+      <div style="padding:30px 40px 0;font-size:60px;font-weight:700;color:#047857">Purple Punch</div>
+      <div class="abs" style="${P(40,140,880,76)};background:#fde047;border-radius:40px;overflow:hidden">
+        <div class="abs" style="${P(0,0,634,76)};background:#7c3aed;transform-origin:left" ${F('fillx',21,{d:2})}></div>
+      </div>
+      <div class="abs" style="${P(40,236)};font-size:40px;font-weight:700;color:#6b21a8">Indica <span data-count="21,2,72" data-suf="%"></span></div>
+      <div class="abs" style="${P(660,236,260)};text-align:right;font-size:40px;font-weight:700;color:#854d0e">Sativa <span data-count="21,2,28" data-suf="%"></span></div>
+    </div>
+    <div class="abs center-x" style="top:790px" ${F('slam',24,{rot:-6})}><span class="tag t-indica" style="font-size:80px;padding:14px 48px;box-shadow:0 20px 50px rgba(0,0,0,.5)">😴 Indica</span></div>
+    <div class="abs" style="${P(60,960,960)};font-size:36px;color:#c4b5fd;line-height:1.4" ${F('fade',22.5)}>Indica ≥ 60% → Indica<br>ต่างกันไม่เกิน 20% → Hybrid</div>
+    ${[['😴','Indica','t-indica'],['⚡','Sativa','t-sativa'],['🌿','Hybrid','t-hybrid']].map((g,k)=>`
+      <div class="abs ${g[2]}" style="${P(60+k*330,1110,300,200)};border-radius:28px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:46px;font-weight:700;${k===0?'':'opacity:.85'}" ${F('fromB',22+k*0.5)} ${k===0?'data-cls="glow@25"':''}><span style="font-size:64px">${g[0]}</span>${g[1]}</div>`).join('')}
+    <div class="abs" style="${P(250,1075)};background:#16a34a;color:#fff;font-size:40px;font-weight:700;padding:6px 22px;border-radius:999px" ${F('pop',25)}>+1</div>
+    <style>.glow{ box-shadow:0 0 0 10px #a259ff, 0 0 80px #a259ff; }</style>
+  `);
+
+  // 3 — CATALOG
+  {
+    const cats=[['🌿','สายพันธุ์','Indica · Sativa · Hybrid','#16a34a'],['🚬','Pre-Roll','พร้อมสูบ','#ea580c'],['🎁','Combo Pack','คุ้มกว่า','#db2777'],['💨','Vape','หลายแบรนด์','#0284c7'],['⚙️','อุปกรณ์','ครบทุกชิ้น','#4b5563']];
+    PANELS.push(`
+      <div class="abs" style="${FULL};background:linear-gradient(160deg,#111827,#07070b)"></div>
+      <div class="abs h-title" style="${P(60,170)};font-size:64px" ${F('fromR',33)}>เลือกได้ทุกหมวด</div>
+      ${cats.map((c,k)=>`
+        <div class="abs" style="${P(60,300+k*240,960,210)};border-radius:32px;background:linear-gradient(100deg,${c[3]},#000);border:6px solid rgba(255,255,255,.2);display:flex;align-items:center;gap:30px;padding:0 40px" ${F('fromB',k?28+k:27.75,{d:.5})}>
+          <div style="font-size:120px;line-height:1">${c[0]}</div>
+          <div><div style="font-size:60px;font-weight:800;line-height:1.1">${c[1]}</div><div style="font-size:32px;opacity:.85">${c[2]}</div></div>
+        </div>`).join('')}
+    `);
+  }
+
+  // 4 — HOME FEED
+  {
+    const rows=[['🔥 โปรโมชั่นประจำเดือน','#ff2d78',true],['⭐ สินค้าแนะนำ','#ffe600',false],['💰 Budget Selection','#3ddc84',false],['🎯 Limited Offer','#a259ff',false]];
+    const names=['Purple Punch','Gelato 41','OG Kush','Blue Dream','Zkittlez','Wedding Cake','Runtz','Gorilla Glue','Sour Diesel','Jack Herer'];
+    let html=`<div class="abs" style="${FULL};background:#f3f4f6"></div>`;
+    rows.forEach((r,k)=>{
+      const y=250+k*300, b=36+k*2;
+      let cards='';
+      for(let j=0;j<8;j++){
+        const nm=names[(j+k*3)%names.length];
+        const price = r[2] ? `<s>฿${450+j*10}</s><b>฿${390+j*10}</b>` : `฿${[190,250,290,390,450][(j+k)%5]}`;
+        cards+=`<div class="mini" style="left:${j*330}px;top:0"><div class="band" style="background:linear-gradient(90deg,${r[1]},#047857)"></div><div class="nm">${nm}</div><div class="pr">${price}</div></div>`;
+      }
+      html+=`<div class="abs" style="${P(60,y)};font-size:50px;font-weight:700;color:#111" ${F('fromR',b-0.35)}>${r[0]}</div>`;
+      html+=`<div class="abs" style="${P(60,y+72,2700,150)}" ${F('scroll',b-0.2,{speed:28*(k%2?-1:1)})}>${cards}</div>`;
+    });
+    PANELS.push(html);
+  }
+
+  // 5 — PRODUCT
+  PANELS.push(`
+    <div class="abs" style="${FULL};background:linear-gradient(170deg,#065f46,#022c22 60%,#07070b)"></div>
+    <div class="abs card" style="${P(40,200,1000,1320)}" ${F('pop',45.7,{d:.5})}></div>
+    <div class="abs bud" style="${P(80,240,920,520)}" ${F('fromB',45.85)}><div class="abs" style="${P(0,110,920)};text-align:center;font-size:280px;line-height:1">🌿</div></div>
+    <div class="abs" style="${P(80,790)};font-size:76px;font-weight:800;color:#047857" ${F('fromR',46.5)}>Purple Punch</div>
+    <div class="abs" style="${P(770,810)}" ${F('pop',47)}><span class="tag t-indica" style="font-size:36px">😴 Indica</span></div>
+    <div class="abs" style="${P(80,920)};background:#000;color:#3ddc84;font-size:56px;font-weight:800;padding:4px 30px;border-radius:16px;box-shadow:0 0 0 4px #3ddc84" ${F('slam',48,{rot:-2})}>THC ~24.5%</div>
+    <div class="abs" style="${P(80,1040)};font-size:40px;color:#374151" ${F('fromR',48.5)}>กลิ่น/รส: <b>Grape · Berry</b></div>
+    <div class="abs" style="${P(80,1100)};font-size:40px;color:#374151" ${F('fromR',49)}>เอฟเฟกต์: <b>ผ่อนคลาย · หลับสบาย</b></div>
+    <div class="abs" style="${P(80,1160)};font-size:40px;color:#374151" ${F('fromR',49.5)}>Indica 80% / Sativa 20%</div>
+    <div class="abs" style="${P(80,1250)};font-size:66px;color:#9ca3af;font-weight:600" ${F('fromR',50.5)}>฿450<div class="abs" style="${P(-6,46,170,8)};background:#dc2626;transform-origin:left;border-radius:4px" ${F('fillx',51,{d:.6})}></div></div>
+    <div class="abs" style="${P(280,1220)};font-size:104px;color:#dc2626;font-weight:800" ${F('slam',52)}>฿390</div>
+    <div class="abs" style="${P(560,1250)};background:#dc2626;color:#fff;font-family:Bangers,Impact,sans-serif;font-size:54px;padding:6px 22px 0;border-radius:12px" ${F('pop',52.5,{rot:8})}>SALE</div>
+    <div class="abs" style="${P(80,1400)};font-size:36px;color:#6b7280" ${F('fromR',53)}>เหลือ 7 ชิ้น</div>
+    <div class="abs btn" style="${P(640,1360,360,110)};font-size:42px" ${F('pop',53.5)} data-cls="pressed@55">เพิ่มลงตะกร้า</div>
+  `);
+
+  // 6 — PACK & HAND ROLL
+  {
+    const packs=[['1g','฿120'],['3.5g','฿390'],['5g','฿520'],['10g','฿990']];
+    PANELS.push(`
+      <div class="abs" style="${FULL};background:radial-gradient(circle at 80% 15%,#9d174d,#3b0a24 55%,#07070b)"></div>
+      <div class="abs card" style="${P(40,200,1000,1240)}" ${F('pop',55.75,{d:.5})}></div>
+      <div class="abs" style="${P(90,240)};font-size:62px;font-weight:800;color:#111" ${F('fromL',55.85)}>เลือกแพ็ค &amp; จำนวน</div>
+      <div class="abs" style="${P(90,330)};font-size:36px;color:#6b7280" ${F('fromL',56)}>Purple Punch · ขนาดแพ็ค</div>
+      ${packs.map((p,k)=>`<div class="abs pack" style="${P(90+(k%2)*460,400+Math.floor(k/2)*130,440,110)}" ${F('pop',56+k*0.25)} ${k===1?'data-cls="sel@59"':''}><b>${p[0]}</b><span>${p[1]}</span></div>`).join('')}
+      <div class="abs hr" style="${P(90,680,900,100)};font-size:38px" ${F('fromL',60)} data-cls="on@61"><span class="box"></span><span style="flex:1">🖐️ Hand Roll (มวนให้)</span><b>+฿20/ชิ้น</b></div>
+      <div class="abs" style="${P(110,810,880,96)};display:flex;align-items:center;gap:22px;font-size:40px;color:#374151" ${F('fromL',61.5)}>
+        <span>จะให้มวนกี่มวน:</span>
+        <span class="step">−</span><span class="stepv"${SEQ([[0,'1'],[62.5,'2'],[63,'3'],[63.5,'4']])}>1</span><span class="step">+</span>
+      </div>
+      <div class="abs" style="${P(90,960)};font-size:54px;font-weight:800;color:#111"${SEQ([[0,'รวม: ฿390'],[61.5,'รวม: ฿410'],[62.5,'รวม: ฿430'],[63,'รวม: ฿450'],[63.5,'รวม: ฿470']])} ${F('fromL',59)}>รวม: ฿390</div>
+      <div class="abs btn" style="${P(90,1080,900,110)};font-size:46px" ${F('pop',60)} data-cls="pressed@65">เพิ่มลงตะกร้า</div>
+      <style>
+        .pack{ border:4px solid #e5e7eb; border-radius:20px; display:flex; align-items:center; justify-content:space-between; padding:0 34px; font-size:46px; color:#111; background:#fff; }
+        .pack.sel{ border-color:#16a34a; background:#dcfce7; box-shadow:0 0 0 8px rgba(22,163,74,.35); }
+        .hr{ border:4px solid #e5e7eb; border-radius:20px; display:flex; align-items:center; gap:22px; padding:0 30px; color:#111; background:#fff; }
+        .hr .box{ width:48px; height:48px; border:4px solid #9ca3af; border-radius:10px; }
+        .hr.on{ border-color:#16a34a; background:#f0fdf4; }
+        .hr.on .box{ background:#16a34a; border-color:#16a34a; box-shadow:inset 0 0 0 8px #fff; }
+        .step{ width:76px; height:76px; border:4px solid #d1d5db; border-radius:16px; display:flex; align-items:center; justify-content:center; font-weight:700; }
+        .stepv{ width:110px; height:76px; border:4px solid #16a34a; border-radius:16px; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:48px; color:#047857; }
+      </style>
+    `);
+  }
+
+  // 7 — SEARCH + VAPE BRANDS
+  PANELS.push(`
+    <div class="abs" style="${FULL};background:#f9fafb"></div>
+    <div class="abs" style="${P(60,260,960,120)};background:#fff;border:4px solid #16a34a;border-radius:999px;box-shadow:0 0 0 10px rgba(22,163,74,.2);display:flex;align-items:center;gap:24px;padding:0 44px;font-size:56px;color:#111" ${F('fromL',67.7)}>
+      <span style="font-size:48px">🔍</span><span data-type="68.5,0.25" data-text="purple"></span><span class="caret"></span>
+    </div>
+    ${['Purple Punch','Purple Haze','Purple Kush'].map((n,k)=>`
+      <div class="abs card" style="${P(60+k*330,440,300,320)};overflow:hidden" ${F('fromB',70.5+k*0.5)}>
+        <div class="bud" style="height:190px;border-radius:0"></div>
+        <div style="padding:16px 22px;font-size:34px;font-weight:700;color:#047857;line-height:1.15">${n}</div>
+      </div>`).join('')}
+    <div class="abs" style="${P(60,860)};font-size:54px;font-weight:700;color:#111" ${F('fromL',72)}>💨 เลือกแบรนด์ Vape</div>
+    ${['Cloud 9','Terp Lab','Hi-Vape','Nimbus'].map((n,k)=>`
+      <div class="abs chip" style="${P(60+(k%2)*490,970+Math.floor(k/2)*140,470,112)};background:#e0f2fe;font-size:44px" ${F('pop',72.5+k*0.25)} ${k===1?'data-cls="active@74"':''}>${n}</div>`).join('')}
+    <style>.caret{ width:5px; height:64px; background:#16a34a; }</style>
+  `);
+
+  // 8 — CART → LINE
+  PANELS.push(`
+    <div class="abs" style="${FULL};background:linear-gradient(170deg,#06c755,#065f2c 40%,#07070b)"></div>
+    <div class="abs card" style="${P(40,180,1000,880)}" ${F('pop',75.7,{d:.5})}></div>
+    <div class="abs" style="${P(80,210)};font-size:60px;font-weight:800;color:#111" ${F('fromL',75.85)}>ตะกร้าสินค้า</div>
+    <div class="abs" style="${P(600,226)};background:#06c755;color:#fff;font-size:30px;font-weight:700;padding:8px 24px;border-radius:999px" ${F('pop',77)}>LINE ✓ สวัสดี, มายด์</div>
+    ${[['Purple Punch (3.5g)','฿390 x 1'],['🖐️ ค่าบริการมวนมือ','฿20 x 4'],['Gelato 41 (5g)','฿520 x 2']].map((it,k)=>`
+      <div class="abs" style="${P(80,320+k*104,920,90)};background:#f9fafb;border-radius:18px;display:flex;align-items:center;justify-content:space-between;padding:0 30px;color:#111;font-size:38px" ${F('fromL',76+k*0.25)}><b>${it[0]}</b><span style="color:#6b7280">${it[1]}</span></div>`).join('')}
+    <div class="abs" style="${P(80,640,920)};text-align:right;font-size:56px;font-weight:800;color:#111" ${F('fromL',78)}>ยอดรวม: <span data-count="78,1.5,1510" data-pre="฿"></span></div>
+    <div class="abs inp" style="${P(80,730,920,80)}" ${F('fromL',78.5)}><span data-type="78.5,0.125" data-text="มายด์ ไฮโซ"></span></div>
+    <div class="abs inp" style="${P(80,825,920,80)}" ${F('fromL',79)}><span data-type="79.25,0.0625" data-text="123 สุขุมวิท กรุงเทพฯ"></span></div>
+    <div class="abs btn" style="${P(80,930,920,100)};font-size:46px" ${F('pop',80)} data-cls="pressed@81">ยืนยันคำสั่งซื้อ</div>
+    <div class="abs" style="${P(160,1110,760,800)};background:#111;border-radius:70px;box-shadow:0 40px 100px rgba(0,0,0,.6)" ${F('fromB',77)}>
+      <div class="abs" style="${P(20,20,720,760)};background:#8cabd9;border-radius:54px;overflow:hidden">
+        <div style="height:110px;background:#1e293b;display:flex;align-items:flex-end;padding:0 30px 18px;gap:16px;font-size:34px;font-weight:700"><span style="width:52px;height:52px;border-radius:50%;background:var(--rainbow)"></span>HIGHSOCIETY</div>
+      </div>
+    </div>
+    <div class="abs" style="${P(330,1260,560)};background:#06c755;color:#000;border-radius:30px 30px 6px 30px;padding:22px 26px;font-size:30px;line-height:1.45;box-shadow:0 10px 30px rgba(0,0,0,.3)" ${F('pop',82)}>
+      <b>🛒 คำสั่งซื้อใหม่</b><br>• Purple Punch (3.5g) x 1 = ฿390<br>• 🖐️ ค่าบริการมวนมือ x 4 = ฿80<br>• Gelato 41 (5g) x 2 = ฿1040<br><b>ยอดรวม: ฿1510</b><br>ชื่อผู้สั่ง: มายด์ ไฮโซ
+    </div>
+    <div class="abs" style="${P(200,1630,480)};background:#fff;color:#111;border-radius:30px 30px 30px 6px;padding:22px 26px;font-size:32px;line-height:1.4;box-shadow:0 10px 30px rgba(0,0,0,.25)" ${F('pop',84)}>รับออเดอร์แล้วครับ 🙏<br>โอนแล้วส่งสลิปได้เลย</div>
+    <style>.inp{ border:3px solid #d1d5db; border-radius:16px; display:flex; align-items:center; padding:0 26px; font-size:38px; color:#111; background:#fff; }</style>
+  `);
+
+  // 9 — ORDER HISTORY + RECEIPT
+  {
+    const rows=[['01/10 20:14','HS-0127','฿1,510','⏳ รอยืนยัน',''],['28/09 18:02','HS-0119','฿890','✅ ชำระแล้ว','ดาวน์โหลด'],['21/09 21:40','HS-0102','฿1,240','✅ ชำระแล้ว','ดาวน์โหลด'],['12/09 19:05','HS-0088','฿520','✅ ชำระแล้ว','ดาวน์โหลด']];
+    PANELS.push(`
+      <div class="abs" style="${FULL};background:linear-gradient(180deg,#e5e7eb,#f9fafb)"></div>
+      <div class="abs h-title" style="${P(60,200)};color:#111;font-size:70px" ${F('fromL',87.7)}>ประวัติคำสั่งซื้อ</div>
+      ${rows.map((r,j)=>`
+        <div class="abs" style="${P(60,330+j*190,960,170)};background:#fff;border-radius:22px;color:#111;box-shadow:0 4px 14px rgba(0,0,0,.08)" ${F('fromL',88+j*0.25)}>
+          <div class="abs" style="${P(34,22)};font-size:34px;font-weight:700">${r[1]} <span style="font-weight:400;color:#6b7280;font-size:30px">· ${r[0]}</span></div>
+          <div class="abs" style="${P(34,92)};font-size:40px;font-weight:800">${r[2]}</div>
+          <div class="abs" style="${P(260,98)};font-size:32px">${r[3]}</div>
+          ${r[4]?`<span class="abs dl" style="left:720px;top:94px" ${j===1?'data-cls="hot@91"':''}>${r[4]}</span>`:''}
+        </div>`).join('')}
+      <div class="abs" style="${P(230,1110,620,600)}" ${F('fromB',92,{rot:-3})}>
+        <div class="card" style="width:620px;height:600px;padding:40px;font-size:30px;line-height:1.6;color:#111">
+          <div style="font-size:44px;font-weight:800">ใบเสร็จรับเงิน</div>
+          <div style="color:#6b7280">HIGHSOCIETY · HS-0119</div>
+          <hr style="border:0;border-top:3px dashed #d1d5db;margin:16px 0">
+          <div style="display:flex;justify-content:space-between"><span>Gelato 41 (3.5g)</span><span>฿390</span></div>
+          <div style="display:flex;justify-content:space-between"><span>Pre-Roll Pack</span><span>฿500</span></div>
+          <hr style="border:0;border-top:3px dashed #d1d5db;margin:16px 0">
+          <div style="display:flex;justify-content:space-between;font-size:40px;font-weight:800"><span>รวม</span><span>฿890</span></div>
+          <div style="margin-top:20px;color:#047857;font-weight:800;font-size:38px">✓ ชำระแล้ว</div>
+        </div>
+      </div>
+      <style>
+        .dl{ background:#16a34a; color:#fff; padding:2px 22px; border-radius:12px; font-size:30px; }
+        .dl.hot{ background:#ff2d78; box-shadow:0 0 0 8px rgba(255,45,120,.35); }
+      </style>
+    `);
+  }
+
+  // 10 — DARK MODE
+  const storefrontV = dark=>{
+    const bg=dark?'#0f1412':'#f9fafb', card=dark?'#1a201d':'#fff', tx=dark?'#e5e7eb':'#1f2937', sub=dark?'#9ca3af':'#6b7280', gr=dark?'#4ade80':'#047857';
+    const items=[['Purple Punch','฿390'],['Gelato 41','฿420'],['Blue Dream','฿350'],['OG Kush','฿290']];
+    return `
+      <div class="abs" style="${FULL};background:${bg}"></div>
+      <div class="abs" style="${P(0,0,1080,210)};background:var(--rainbow)">
+        <img class="abs" src="assets/genz-terpz-logo.png" alt="" style="${P(30,30,170,170)}">
+        <div class="abs" style="${P(720,70)};font-size:56px">🛒</div>
+        <div class="abs moon" style="${P(860,50,110,110)}" ${dark?'':'data-cls="pressed@95"'}>${dark?'☀️':'🌙'}</div>
+        <div class="abs" style="${P(990,64)};font-size:56px;color:#111">☰</div>
+      </div>
+      <div class="abs" style="${P(0,210,1080,300)};background:var(--rainbow);opacity:.92;display:flex;align-items:center;justify-content:center;text-align:center">
+        <div style="font-size:66px;font-weight:800;color:#fff;line-height:1.2;text-shadow:0 4px 0 rgba(0,0,0,.25)">ค้นหาสายพันธุ์<br>ที่เหมาะกับคุณ</div>
+      </div>
+      <div class="abs" style="${P(60,560)};font-size:54px;font-weight:700;color:${tx}">⭐ สินค้าแนะนำ</div>
+      ${items.map((it,k)=>`
+        <div class="abs" style="${P(60+(k%2)*500,660+Math.floor(k/2)*430,460,400)};background:${card};border-radius:26px;box-shadow:0 14px 34px rgba(0,0,0,${dark?.6:.12});overflow:hidden">
+          <div class="bud" style="height:220px;border-radius:0"></div>
+          <div style="padding:16px 26px 0;font-size:42px;font-weight:700;color:${gr}">${it[0]}</div>
+          <div style="padding:0 26px;font-size:38px;font-weight:700;color:${tx}">${it[1]} <span style="font-size:26px;color:${sub};font-weight:400">· เหลือ 9 ชิ้น</span></div>
+        </div>`).join('')}`;
+  };
+  PANELS.push(`
+    <div class="abs" style="${FULL}">${storefrontV(false)}</div>
+    <div class="abs" style="${FULL}" ${F('iris',96,{d:1.2,cx:915,cy:105})}>${storefrontV(true)}</div>
+    <style>.moon{ border-radius:50%; background:rgba(0,0,0,.25); display:flex; align-items:center; justify-content:center; font-size:64px; } .moon.pressed{ background:#000; box-shadow:0 0 0 8px #fff; }</style>
+  `);
+
+  // 11 — ADMIN DASHBOARD
+  {
+    const kpi=[['SALES เดือนนี้',128450,'฿','+18% จากเดือนก่อน'],['SALES ทั้งหมด',1284900,'฿','1,036 ออเดอร์'],['รอยืนยัน',6,'','pending'],['สต็อกต่ำ',3,'','รายการ <5']];
+    const bars=[120,180,150,240,210,290,260,200,310,280,330,300,360,340];
+    PANELS.push(`
+      <div class="abs adm" style="${FULL}"></div>
+      <div class="abs mono neon" style="${P(60,190)};font-size:34px;font-weight:700" ${F('fromL',99.7)}>H!GH$OC!€T¥ <span style="color:#666;font-size:24px">ADMIN v4</span></div>
+      <div class="abs" style="${P(60,250)};font-size:70px;font-weight:700" ${F('fromL',99.85)}>Dashboard</div>
+      <div class="abs mono neon" style="${P(480,276)};border:3px solid #00ff88;border-radius:999px;padding:4px 24px;font-size:28px;display:flex;align-items:center;gap:12px" ${F('pop',100.5)}><span style="width:16px;height:16px;border-radius:50%;background:#00ff88" ${F('blink',-9)}></span>LIVE</div>
+      ${kpi.map((k,j)=>`
+        <div class="abs surface" style="${P(60+(j%2)*490,390+Math.floor(j/2)*250,470,230)};padding:26px 30px" ${F('fromB',100+j*0.25)}>
+          <div class="mono" style="font-size:26px;color:#888">${k[0]}</div>
+          <div style="font-size:${k[1]>99999?62:76}px;font-weight:800;color:${j===2?'#ffcc00':j===3?'#ff4455':'#00ff88'}" data-count="${100+j*0.25},2,${k[1]}" data-pre="${k[2]}"></div>
+          <div class="mono" style="font-size:24px;color:#666">${k[3]}</div>
+        </div>`).join('')}
+      <div class="abs surface" style="${P(60,920,960,580)}" ${F('fromB',102.5)}>
+        <div style="padding:24px 34px;font-size:42px;font-weight:700">ยอดขายรายวัน</div>
+        ${bars.map((h,i)=>`<div class="abs" style="${P(40+i*65,530-h*1.1,46,h*1.1)};border-radius:10px 10px 0 0;background:linear-gradient(180deg,${['#ff2d78','#ff8a00','#ffe600','#3ddc84','#00c2ff','#a259ff'][i%6]},#00ff88);transform-origin:bottom" ${F('grow',103+i*0.25,{d:.5})}></div>`).join('')}
+      </div>
+    `);
+  }
+
+  // 12 — ORDERS + SLIP
+  PANELS.push(`
+    <div class="abs adm" style="${FULL}"></div>
+    <div class="abs" style="${P(60,190)};font-size:70px;font-weight:700" ${F('fromR',109.7)}>คำสั่งซื้อ</div>
+    ${['ทุกสถานะ','⏳ รอยืนยัน','✅ ชำระแล้ว','❌ ยกเลิก'].map((n,k)=>`<div class="abs abtn" style="${P(60+(k%2)*490,300+Math.floor(k/2)*90,470,76)};${k===1?'border-color:#ffcc00;color:#ffcc00':''}" ${F('pop',110.25+k*0.25)}>${n}</div>`).join('')}
+    <div class="abs surface" style="${P(60,500,960,220)}" ${F('fromR',109.85)}>
+      <div class="abs mono" style="${P(36,28)};font-size:34px;color:#888">#HS-0127</div>
+      <div class="abs" style="${P(36,100)};font-size:46px;font-weight:700">มายด์ ไฮโซ · ฿1,510</div>
+      <div class="abs" style="${P(560,22)}"><span class="pill pending" style="font-size:36px" ${SEQ([[0,'⏳ รอยืนยัน'],[114,'✅ ชำระแล้ว']])} data-cls="paid@114,-pending@114">⏳ รอยืนยัน</span></div>
+    </div>
+    <div class="abs abtn" style="${P(60,750,960,90)}" ${F('pop',111)} data-cls="pressed@113.75">✅ ยืนยัน + บันทึกสลิป</div>
+    <div class="abs" style="${P(560,800)};z-index:5;font-family:Bangers,Impact,sans-serif;font-size:120px;color:#00ff88;border:10px solid #00ff88;border-radius:20px;padding:0 30px;line-height:1.1;text-shadow:0 0 30px rgba(0,255,136,.6)" ${F('slam',114,{rot:-12})}>PAID</div>
+    <div class="abs" style="${P(140,890,800,800)};background:#fff;color:#111;border-radius:30px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.6)" ${F('fromB',111.5)}>
+      <div style="background:#16a34a;color:#fff;padding:30px 40px;font-size:46px;font-weight:800">โอนเงินสำเร็จ ✓</div>
+      <div style="padding:26px 40px;font-size:34px;line-height:1.75">
+        <div style="color:#6b7280">จำนวนเงิน</div>
+        <div style="font-size:92px;font-weight:800">฿1,510.00</div>
+        <div>จาก: นาย ม. ไฮโซ</div><div>ไปยัง: HIGHSOCIETY</div><div style="color:#6b7280">01 ต.ค. · 20:16</div>
+        <div class="mono" style="color:#6b7280;font-size:28px">REF 0127-8842-1510</div>
+      </div>
+      <div class="abs" style="${P(0,0,800,10)};background:#00ff88;box-shadow:0 0 30px #00ff88" ${F('scan',112.25,{d:1.5,h:790})}></div>
+    </div>
+    <div class="abs" style="${P(170,1600)};display:flex;gap:16px" ${F('pop',113.5)}><span class="pill paid" style="font-size:34px;background:#000">ยอดตรง ✓</span><span class="pill paid" style="font-size:34px;background:#000">บัญชีตรง ✓</span></div>
+  `);
+
+  // 13 — MANAGE
+  PANELS.push(`
+    <div class="abs adm" style="${FULL}"></div>
+    <div class="abs" style="${P(60,190)};font-size:66px;font-weight:700" ${F('fromR',117.7)}>จัดการสินค้า</div>
+    <div class="abs abtn primary" style="${P(620,180,400,96)};font-size:38px" ${F('slam',119)}>+ เพิ่มสินค้า</div>
+    ${[['Purple Punch','สต็อก 2','#7c3aed'],['Gelato 41','สต็อก 18','#16a34a'],['🔥 โปร ลด 15%','ถึง 31 ต.ค.','#ff2d78']].map((c,k)=>`
+      <div class="abs surface acard" style="${P(60,330+k*400,960,370)};overflow:hidden" ${F('fromR',117.85+k*0.25)} ${k===1?'data-cls="hiddenp@121"':''} ${k===2?'data-cls="newimg@122"':''}>
+        <div class="img abs" style="${P(0,0,300,370)};border-radius:0;background:linear-gradient(135deg,${c[2]},#000)"></div>
+        <div class="abs" style="${P(330,30)};font-size:46px;font-weight:700">${c[0]}</div>
+        <div class="abs" style="${P(330,105)};font-size:36px;color:${k===0?'#ff4455':'#888'}" ${k===0?SEQ([[0,'สต็อก 2 ⚠️'],[120,'สต็อก 50 ✓']])+' data-cls="okc@120"':''}>${c[1]}</div>
+        ${k===0?`<div class="abs" style="${P(330,260,260,76)}" data-cls="pressed@120"><div class="abtn" style="height:76px">📦 สต็อก</div></div>`:''}
+        ${k===1?`<div class="abs abtn" style="${P(330,260,260,76)}" ${SEQ([[0,'👁️ ซ่อน'],[121,'🚫 แสดง']])}>👁️ ซ่อน</div>`:''}
+        ${k===2?`<div class="abs abtn" style="${P(330,260,300,76)}" data-cls="pressed@122">📸 เปลี่ยนรูป</div>`:''}
+        <div class="abs abtn" style="${P(k===2?650:610,260,220,76)}">✏️ แก้ไข</div>
+      </div>`).join('')}
+    <style>.okc{ color:#00ff88 !important; } .pressed > .abtn{ background:#00ff88; color:#000; border-color:#00ff88; box-shadow:0 0 40px rgba(0,255,136,.6); }</style>
+  `);
+
+  // 14 — OUTRO
+  PANELS.push(`
+    <div class="abs" style="${P(-860,-440,2800,2800)};background:conic-gradient(from 90deg,#a259ff,#00c2ff,#3ddc84,#ffe600,#ff8a00,#ff2d78,#a259ff);border-radius:50%" ${F('spin',-9,{speed:-12})}></div>
+    <div class="abs" style="${FULL};background:radial-gradient(circle at 50% 28%, rgba(255,255,255,.95) 0 18%, rgba(255,255,255,0) 36%)"></div>
+    <img class="abs" src="assets/genz-terpz-logo.png" alt="" style="${P(270,250,540,540)}" ${F('slam',130,{d:.35})}>
+    <div class="abs graffiti center-x" style="top:800px;font-size:120px;color:#fff" ${F('slam',131,{d:.35})}>HIGHSOCIETY</div>
+    <div class="abs graffiti center-x" style="top:955px;font-size:84px;color:#ffe600;-webkit-text-stroke:4px #000;text-shadow:6px 6px 0 #000" ${F('fromR',131.5)}>SHOP ONLINE</div>
+    <div class="abs center-x" style="top:1100px" ${F('pop',132)}><span style="display:inline-flex;flex-direction:column;align-items:center;background:#06c755;color:#fff;font-size:58px;font-weight:800;padding:14px 56px 18px;border-radius:44px;box-shadow:0 0 0 8px #000;line-height:1.25">สั่งเลยผ่าน LINE<span class="mono" style="font-size:48px">@176ssaqa</span></span></div>
+    <div class="abs center-x" style="top:1330px" ${F('fromB',133)}><span style="background:#000;padding:8px 26px;border-radius:14px;font-size:36px">⚠️ สำหรับผู้ที่มีอายุ 20 ปีขึ้นไปเท่านั้น</span></div>
+  `);
+}
+
 /* ================= CAMERA ================= */
 // [beat, panel(-1 = กลางโลก), dx, dy (จากจุดกลาง panel), scale, rot, ease ของช่วงที่มาถึงคีย์นี้]
 // whip  : ออกตัวก่อนบีต ~0.55 แล้ว "ลง" บนบีต (expo in-out)
 // snap  : crash zoom เริ่ม "บน" บีตทันที (quint out)
 // lin   : ช่วง hold — กล้องยังไหลช้าๆ ไม่เคยหยุด
 // sine/ramp : เคลื่อนนุ่ม / speed ramp (เร็ว-สโลว์-เร็ว)
-const KEYS = [
+const KEYS_H = [
   [0,     0,    0, -80, 3.2, -8, 'lin'],
   [0.45,  0,    0,   0, 1.0,  0, 'snap'],
   [7.45,  0,   30, -10, 1.07, 0, 'lin'],
@@ -590,7 +1026,8 @@ const KEYS = [
   [130.1,14,    0,   0, 1.0,  0, 'whip'],
   [140,  14,    0,   0, 1.08, 0, 'lin'],
   [142,  14,    0,   0, 1.12, 0, 'lin'],
-].map(k=>{ const c = k[1]<0 ? WORLD_CENTER : panelCenter(k[1]); return { b:k[6]==='whip'?k[0]-0.08:k[0], x:c.x+k[2], y:c.y+k[3], s:k[4], r:k[5], e:k[6] }; });
+];
+const KEYS = (V?KEYS_V:KEYS_H).map(k=>{ const c = k[1]<0 ? WORLD_CENTER : panelCenter(k[1]); return { b:k[6]==='whip'?k[0]-0.08:k[0], x:c.x+k[2], y:c.y+k[3], s:k[4], r:k[5], e:k[6] }; });
 
 // กล้อง "punch" (ซูมกระแทกสั้นๆ) บนจังหวะสำคัญ
 const PUNCH = [[0,.12],[1,.04],[2,.09],[3,.04],[13,.06],[15,.05],[24,.07],[25,.04],[29,.04],[30,.04],[31,.04],[32,.04],[33,.06],[44,.06],[48,.05],[52,.08],[55,.06],[59,.06],[61,.04],[63,.05],[65,.05],[74,.05],[81,.06],[82,.05],[84,.04],[91,.05],[95,.05],[96,.1],[107,.06],[114,.1],[119,.06],[120,.05],[121,.05],[122,.05],[130,.12],[131,.07],[132,.04],[136,.03],[140,.1]];
@@ -743,7 +1180,7 @@ let lastBlur='';
 function render(t){
   const bt=t/B;
   const c=cam(bt);
-  world.style.transform=`translate(960px,540px) rotate(${c.r.toFixed(3)}deg) scale(${c.s.toFixed(5)}) translate(${(-c.x).toFixed(2)}px,${(-c.y).toFixed(2)}px)`;
+  world.style.transform=`translate(${SW/2}px,${SH/2}px) rotate(${c.r.toFixed(3)}deg) scale(${c.s.toFixed(5)}) translate(${(-c.x).toFixed(2)}px,${(-c.y).toFixed(2)}px)`;
 
   // motion blur ตามความเร็วกล้อง (ทิศทางจริงบนจอ)
   const dtb=(1/120)/B, cb=camBase(bt), p0=camBase(bt-dtb);
@@ -759,7 +1196,7 @@ function render(t){
   for (const p of panels){
     const ox=(p.c.x-c.x)*c.s, oy=(p.c.y-c.y)*c.s;
     const sx=ox*cr-oy*sr, sy=ox*sr+oy*cr;
-    const v=Math.abs(sx)<960+rad && Math.abs(sy)<540+rad;
+    const v=Math.abs(sx)<SW/2+rad && Math.abs(sy)<SH/2+rad;
     if (v!==p.vis){ p.vis=v; p.el.style.visibility=v?'visible':'hidden'; }
     if (v) for (const it of p.items) updateItem(it,bt);
   }
@@ -774,7 +1211,8 @@ function render(t){
 
 /* ================= STAGE FIT ================= */
 const stage=document.getElementById('stage');
-function fit(){ const s=Math.min(innerWidth/1920, innerHeight/1080); stage.style.transform=`translate(${(innerWidth-1920*s)/2}px,${(innerHeight-1080*s)/2}px) scale(${s})`; }
+stage.style.width=SW+'px'; stage.style.height=SH+'px';
+function fit(){ const s=Math.min(innerWidth/SW, innerHeight/SH); stage.style.transform=`translate(${(innerWidth-SW*s)/2}px,${(innerHeight-SH*s)/2}px) scale(${s})`; }
 addEventListener('resize',fit); fit();
 
 /* ================= AUDIO (สังเคราะห์สด 160 BPM) ================= */
@@ -844,7 +1282,6 @@ function buildEvents(){
 }
 
 /* ================= CLOCK / TRANSPORT ================= */
-const params=new URLSearchParams(location.search);
 let debugOn=params.has('debug'), playing=false, paused=false, clockBase=0, clockStart=0, frozenT=null;
 const latency=()=>AC?((AC.outputLatency||0)+(AC.baseLatency||0)):0;
 function now(){
